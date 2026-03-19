@@ -78,11 +78,62 @@
     .section-rule { width: 40px; height: 1px; background: var(--gold); margin-bottom: 24px; }
     .section-title { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 30px; color: var(--green-deep); margin-bottom: 28px; line-height: 1.2; }
 
-    /* PLAYER */
+    /* EPISODE LIST */
     .player-section { background: var(--white); border-bottom: 1px solid var(--cream-dark); }
     .player-inner { max-width: 1200px; margin: 0 auto; padding: 56px 32px; }
-    .player-embed { width: 100%; border-radius: 4px; overflow: hidden; box-shadow: 0 4px 32px rgba(44,74,53,0.10); }
-    .player-embed iframe { width: 100%; border: none; display: block; min-height: 600px; }
+
+    .episodes-loading { text-align: center; padding: 80px 0; color: var(--grey-light); font-family: 'Cormorant SC', serif; letter-spacing: 0.18em; font-size: 12px; }
+    .episodes-loading .spinner { width: 28px; height: 28px; border: 1.5px solid var(--cream-dark); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.9s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .episode-list { list-style: none; margin: 0; padding: 0; }
+    .episode-item { border-bottom: 1px solid var(--cream-dark); transition: background 0.25s; }
+    .episode-item:first-child { border-top: 1px solid var(--cream-dark); }
+    .episode-item:hover { background: #fafaf8; }
+    .episode-item.playing { background: #f2f6f3; }
+
+    .episode-inner { display: grid; grid-template-columns: 88px 1fr 130px; grid-template-rows: auto auto; gap: 0 28px; padding: 28px 4px; align-items: start; }
+
+    .ep-art { grid-column: 1; grid-row: 1 / 3; width: 88px; height: 88px; border-radius: 6px; overflow: hidden; background: var(--cream-dark); box-shadow: 0 2px 12px rgba(44,74,53,0.10); position: relative; flex-shrink: 0; }
+    .ep-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ep-art-overlay { position: absolute; inset: 0; background: rgba(44,74,53,0); display: flex; align-items: center; justify-content: center; transition: background 0.2s; cursor: pointer; }
+    .ep-art-overlay:hover { background: rgba(44,74,53,0.5); }
+    .ep-art-overlay:hover .ep-art-play { opacity: 1; transform: scale(1); }
+    .episode-item.playing .ep-art-overlay { background: rgba(44,74,53,0.55); }
+    .episode-item.playing .ep-art-play { opacity: 1; transform: scale(1); }
+    .ep-art-play { opacity: 0; transform: scale(0.85); transition: opacity 0.2s, transform 0.2s; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center; }
+    .ep-art-play svg { fill: var(--green-deep); }
+    .ep-art-play.is-pause svg { margin-left: 0; }
+
+    .ep-body { grid-column: 2; grid-row: 1; min-width: 0; }
+    .ep-date { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.2em; color: var(--gold); margin-bottom: 7px; }
+    .ep-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 400; color: var(--green-deep); line-height: 1.3; margin-bottom: 8px; }
+    .ep-desc { font-size: 13px; line-height: 1.65; color: #999; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .ep-meta { grid-column: 3; grid-row: 1; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; padding-top: 2px; }
+    .ep-duration { font-family: 'Cormorant SC', serif; font-size: 11px; letter-spacing: 0.14em; color: var(--grey-light); }
+    .ep-play-btn { display: flex; align-items: center; gap: 7px; background: none; border: 1.5px solid var(--green-deep); border-radius: 2px; padding: 7px 13px; cursor: pointer; transition: all 0.2s; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); white-space: nowrap; }
+    .ep-play-btn svg { fill: var(--green-deep); flex-shrink: 0; transition: fill 0.2s; }
+    .ep-play-btn:hover, .episode-item.playing .ep-play-btn { background: var(--green-deep); color: var(--white); }
+    .ep-play-btn:hover svg, .episode-item.playing .ep-play-btn svg { fill: var(--white); }
+
+    .ep-player { grid-column: 2 / 4; grid-row: 2; display: none; padding-top: 20px; }
+    .episode-item.playing .ep-player { display: block; }
+    .ep-progress-wrap { display: flex; align-items: center; gap: 12px; }
+    .ep-time { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.1em; color: var(--grey-light); white-space: nowrap; min-width: 34px; }
+    .ep-progress-bar { flex: 1; height: 2px; background: var(--cream-dark); border-radius: 2px; position: relative; cursor: pointer; }
+    .ep-progress-fill { height: 100%; background: var(--gold); border-radius: 2px; width: 0%; pointer-events: none; }
+    .ep-progress-thumb { position: absolute; top: 50%; right: -5px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); transform: translateY(-50%); pointer-events: none; opacity: 0; transition: opacity 0.15s; }
+    .ep-progress-bar:hover .ep-progress-thumb { opacity: 1; }
+
+    @media (max-width: 760px) {
+      .episode-inner { grid-template-columns: 70px 1fr; grid-template-rows: auto auto auto; gap: 0 16px; padding: 22px 4px; }
+      .ep-art { width: 70px; height: 70px; grid-row: 1 / 3; }
+      .ep-meta { grid-column: 2; grid-row: 2; flex-direction: row; align-items: center; justify-content: flex-start; padding-top: 10px; }
+      .ep-player { grid-column: 1 / -1; grid-row: 3; padding-top: 14px; }
+      .ep-title { font-size: 16px; }
+      .ep-desc { display: none; }
+    }
 
     /* ABOUT */
     .about-section { background: var(--cream); padding: 80px 32px; }
@@ -279,50 +330,248 @@
   </div>
 </div>
 
-<!-- PLAYER -->
+<!-- EPISODE LIST -->
 <section class="player-section">
   <div class="player-inner">
     <p class="section-label">Latest Episodes</p>
     <div class="section-rule"></div>
     <h2 class="section-title">Listen Now</h2>
-    <div class="player-embed">
-      <iframe 
-        id="rss-player"
-        src="https://player.rss.com/sacredherbology?theme=light&v=2&hl=aGlkZV9sb2dv" 
-        width="100%" 
-        height="800px" 
-        title="The Precision Health Podcast" 
-        frameBorder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen 
-        scrolling="yes"
-        style="min-height:600px;"
-      ><a href="https://rss.com/podcasts/sacredherbology">The Precision Health Podcast | RSS.com</a></iframe>
-      <script>
-        // Auto-resize the RSS player iframe to show all episodes without scrollbar
-        (function() {
-          var iframe = document.getElementById('rss-player');
-          function resize() {
-            try {
-              var h = iframe.contentWindow.document.body.scrollHeight;
-              if (h && h > 400) iframe.style.height = h + 'px';
-            } catch(e) {}
-          }
-          iframe.addEventListener('load', function() {
-            resize();
-            setInterval(resize, 1000);
-          });
-          // Also try postMessage approach for cross-origin
-          window.addEventListener('message', function(e) {
-            if (e.data && e.data.height) {
-              iframe.style.height = e.data.height + 'px';
-            }
-          });
-        })();
-      </script>
+    <div id="episode-container">
+      <div class="episodes-loading">
+        <div class="spinner"></div>
+        Loading episodes
+      </div>
     </div>
   </div>
 </section>
+
+<script>
+(function () {
+  var RSS_FEED = 'https://media.rss.com/sacredherbology/feed.xml';
+  var FALLBACK_ART = 'https://img.rss.com/sacredherbology/536/20260319_050354_abd3b4c55ca870bf346d5bef81cab69a.png';
+  var PROXIES = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+  ];
+  var currentAudio = null;
+  var currentLi = null;
+
+  /* ── helpers ── */
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function secsToHMS(raw) {
+    if (!raw) return '';
+    // handle HH:MM:SS strings from iTunes
+    if (/^\d+:\d+/.test(raw)) return raw;
+    var s = parseInt(raw, 10);
+    if (isNaN(s)) return '';
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return h > 0 ? h + ':' + pad(m) + ':' + pad(sec) : m + ':' + pad(sec);
+  }
+
+  function fmtTime(s) {
+    s = Math.floor(s || 0);
+    var m = Math.floor(s / 60); return pad(m) + ':' + pad(s % 60);
+  }
+
+  function fmtDate(str) {
+    if (!str) return '';
+    var d = new Date(str);
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function stripHtml(h) {
+    var d = document.createElement('div'); d.innerHTML = h;
+    return (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
+  }
+
+  /* ── XML parse ── */
+  function parseItems(text) {
+    var doc = new DOMParser().parseFromString(text, 'text/xml');
+    var NS = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
+    function itunes(el, tag) {
+      var n = el.getElementsByTagNameNS(NS, tag)[0];
+      return n ? (n.getAttribute('href') || n.textContent) : '';
+    }
+    return Array.from(doc.querySelectorAll('item')).map(function (item) {
+      var enc = item.querySelector('enclosure');
+      var imgEl = item.getElementsByTagNameNS(NS, 'image')[0];
+      var imgUrl = (imgEl ? imgEl.getAttribute('href') : '') || itunes(item, 'image') || FALLBACK_ART;
+      var dur = itunes(item, 'duration') || (item.querySelector('duration') || {}).textContent || '';
+      return {
+        title:    (item.querySelector('title') || {}).textContent || '',
+        pubDate:  (item.querySelector('pubDate') || {}).textContent || '',
+        desc:     stripHtml((item.querySelector('description') || {}).textContent || ''),
+        audioUrl: enc ? enc.getAttribute('url') : '',
+        duration: secsToHMS(dur),
+        image:    imgUrl,
+      };
+    });
+  }
+
+  /* ── stop current ── */
+  function stopCurrent() {
+    if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+    if (currentLi) currentLi.classList.remove('playing');
+    currentAudio = null; currentLi = null;
+  }
+
+  /* ── build list ── */
+  function buildList(items) {
+    var ul = document.createElement('ul');
+    ul.className = 'episode-list';
+
+    items.forEach(function (ep) {
+      var li = document.createElement('li');
+      li.className = 'episode-item';
+
+      var desc = ep.desc.substring(0, 220) + (ep.desc.length > 220 ? '…' : '');
+
+      li.innerHTML =
+        '<div class="episode-inner">' +
+
+          /* artwork col */
+          '<div class="ep-art">' +
+            '<img src="' + ep.image + '" alt="" loading="lazy" onerror="this.src=\'' + FALLBACK_ART + '\'">' +
+            '<div class="ep-art-overlay">' +
+              '<div class="ep-art-play">' +
+                '<svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1l10 6L1 13V1z"/></svg>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          /* body col */
+          '<div class="ep-body">' +
+            (ep.pubDate ? '<p class="ep-date">' + fmtDate(ep.pubDate) + '</p>' : '') +
+            '<p class="ep-title">' + ep.title + '</p>' +
+            (desc ? '<p class="ep-desc">' + desc + '</p>' : '') +
+          '</div>' +
+
+          /* meta col */
+          '<div class="ep-meta">' +
+            (ep.duration ? '<p class="ep-duration">' + ep.duration + '</p>' : '') +
+            '<button class="ep-play-btn" aria-label="Play">' +
+              '<svg width="10" height="12" viewBox="0 0 10 12"><path d="M1 1l8 5-8 5V1z"/></svg>' +
+              '<span class="ep-btn-label">Play</span>' +
+            '</button>' +
+          '</div>' +
+
+          /* custom progress bar — hidden until playing */
+          '<div class="ep-player">' +
+            '<div class="ep-progress-wrap">' +
+              '<span class="ep-time ep-time-cur">0:00</span>' +
+              '<div class="ep-progress-bar">' +
+                '<div class="ep-progress-fill"></div>' +
+                '<div class="ep-progress-thumb"></div>' +
+              '</div>' +
+              '<span class="ep-time ep-time-end">' + (ep.duration || '–') + '</span>' +
+            '</div>' +
+          '</div>' +
+
+        '</div>';
+
+      /* audio element (not in DOM visually) */
+      var audio = new Audio();
+      audio.preload = 'none';
+      audio.src = ep.audioUrl;
+
+      var overlay   = li.querySelector('.ep-art-overlay');
+      var artPlay   = li.querySelector('.ep-art-play');
+      var playBtn   = li.querySelector('.ep-play-btn');
+      var btnLabel  = li.querySelector('.ep-btn-label');
+      var fill      = li.querySelector('.ep-progress-fill');
+      var thumb     = li.querySelector('.ep-progress-thumb');
+      var timeCur   = li.querySelector('.ep-time-cur');
+      var timeEnd   = li.querySelector('.ep-time-end');
+      var bar       = li.querySelector('.ep-progress-bar');
+
+      var PLAY_ICON  = '<svg width="10" height="12" viewBox="0 0 10 12"><path d="M1 1l8 5-8 5V1z"/></svg>';
+      var PAUSE_ICON = '<svg width="10" height="12" viewBox="0 0 10 12"><rect x="1" y="1" width="3" height="10" rx="1"/><rect x="6" y="1" width="3" height="10" rx="1"/></svg>';
+      var ART_PLAY_ICON  = '<svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1l10 6L1 13V1z"/></svg>';
+      var ART_PAUSE_ICON = '<svg width="12" height="14" viewBox="0 0 12 14"><rect x="1" y="1" width="4" height="12" rx="1"/><rect x="7" y="1" width="4" height="12" rx="1"/></svg>';
+
+      function setPlaying(on) {
+        li.classList.toggle('playing', on);
+        playBtn.querySelector('svg').outerHTML; // force repaint
+        playBtn.innerHTML = (on ? PAUSE_ICON : PLAY_ICON) + '<span class="ep-btn-label">' + (on ? 'Pause' : 'Play') + '</span>';
+        artPlay.innerHTML = on ? ART_PAUSE_ICON : ART_PLAY_ICON;
+      }
+
+      function toggle() {
+        if (!ep.audioUrl) return;
+        if (currentLi === li) {
+          if (audio.paused) { audio.play(); }
+          else { audio.pause(); stopCurrent(); }
+          return;
+        }
+        stopCurrent();
+        currentAudio = audio; currentLi = li;
+        setPlaying(true);
+        audio.play();
+      }
+
+      overlay.addEventListener('click', toggle);
+      playBtn.addEventListener('click', toggle);
+
+      /* progress */
+      audio.addEventListener('timeupdate', function () {
+        if (!audio.duration) return;
+        var pct = (audio.currentTime / audio.duration) * 100;
+        fill.style.width = pct + '%';
+        thumb.style.left = 'calc(' + pct + '% - 5px)';
+        timeCur.textContent = fmtTime(audio.currentTime);
+      });
+      audio.addEventListener('loadedmetadata', function () {
+        timeEnd.textContent = fmtTime(audio.duration);
+      });
+      audio.addEventListener('ended', function () {
+        setPlaying(false); currentAudio = null; currentLi = null;
+        fill.style.width = '0%'; timeCur.textContent = '0:00';
+      });
+      audio.addEventListener('pause', function () { if (!audio.ended && currentLi === li) setPlaying(false); });
+      audio.addEventListener('play',  function () { if (currentLi === li) setPlaying(true); });
+
+      /* seek */
+      bar.addEventListener('click', function (e) {
+        if (!audio.duration) return;
+        var rect = bar.getBoundingClientRect();
+        audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+      });
+
+      ul.appendChild(li);
+    });
+
+    var container = document.getElementById('episode-container');
+    container.innerHTML = '';
+    container.appendChild(ul);
+  }
+
+  /* ── fetch ── */
+  function fetchWithFallback(proxies, url, i) {
+    if (i >= proxies.length) return Promise.reject(new Error('all proxies failed'));
+    return fetch(proxies[i] + encodeURIComponent(url))
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .catch(function () { return fetchWithFallback(proxies, url, i + 1); });
+  }
+
+  function loadFeed() {
+    fetch(RSS_FEED)
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .catch(function () { return fetchWithFallback(PROXIES, RSS_FEED, 0); })
+      .then(function (text) {
+        var items = parseItems(text);
+        if (items.length) { buildList(items); }
+        else { document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:\'Cormorant SC\',serif;letter-spacing:0.15em;font-size:12px;">No episodes found.</p>'; }
+      })
+      .catch(function () {
+        document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:\'Cormorant SC\',serif;letter-spacing:0.15em;font-size:12px;">Episodes temporarily unavailable.</p>';
+      });
+  }
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', loadFeed); }
+  else { loadFeed(); }
+})();
+</script>
 
 <!-- ABOUT -->
 <section class="about-section">
