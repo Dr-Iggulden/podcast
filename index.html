@@ -527,6 +527,17 @@
       audio.addEventListener('ended', function () {
         setPlaying(false); currentAudio = null; currentLi = null;
         fill.style.width = '0%'; timeCur.textContent = '0:00';
+        // Autoplay next episode
+        var allItems = Array.from(ul.querySelectorAll('.episode-item'));
+        var idx = allItems.indexOf(li);
+        if (idx !== -1 && idx < allItems.length - 1) {
+          var nextLi = allItems[idx + 1];
+          var nextBtn = nextLi.querySelector('.ep-play-btn');
+          if (nextBtn) {
+            nextLi.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            setTimeout(function() { nextBtn.click(); }, 400);
+          }
+        }
       });
       audio.addEventListener('pause', function () { if (!audio.ended && currentLi === li) setPlaying(false); });
       audio.addEventListener('play',  function () { if (currentLi === li) setPlaying(true); });
