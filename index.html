@@ -545,6 +545,33 @@
       artPlay.innerHTML = on ? ART_PAUSE_ICON : ART_PLAY_ICON;
     }
 
+    function updateMediaSession() {
+      if (!('mediaSession' in navigator)) return;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title:  ep.title,
+        artist: 'Dr Luke Iggulden, ND',
+        album:  'The Precision Health Podcast',
+        artwork: [
+          { src: ep.image, sizes: '512x512', type: 'image/png' },
+          { src: ep.image, sizes: '256x256', type: 'image/png' },
+        ]
+      });
+      navigator.mediaSession.setActionHandler('play',  function () { audio.play(); });
+      navigator.mediaSession.setActionHandler('pause', function () { audio.pause(); });
+      navigator.mediaSession.setActionHandler('stop',  function () { stopCurrent(); });
+      navigator.mediaSession.setActionHandler('nexttrack', function () {
+        var idx = allEls.indexOf(li);
+        if (idx !== -1 && idx < allEls.length - 1) { stopCurrent(); allEls[idx + 1].querySelector('.ep-play-btn').click(); }
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', function () {
+        var idx = allEls.indexOf(li);
+        if (idx > 0) { stopCurrent(); allEls[idx - 1].querySelector('.ep-play-btn').click(); }
+      });
+      navigator.mediaSession.setActionHandler('seekto', function (details) {
+        if (details.seekTime !== undefined) audio.currentTime = details.seekTime;
+      });
+    }
+
     function toggle() {
       if (!ep.audioUrl) return;
       if (currentLi === li) {
@@ -555,6 +582,7 @@
       currentAudio = audio; currentLi = li;
       setPlaying(true);
       audio.play();
+      updateMediaSession();
     }
 
     if (overlay) overlay.addEventListener('click', toggle);
