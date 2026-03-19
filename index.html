@@ -126,6 +126,34 @@
     .ep-progress-thumb { position: absolute; top: 50%; right: -5px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); transform: translateY(-50%); pointer-events: none; opacity: 0; transition: opacity 0.15s; }
     .ep-progress-bar:hover .ep-progress-thumb { opacity: 1; }
 
+    /* FEATURED EPISODE */
+    .ep-featured { background: var(--cream); border-radius: 6px; margin-bottom: 48px; border: 1px solid var(--cream-dark); overflow: hidden; }
+    .ep-featured-inner { display: grid; grid-template-columns: 280px 1fr; min-height: 280px; }
+    .ep-featured-art { position: relative; overflow: hidden; background: var(--green-deep); }
+    .ep-featured-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ep-featured-body { padding: 40px 44px; display: flex; flex-direction: column; justify-content: center; gap: 0; }
+    .ep-featured-label { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.28em; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+    .ep-featured-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; color: var(--green-deep); line-height: 1.25; margin-bottom: 14px; }
+    .ep-featured-desc { font-size: 14px; line-height: 1.75; color: #888; margin-bottom: 24px; flex: 1; }
+    .ep-featured-foot { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .ep-play-btn--lg { padding: 11px 22px; font-size: 11px; }
+    .ep-play-btn--lg svg { width: 14px; height: 16px; }
+    .ep-player--featured { margin-top: 20px; }
+    .ep-featured.playing .ep-player--featured { display: block; }
+    .ep-more-header { margin-bottom: 8px; }
+
+    @media (max-width: 900px) {
+      .ep-featured-inner { grid-template-columns: 200px 1fr; }
+      .ep-featured-body { padding: 28px 32px; }
+      .ep-featured-title { font-size: 22px; }
+    }
+    @media (max-width: 680px) {
+      .ep-featured-inner { grid-template-columns: 1fr; }
+      .ep-featured-art { height: 220px; }
+      .ep-featured-body { padding: 24px; }
+      .ep-featured-title { font-size: 20px; }
+      .ep-featured-desc { display: none; }
+    }
     @media (max-width: 760px) {
       .episode-inner { grid-template-columns: 70px 1fr; grid-template-rows: auto auto auto; gap: 0 16px; padding: 22px 4px; }
       .ep-art { width: 70px; height: 70px; grid-row: 1 / 3; }
@@ -416,47 +444,74 @@
     currentAudio = null; currentLi = null;
   }
 
-  /* ── build list ── */
-  function buildList(items) {
-    var ul = document.createElement('ul');
-    ul.className = 'episode-list';
+  /* ── build a single episode element ── */
+  function buildEpisodeEl(ep, allEls, isFeatured) {
+    var li = document.createElement(isFeatured ? 'div' : 'li');
+    li.className = isFeatured ? 'episode-item ep-featured' : 'episode-item';
 
-    items.forEach(function (ep) {
-      var li = document.createElement('li');
-      li.className = 'episode-item';
+    var desc = ep.desc.substring(0, isFeatured ? 340 : 220) + (ep.desc.length > (isFeatured ? 340 : 220) ? '…' : '');
 
-      var desc = ep.desc.substring(0, 220) + (ep.desc.length > 220 ? '…' : '');
+    var PLAY_ICON  = isFeatured
+      ? '<svg width="16" height="18" viewBox="0 0 16 18"><path d="M1 1l14 8L1 17V1z"/></svg>'
+      : '<svg width="10" height="12" viewBox="0 0 10 12"><path d="M1 1l8 5-8 5V1z"/></svg>';
+    var PAUSE_ICON = isFeatured
+      ? '<svg width="16" height="18" viewBox="0 0 16 18"><rect x="1" y="1" width="5" height="16" rx="1"/><rect x="10" y="1" width="5" height="16" rx="1"/></svg>'
+      : '<svg width="10" height="12" viewBox="0 0 10 12"><rect x="1" y="1" width="3" height="10" rx="1"/><rect x="6" y="1" width="3" height="10" rx="1"/></svg>';
+    var ART_PLAY_ICON  = '<svg width="18" height="20" viewBox="0 0 18 20"><path d="M1 1l16 9L1 19V1z"/></svg>';
+    var ART_PAUSE_ICON = '<svg width="18" height="20" viewBox="0 0 18 20"><rect x="1" y="1" width="5" height="18" rx="1"/><rect x="12" y="1" width="5" height="18" rx="1"/></svg>';
 
+    if (isFeatured) {
       li.innerHTML =
-        '<div class="episode-inner">' +
-
-          /* artwork col */
-          '<div class="ep-art">' +
-            '<img src="' + ep.image + '" alt="" loading="lazy" onerror="this.src=\'' + FALLBACK_ART + '\'">' +
+        '<div class="ep-featured-inner">' +
+          '<div class="ep-featured-art">' +
+            '<img src="' + ep.image + '" alt="" onerror="this.src=\'' + FALLBACK_ART + '\'">' +
             '<div class="ep-art-overlay">' +
-              '<div class="ep-art-play">' +
-                '<svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1l10 6L1 13V1z"/></svg>' +
+              '<div class="ep-art-play"><svg width="18" height="20" viewBox="0 0 18 20"><path d="M1 1l16 9L1 19V1z"/></svg></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="ep-featured-body">' +
+            '<p class="ep-featured-label">Latest Episode</p>' +
+            (ep.pubDate ? '<p class="ep-date">' + fmtDate(ep.pubDate) + '</p>' : '') +
+            '<h3 class="ep-featured-title">' + ep.title + '</h3>' +
+            (desc ? '<p class="ep-featured-desc">' + desc + '</p>' : '') +
+            '<div class="ep-featured-foot">' +
+              (ep.duration ? '<span class="ep-duration">' + ep.duration + '</span>' : '') +
+              '<button class="ep-play-btn ep-play-btn--lg" aria-label="Play">' +
+                PLAY_ICON + '<span class="ep-btn-label">Play Episode</span>' +
+              '</button>' +
+            '</div>' +
+            '<div class="ep-player ep-player--featured">' +
+              '<div class="ep-progress-wrap">' +
+                '<span class="ep-time ep-time-cur">0:00</span>' +
+                '<div class="ep-progress-bar">' +
+                  '<div class="ep-progress-fill"></div>' +
+                  '<div class="ep-progress-thumb"></div>' +
+                '</div>' +
+                '<span class="ep-time ep-time-end">' + (ep.duration || '–') + '</span>' +
               '</div>' +
             '</div>' +
           '</div>' +
-
-          /* body col */
+        '</div>';
+    } else {
+      li.innerHTML =
+        '<div class="episode-inner">' +
+          '<div class="ep-art">' +
+            '<img src="' + ep.image + '" alt="" loading="lazy" onerror="this.src=\'' + FALLBACK_ART + '\'">' +
+            '<div class="ep-art-overlay">' +
+              '<div class="ep-art-play"><svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1l10 6L1 13V1z"/></svg></div>' +
+            '</div>' +
+          '</div>' +
           '<div class="ep-body">' +
             (ep.pubDate ? '<p class="ep-date">' + fmtDate(ep.pubDate) + '</p>' : '') +
             '<p class="ep-title">' + ep.title + '</p>' +
             (desc ? '<p class="ep-desc">' + desc + '</p>' : '') +
           '</div>' +
-
-          /* meta col */
           '<div class="ep-meta">' +
             (ep.duration ? '<p class="ep-duration">' + ep.duration + '</p>' : '') +
             '<button class="ep-play-btn" aria-label="Play">' +
-              '<svg width="10" height="12" viewBox="0 0 10 12"><path d="M1 1l8 5-8 5V1z"/></svg>' +
-              '<span class="ep-btn-label">Play</span>' +
+              PLAY_ICON + '<span class="ep-btn-label">Play</span>' +
             '</button>' +
           '</div>' +
-
-          /* custom progress bar — hidden until playing */
           '<div class="ep-player">' +
             '<div class="ep-progress-wrap">' +
               '<span class="ep-time ep-time-cur">0:00</span>' +
@@ -467,94 +522,110 @@
               '<span class="ep-time ep-time-end">' + (ep.duration || '–') + '</span>' +
             '</div>' +
           '</div>' +
-
         '</div>';
+    }
 
-      /* audio element (not in DOM visually) */
-      var audio = new Audio();
-      audio.preload = 'none';
-      audio.src = ep.audioUrl;
+    var audio = new Audio();
+    audio.preload = 'none';
+    audio.src = ep.audioUrl;
 
-      var overlay   = li.querySelector('.ep-art-overlay');
-      var artPlay   = li.querySelector('.ep-art-play');
-      var playBtn   = li.querySelector('.ep-play-btn');
-      var btnLabel  = li.querySelector('.ep-btn-label');
-      var fill      = li.querySelector('.ep-progress-fill');
-      var thumb     = li.querySelector('.ep-progress-thumb');
-      var timeCur   = li.querySelector('.ep-time-cur');
-      var timeEnd   = li.querySelector('.ep-time-end');
-      var bar       = li.querySelector('.ep-progress-bar');
+    var overlay  = li.querySelector('.ep-art-overlay');
+    var artPlay  = li.querySelector('.ep-art-play');
+    var playBtn  = li.querySelector('.ep-play-btn');
+    var fill     = li.querySelector('.ep-progress-fill');
+    var thumb    = li.querySelector('.ep-progress-thumb');
+    var timeCur  = li.querySelector('.ep-time-cur');
+    var timeEnd  = li.querySelector('.ep-time-end');
+    var bar      = li.querySelector('.ep-progress-bar');
 
-      var PLAY_ICON  = '<svg width="10" height="12" viewBox="0 0 10 12"><path d="M1 1l8 5-8 5V1z"/></svg>';
-      var PAUSE_ICON = '<svg width="10" height="12" viewBox="0 0 10 12"><rect x="1" y="1" width="3" height="10" rx="1"/><rect x="6" y="1" width="3" height="10" rx="1"/></svg>';
-      var ART_PLAY_ICON  = '<svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1l10 6L1 13V1z"/></svg>';
-      var ART_PAUSE_ICON = '<svg width="12" height="14" viewBox="0 0 12 14"><rect x="1" y="1" width="4" height="12" rx="1"/><rect x="7" y="1" width="4" height="12" rx="1"/></svg>';
+    function setPlaying(on) {
+      li.classList.toggle('playing', on);
+      var btnLabel = isFeatured ? (on ? 'Pause' : 'Play Episode') : (on ? 'Pause' : 'Play');
+      playBtn.innerHTML = (on ? PAUSE_ICON : PLAY_ICON) + '<span class="ep-btn-label">' + btnLabel + '</span>';
+      artPlay.innerHTML = on ? ART_PAUSE_ICON : ART_PLAY_ICON;
+    }
 
-      function setPlaying(on) {
-        li.classList.toggle('playing', on);
-        playBtn.querySelector('svg').outerHTML; // force repaint
-        playBtn.innerHTML = (on ? PAUSE_ICON : PLAY_ICON) + '<span class="ep-btn-label">' + (on ? 'Pause' : 'Play') + '</span>';
-        artPlay.innerHTML = on ? ART_PAUSE_ICON : ART_PLAY_ICON;
+    function toggle() {
+      if (!ep.audioUrl) return;
+      if (currentLi === li) {
+        if (audio.paused) { audio.play(); } else { audio.pause(); stopCurrent(); }
+        return;
       }
+      stopCurrent();
+      currentAudio = audio; currentLi = li;
+      setPlaying(true);
+      audio.play();
+    }
 
-      function toggle() {
-        if (!ep.audioUrl) return;
-        if (currentLi === li) {
-          if (audio.paused) { audio.play(); }
-          else { audio.pause(); stopCurrent(); }
-          return;
+    if (overlay) overlay.addEventListener('click', toggle);
+    playBtn.addEventListener('click', toggle);
+
+    audio.addEventListener('timeupdate', function () {
+      if (!audio.duration) return;
+      var pct = (audio.currentTime / audio.duration) * 100;
+      fill.style.width = pct + '%';
+      thumb.style.left = 'calc(' + pct + '% - 5px)';
+      timeCur.textContent = fmtTime(audio.currentTime);
+    });
+    audio.addEventListener('loadedmetadata', function () {
+      timeEnd.textContent = fmtTime(audio.duration);
+    });
+    audio.addEventListener('ended', function () {
+      setPlaying(false); currentAudio = null; currentLi = null;
+      fill.style.width = '0%'; timeCur.textContent = '0:00';
+      // Autoplay next
+      var idx = allEls.indexOf(li);
+      if (idx !== -1 && idx < allEls.length - 1) {
+        var nextEl = allEls[idx + 1];
+        var nextBtn = nextEl.querySelector('.ep-play-btn');
+        if (nextBtn) {
+          nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          setTimeout(function () { nextBtn.click(); }, 400);
         }
-        stopCurrent();
-        currentAudio = audio; currentLi = li;
-        setPlaying(true);
-        audio.play();
       }
+    });
+    audio.addEventListener('pause', function () { if (!audio.ended && currentLi === li) setPlaying(false); });
+    audio.addEventListener('play',  function () { if (currentLi === li) setPlaying(true); });
 
-      overlay.addEventListener('click', toggle);
-      playBtn.addEventListener('click', toggle);
-
-      /* progress */
-      audio.addEventListener('timeupdate', function () {
-        if (!audio.duration) return;
-        var pct = (audio.currentTime / audio.duration) * 100;
-        fill.style.width = pct + '%';
-        thumb.style.left = 'calc(' + pct + '% - 5px)';
-        timeCur.textContent = fmtTime(audio.currentTime);
-      });
-      audio.addEventListener('loadedmetadata', function () {
-        timeEnd.textContent = fmtTime(audio.duration);
-      });
-      audio.addEventListener('ended', function () {
-        setPlaying(false); currentAudio = null; currentLi = null;
-        fill.style.width = '0%'; timeCur.textContent = '0:00';
-        // Autoplay next episode
-        var allItems = Array.from(ul.querySelectorAll('.episode-item'));
-        var idx = allItems.indexOf(li);
-        if (idx !== -1 && idx < allItems.length - 1) {
-          var nextLi = allItems[idx + 1];
-          var nextBtn = nextLi.querySelector('.ep-play-btn');
-          if (nextBtn) {
-            nextLi.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            setTimeout(function() { nextBtn.click(); }, 400);
-          }
-        }
-      });
-      audio.addEventListener('pause', function () { if (!audio.ended && currentLi === li) setPlaying(false); });
-      audio.addEventListener('play',  function () { if (currentLi === li) setPlaying(true); });
-
-      /* seek */
-      bar.addEventListener('click', function (e) {
-        if (!audio.duration) return;
-        var rect = bar.getBoundingClientRect();
-        audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
-      });
-
-      ul.appendChild(li);
+    bar.addEventListener('click', function (e) {
+      if (!audio.duration) return;
+      var rect = bar.getBoundingClientRect();
+      audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
     });
 
+    return li;
+  }
+
+  /* ── build list ── */
+  function buildList(items) {
     var container = document.getElementById('episode-container');
     container.innerHTML = '';
-    container.appendChild(ul);
+
+    var allEls = [];
+
+    // Featured — latest episode
+    var featured = buildEpisodeEl(items[0], allEls, true);
+    allEls.push(featured);
+    container.appendChild(featured);
+
+    // More episodes
+    if (items.length > 1) {
+      var moreHeader = document.createElement('div');
+      moreHeader.className = 'ep-more-header';
+      moreHeader.innerHTML =
+        '<p class="section-label" style="margin-bottom:10px;">More Episodes</p>' +
+        '<div class="section-rule"></div>';
+      container.appendChild(moreHeader);
+
+      var ul = document.createElement('ul');
+      ul.className = 'episode-list';
+      items.slice(1).forEach(function (ep) {
+        var li = buildEpisodeEl(ep, allEls, false);
+        allEls.push(li);
+        ul.appendChild(li);
+      });
+      container.appendChild(ul);
+    }
   }
 
   /* ── fetch ── */
