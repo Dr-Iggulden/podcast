@@ -537,10 +537,7 @@
       <div class="ep-modal-nudge" style="margin-top:24px;padding:16px 20px;background:var(--cream);border-left:3px solid var(--gold);border-radius:2px;">
         <p style="font-family:'Nunito Sans',sans-serif;font-size:13px;color:var(--grey-nav);line-height:1.6;margin:0;">
           Want to go further? Be first to hear about upcoming workshops and programmes like Metabolic Masters.
-          <button onclick="document.getElementById('ep-modal-overlay').classList.remove('open');document.body.style.overflow='';document.getElementById('signup-modal-overlay').classList.add('open');document.body.style.overflow='hidden';"
-            style="background:none;border:none;color:var(--green-mid);font-family:'Nunito Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;">
-            Join the mailing list &rsaquo;
-          </button>
+          <button id="ep-modal-signup-nudge" style="background:none;border:none;color:var(--green-mid);font-family:'Nunito Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;">Join the mailing list &rsaquo;</button>
         </p>
       </div>
       <div class="ep-modal-share">
@@ -1145,6 +1142,15 @@
 
   openBtn.addEventListener('click', openModal);
   closeBtn.addEventListener('click', closeModal);
+  // Episode modal nudge button
+  var nudgeBtn = document.getElementById('ep-modal-signup-nudge');
+  if (nudgeBtn) {
+    nudgeBtn.addEventListener('click', function () {
+      document.getElementById('ep-modal-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+      openModal();
+    });
+  }
   overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
 
