@@ -305,6 +305,13 @@
     .episode-item:not(.ep-featured) .ep-like-btn,
     .ep-featured .ep-like-btn { border-color: #e8c0c0; color: #c0717a; background: transparent; }
 
+    /* DOWNLOAD BUTTON */
+    .ep-download-btn { display: inline-flex; align-items: center; gap: 5px; background: none; border: 1.5px solid var(--cream-dark); border-radius: 2px; padding: 6px 11px; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey-nav); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .ep-download-btn:hover { border-color: var(--green-mid); color: var(--green-deep); }
+    .ep-download-btn svg { fill: none; stroke: currentColor; stroke-width: 2; width: 12px; height: 12px; flex-shrink: 0; }
+    .ep-download-btn.downloading { border-color: var(--gold); color: var(--gold); cursor: default; }
+    .ep-download-btn.done { border-color: #4caf7a; color: #4caf7a; }
+
     /* FAVOURITE STAR */
     .ep-fav-btn { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: none; border: none; cursor: pointer; transition: transform 0.2s; flex-shrink: 0; padding: 0; }
     .ep-fav-btn:hover { transform: scale(1.2); }
@@ -1076,6 +1083,62 @@
     });
   }
 
+  /* ── download button helper ── */
+  function makeDownloadBtn(ep) {
+    if (!ep.audio) return '';
+    return '<button class="ep-download-btn" data-audio="' + ep.audio + '" data-title="' + ep.title.replace(/"/g, '&quot;') + '" title="Download episode">' +
+      '<svg viewBox="0 0 24 24"><path d="M12 2v13m0 0l-4-4m4 4l4-4M2 17v3a2 2 0 002 2h16a2 2 0 002-2v-3"/></svg>' +
+      '<span class="ep-dl-label">Download</span>' +
+    '</button>';
+  }
+
+  // Delegated download click handler
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.ep-download-btn');
+    if (!btn) return;
+    if (btn.classList.contains('downloading') || btn.classList.contains('done')) return;
+
+    var audioUrl = btn.getAttribute('data-audio');
+    var title    = btn.getAttribute('data-title') || 'episode';
+    var label    = btn.querySelector('.ep-dl-label');
+
+    btn.classList.add('downloading');
+    if (label) label.textContent = 'Downloading...';
+
+    fetch(audioUrl)
+      .then(function (r) { return r.blob(); })
+      .then(function (blob) {
+        var a   = document.createElement('a');
+        a.href  = URL.createObjectURL(blob);
+        a.download = title.replace(/[^a-z0-9 ]/gi, '').trim() + '.mp3';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+
+        btn.classList.remove('downloading');
+        btn.classList.add('done');
+        if (label) label.textContent = 'Downloaded';
+
+        // If not already following, open the follow modal after download
+        setTimeout(function () {
+          if (localStorage.getItem('pnm_podcast_following') !== 'true') {
+            var followOverlay = document.getElementById('follow-modal-overlay');
+            if (followOverlay) {
+              followOverlay.classList.add('open');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+        }, 1500);
+      })
+      .catch(function () {
+        btn.classList.remove('downloading');
+        if (label) label.textContent = 'Download';
+        // Fallback — open audio URL directly if fetch fails (common on iOS)
+        window.open(audioUrl, '_blank');
+      });
+  });
+
   /* ── build episode element ── */
   function buildEpisodeEl(ep, isFeatured) {
     var li = document.createElement(isFeatured ? 'div' : 'li');
@@ -1113,7 +1176,7 @@
               '<button class="ep-play-btn ep-play-btn--lg" aria-label="Play">' + PLAY_ICON + '<span class="ep-btn-label">Play Episode</span></button>' +
               '<button class="ep-fav-btn" data-slug="' + ep.slug + '" title="Add to favourites"><svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></button>' +
             '</div>' +
-            '<div class="ep-share"><span class="ep-share-label">Share</span>' + shareHtml + '</div>' +
+            '<div class="ep-share"><span class="ep-share-label">Share</span>' + shareHtml + makeDownloadBtn(ep) + '</div>' +
             '<div class="ep-player ep-player--featured">' +
               '<div class="ep-progress-wrap">' +
                 '<span class="ep-time ep-time-cur">0:00</span>' +
@@ -1135,7 +1198,7 @@
             (ep.pubDate ? '<p class="ep-date">' + fmtDate(ep.pubDate) + '</p>' : '') +
             '<p class="ep-title"><span class="ep-title-link ep-modal-trigger">' + ep.title + '</span></p>' +
             (desc ? '<p class="ep-desc">' + desc + ' <span class="ep-modal-trigger" style="color:var(--gold);cursor:pointer;font-size:12px;font-family:\'Nunito Sans\',sans-serif;font-style:normal;">More &rsaquo;</span></p>' : '') +
-            '<div class="ep-share"><span class="ep-share-label">Share</span>' + shareHtml + '</div>' +
+            '<div class="ep-share"><span class="ep-share-label">Share</span>' + shareHtml + makeDownloadBtn(ep) + '</div>' +
           '</div>' +
           '<div class="ep-meta">' +
             (ep.duration ? '<p class="ep-duration">' + ep.duration + '</p>' : '') +
