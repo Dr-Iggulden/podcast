@@ -1872,10 +1872,11 @@ document.addEventListener('DOMContentLoaded', function () {
         submitBtn.textContent = 'Subscribing...';
         // Use Firebase SDK to get a proper FCM registration token
         var messaging = window._fcmMessaging;
-        navigator.serviceWorker.ready.then(function (reg) {
+        // Register Firebase messaging service worker explicitly
+        navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function (firebaseReg) {
           return messaging.getToken({
             vapidKey:                    'BC8tjkul4PUY82pS0KfHIr7QiMeX-6optd_aKY785g3enl3c90V-C5GuZCdIGQAHPjx4nxqzBOhPdWzLMwbFeKI',
-            serviceWorkerRegistration:   reg
+            serviceWorkerRegistration:   firebaseReg
           });
         }).then(function (fcmToken) {
           if (!fcmToken) throw new Error('No FCM token received');
