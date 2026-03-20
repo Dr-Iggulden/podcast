@@ -233,9 +233,12 @@
     .ep-share-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: 1.5px solid rgba(177,148,67,0.5); background: rgba(177,148,67,0.1); color: rgba(255,255,255,0.8); padding: 6px 12px; border-radius: 2px; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
     .ep-share-btn:hover, .ep-share-btn:focus { border-color: var(--gold); color: var(--gold); background: rgba(177,148,67,0.18); outline: none; }
     .ep-share-btn.copied { border-color: #4caf7a; color: #4caf7a; background: rgba(76,175,122,0.1); }
-    .episode-item:not(.ep-featured) .ep-share-btn { border-color: rgba(177,148,67,0.35); background: rgba(177,148,67,0.05); color: var(--green-deep); }
-    .episode-item:not(.ep-featured) .ep-share-label { color: var(--gold); }
-    .episode-item:not(.ep-featured) .ep-share-btn:hover { border-color: var(--gold); background: rgba(177,148,67,0.12); color: var(--green-deep); }
+    .episode-item:not(.ep-featured) .ep-share-btn,
+    .ep-featured .ep-share-btn { border-color: rgba(177,148,67,0.35); background: rgba(177,148,67,0.05); color: var(--green-deep); }
+    .episode-item:not(.ep-featured) .ep-share-label,
+    .ep-featured .ep-share-label { color: var(--gold); }
+    .episode-item:not(.ep-featured) .ep-share-btn:hover,
+    .ep-featured .ep-share-btn:hover { border-color: var(--gold); background: rgba(177,148,67,0.12); color: var(--green-deep); }
 
     /* EPISODE NUMBER */
     .ep-number { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.25em; color: var(--gold); margin-bottom: 5px; display: block; }
@@ -268,7 +271,8 @@
     .ep-like-btn .ep-like-heart { fill: none; stroke: #c0717a; stroke-width: 1.8; transition: all 0.25s; }
     .ep-like-btn:hover .ep-like-heart, .ep-like-btn.liked .ep-like-heart { fill: #e05c6e; stroke: #e05c6e; }
     .ep-like-count { font-variant-numeric: tabular-nums; }
-    .episode-item:not(.ep-featured) .ep-like-btn { border-color: #e8c0c0; color: #c0717a; background: transparent; }
+    .episode-item:not(.ep-featured) .ep-like-btn,
+    .ep-featured .ep-like-btn { border-color: #e8c0c0; color: #c0717a; background: transparent; }
 
     /* EPISODE MODAL */
     .ep-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(20,35,22,0.88); z-index: 500; overflow-y: auto; backdrop-filter: blur(4px); }
@@ -295,8 +299,8 @@
     .ep-modal-close:hover { background: rgba(255,255,255,0.22); color: #fff; }
     .ep-title-link { cursor: pointer; text-decoration: none; color: inherit; }
     .ep-title-link:hover { color: var(--green-mid); }
-    .ep-featured-title .ep-title-link { color: var(--white); }
-    .ep-featured-title .ep-title-link:hover { color: var(--gold-light); }
+    .ep-featured-title .ep-title-link { color: var(--green-deep); }
+    .ep-featured-title .ep-title-link:hover { color: var(--green-mid); }
     @media (max-width: 560px) { .ep-modal-header { grid-template-columns: 72px 1fr; } .ep-modal-art { width: 72px; height: 72px; } .ep-modal-title { font-size: 17px; } .ep-modal-body { padding: 20px; } }
 
     /* SIGNUP SECTION */
