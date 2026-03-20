@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Precision Health Podcast | Dr Luke Iggulden, ND | Precision Natural Medicine</title>
-  <meta name="description" content="The Precision Health Podcast — Australia's evidence-based natural medicine podcast hosted by Dr Luke Iggulden, medical herbalist, clinical naturopath and pharmacognosist at Precision Natural Medicine, Queensland." />
-  <meta property="og:title" content="The Precision Health Podcast with Dr Luke Iggulden, ND" />
-  <meta property="og:description" content="Clinical-grade insight into herbal medicine, integrative health, longevity, and the science of living well. Hosted by Dr Luke Iggulden, medical herbalist, clinical naturopath and pharmacognosist." />
+  <title>The Precision Health Podcast | Dr Luke Iggulden | Precision Natural Medicine</title>
+  <meta name="description" content="The Precision Health Podcast — Australia's evidence-based natural medicine podcast hosted by Dr Luke Iggulden, naturopathic doctor and pharmacognosist at Precision Natural Medicine, Queensland." />
+  <meta property="og:title" content="The Precision Health Podcast with Dr Luke Iggulden" />
+  <meta property="og:description" content="Clinical-grade insight into herbal medicine, integrative health, longevity, and the science of living well. Hosted by Dr Luke Iggulden, naturopath and pharmacognosist." />
   <meta property="og:url" content="https://podcast.precisionnaturalmedicine.com.au" />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://podcast.precisionnaturalmedicine.com.au/og-image.jpg" />
@@ -178,6 +178,12 @@
     .ep-player--featured { margin-top: 20px; }
     .ep-featured.playing .ep-player--featured { display: block; }
     .ep-more-header { margin-bottom: 8px; }
+    /* Series nav bar */
+    .series-nav { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; padding: 16px 0 20px; border-bottom: 1px solid var(--cream-dark); margin-bottom: 8px; }
+    .series-nav-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .series-nav-pill { background: none; border: 1.5px solid var(--cream-dark); border-radius: 20px; padding: 6px 16px; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey-nav); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .series-nav-pill:hover { border-color: var(--gold); color: var(--green-deep); }
+    .series-nav-pill.active { background: var(--green-deep); border-color: var(--green-deep); color: var(--white); }
     .ep-series-group { margin-bottom: 40px; }
     .ep-series-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; margin-top: 36px; }
     .ep-series-badge { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.25em; color: var(--white); background: var(--green-deep); padding: 4px 10px; border-radius: 2px; white-space: nowrap; text-transform: uppercase; }
@@ -388,7 +394,7 @@
 
     /* SERIES COLLAPSE */
     .ep-series-list { overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
-    .ep-series-list.collapsed { max-height: var(--collapsed-height, 400px); }
+    .ep-series-list.collapsed { max-height: 320px; } /* overridden by inline style once measured */
     .ep-series-list.expanded  { max-height: 9999px; }
     .ep-series-more-wrap { text-align: center; padding: 10px 0 4px; position: relative; }
     .ep-series-more-wrap::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 60px; transform: translateY(-100%); background: linear-gradient(to bottom, transparent, var(--cream)); pointer-events: none; }
@@ -876,7 +882,7 @@
     var shareText = 'The Precision Health Podcast \u2014 ' + epTitle;
     var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(epUrl) + '&quote=' + encodeURIComponent(shareText);
     var x  = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(epUrl) + '&text=' + encodeURIComponent(shareText);
-    var li = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(epUrl) + '&title=' + encodeURIComponent(epTitle) + '&summary=' + encodeURIComponent('The Precision Health Podcast by Dr Luke Iggulden, ND');
+    var li = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(epUrl) + '&title=' + encodeURIComponent(epTitle) + '&summary=' + encodeURIComponent('The Precision Health Podcast by Dr Luke Iggulden');
     var heartSvg = '<svg width="13" height="12" viewBox="0 0 24 22"><path class="ep-like-heart" d="M12 21s-9-6.35-9-12.5A6.5 6.5 0 0112 3.33 6.5 6.5 0 0121 8.5C21 14.65 12 21 12 21z"/></svg>';
     return (
       '<a class="ep-share-btn" href="' + fb + '" target="_blank" rel="noopener">Facebook</a>' +
@@ -1434,26 +1440,59 @@
       groups[s].push(ep);
     });
 
+    // Build series nav — sticky bar above episode groups
+    var availSeries = SERIES_ORDER.filter(function (s) { return groups[s] && groups[s].length > 0; });
+    if (availSeries.length > 0) {
+      var navHeader = document.createElement('div');
+      navHeader.className = 'ep-more-header';
+      var navHtml = '<div class="series-nav" id="series-nav"><span class="section-label" style="margin-bottom:0;white-space:nowrap;">More Episodes</span><div class="series-nav-pills">';
+      navHtml += '<button class="series-nav-pill active" data-season="all">All</button>';
+      availSeries.forEach(function (s) {
+        var label = SERIES_NAMES[s] || ('Series ' + s);
+        navHtml += '<button class="series-nav-pill" data-season="' + s + '">' + label + '</button>';
+      });
+      navHtml += '</div></div>';
+      navHeader.innerHTML = navHtml;
+      container.appendChild(navHeader);
+      // Filter behaviour
+      navHeader.addEventListener('click', function (e) {
+        var pill = e.target.closest('.series-nav-pill');
+        if (!pill) return;
+        var season = pill.getAttribute('data-season');
+        navHeader.querySelectorAll('.series-nav-pill').forEach(function (p) { p.classList.remove('active'); });
+        pill.classList.add('active');
+        // Show/hide groups
+        container.querySelectorAll('.ep-series-group[data-season]').forEach(function (g) {
+          if (season === 'all' || g.getAttribute('data-season') === season) {
+            g.style.display = '';
+            // Scroll to this group if filtering to specific series
+            if (season !== 'all') {
+              setTimeout(function () {
+                var navH = (document.querySelector('nav') || {}).offsetHeight || 64;
+                var stickyH = (document.getElementById('series-nav') || {}).offsetHeight || 0;
+                var top = g.getBoundingClientRect().top + window.pageYOffset - navH - stickyH - 16;
+                window.scrollTo({ top: top, behavior: 'smooth' });
+              }, 50);
+            }
+          } else {
+            g.style.display = 'none';
+          }
+        });
+      });
+    }
+
     // Render in SERIES_ORDER
-    var hasAny = false;
+    var hasAny = availSeries.length > 0;
     SERIES_ORDER.forEach(function (seasonNum) {
       var eps = groups[seasonNum];
       if (!eps || eps.length === 0) return;
-
-      if (!hasAny) {
-        // "More Episodes" header — only once, above first group
-        var moreHeader = document.createElement('div');
-        moreHeader.className = 'ep-more-header';
-        moreHeader.innerHTML = '<p class="section-label" style="margin-bottom:10px;">More Episodes</p><div class="section-rule"></div>';
-        container.appendChild(moreHeader);
-        hasAny = true;
-      }
 
       // Series group header
       var seriesName = SERIES_NAMES[seasonNum] || ('Series ' + seasonNum);
       var seriesLabel = seasonNum === 0 ? 'Extras' : 'Series ' + seasonNum;
       var groupDiv = document.createElement('div');
       groupDiv.className = 'ep-series-group';
+      groupDiv.setAttribute('data-season', seasonNum);
       groupDiv.innerHTML =
         '<div class="ep-series-header">' +
           '<span class="ep-series-badge">' + seriesLabel + '</span>' +
@@ -1476,17 +1515,19 @@
       listWrap.className = 'ep-series-list' + (needsCollapse ? ' collapsed' : ' expanded');
       listWrap.appendChild(ul);
 
-      // Measure height of first 2 items after they are in DOM
+      // Set collapsed height precisely once rendered
       if (needsCollapse) {
-        // Set initial collapsed height after render
+        // Start with a safe tiny height so nothing bleeds through before measurement
+        listWrap.style.maxHeight = '0px';
         requestAnimationFrame(function () {
-          var items = ul.querySelectorAll('li.episode-item');
-          var h = 0;
-          for (var j = 0; j < Math.min(PREVIEW, items.length); j++) {
-            h += items[j].offsetHeight;
-          }
-          // Add a little breathing room
-          listWrap.style.setProperty('--collapsed-height', (h + 16) + 'px');
+          requestAnimationFrame(function () { // double-rAF ensures layout is complete
+            var liEls = ul.querySelectorAll('li.episode-item');
+            var h = 0;
+            for (var j = 0; j < Math.min(PREVIEW, liEls.length); j++) {
+              h += liEls[j].offsetHeight;
+            }
+            listWrap.style.maxHeight = (h + 24) + 'px'; // 24px breathing room
+          });
         });
       }
 
@@ -1504,22 +1545,30 @@
         moreBtn.addEventListener('click', function () {
           var isOpen = listWrap.classList.contains('expanded');
           if (isOpen) {
-            // Collapse — first set explicit height so transition works
+            // Collapse — re-measure the preview height
+            var liEls = ul.querySelectorAll('li.episode-item');
+            var h = 0;
+            for (var j = 0; j < Math.min(PREVIEW, liEls.length); j++) { h += liEls[j].offsetHeight; }
+            // First pin current height, then on next frame shrink to measured
             listWrap.style.maxHeight = listWrap.scrollHeight + 'px';
             requestAnimationFrame(function () {
-              listWrap.style.maxHeight = '';
               listWrap.classList.remove('expanded');
               listWrap.classList.add('collapsed');
+              listWrap.style.maxHeight = (h + 24) + 'px';
               moreBtn.classList.remove('open');
               moreBtn.innerHTML =
                 'See all ' + eps.length + ' episodes' +
                 '<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
-              // Scroll back to series header
-              groupDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              setTimeout(function () {
+                groupDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }, 420);
             });
           } else {
             listWrap.classList.remove('collapsed');
             listWrap.classList.add('expanded');
+            listWrap.style.maxHeight = listWrap.scrollHeight + 'px';
+            // After transition, set to 'none' so content can grow freely
+            setTimeout(function () { if (listWrap.classList.contains('expanded')) listWrap.style.maxHeight = '9999px'; }, 450);
             moreBtn.classList.add('open');
             moreBtn.innerHTML =
               'See less' +
@@ -2164,10 +2213,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <h2>Clinical intelligence.<br>No compromise.</h2>
       <p>Most natural health podcasts are run by people who read about medicine. This one is run by someone who practises it.</p>
       <p>The Precision Health Podcast delivers evidence-based insight into herbal medicine, integrative health, longevity science, and the pharmacognosy of medicinal plants. Every episode draws on active clinical experience and primary literature. This is not a wellness podcast. It is a clinical one.</p>
-      <p>Hosted by Dr Luke Iggulden, ND from Precision Natural Medicine in Queensland, Australia, each episode is built for people who are done with surface-level health content and ready to understand the mechanism behind the medicine.</p>
+      <p>Hosted by Dr Luke Iggulden from Precision Natural Medicine in Queensland, Australia, each episode is built for people who are done with surface-level health content and ready to understand the mechanism behind the medicine.</p>
     </div>
     <div class="about-credentials">
-      <p class="cred-name">Dr Luke Iggulden, ND</p>
+      <p class="cred-name">Dr Luke Iggulden</p>
       <p class="cred-quals">PhMN &nbsp;|&nbsp; BHSc. WHM &nbsp;|&nbsp; Adv. Dip. WHM</p>
       <p class="cred-title">Medical Herbalist, Clinical Naturopath &amp; Pharmacognosist</p>
       <ul class="cred-list">
