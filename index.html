@@ -256,7 +256,14 @@
     .footer-bottom p a:hover { color: var(--gold); }
 
     /* SHARE BUTTONS */
-    .ep-share { display: flex; align-items: center; gap: 7px; margin-top: 16px; flex-wrap: wrap; width: 100%; }
+    .ep-share { display: flex; align-items: center; gap: 6px; margin-top: 16px; flex-wrap: wrap; width: 100%; }
+    @media (max-width: 600px) {
+      .ep-share { gap: 4px; margin-top: 10px; }
+      .ep-share-btn { font-size: 8px; padding: 5px 7px; letter-spacing: 0.06em; }
+      .ep-like-btn { font-size: 8px; padding: 5px 8px; }
+      .ep-download-btn { font-size: 8px; padding: 5px 7px; letter-spacing: 0.06em; }
+      .ep-share-label { display: none; }
+    }
     .ep-share-label { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.22em; color: var(--gold); margin-right: 2px; text-transform: uppercase; }
     .ep-share-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: 1.5px solid rgba(177,148,67,0.5); background: rgba(177,148,67,0.1); color: rgba(255,255,255,0.8); padding: 6px 12px; border-radius: 2px; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
     .ep-share-btn:hover, .ep-share-btn:focus { border-color: var(--gold); color: var(--gold); background: rgba(177,148,67,0.18); outline: none; }
@@ -1097,8 +1104,8 @@
 
   /* ── download button helper ── */
   function makeDownloadBtn(ep) {
-    if (!ep.audio) return '';
-    return '<button class="ep-download-btn" data-audio="' + ep.audio + '" data-title="' + ep.title.replace(/"/g, '&quot;') + '" title="Download episode">' +
+    if (!ep.audioUrl) return '';
+    return '<button class="ep-download-btn" data-audio="' + ep.audioUrl + '" data-title="' + ep.title.replace(/"/g, '&quot;') + '" title="Download episode">' +
       '<svg viewBox="0 0 24 24"><path d="M12 2v13m0 0l-4-4m4 4l4-4M2 17v3a2 2 0 002 2h16a2 2 0 002-2v-3"/></svg>' +
       '<span class="ep-dl-label">Download</span>' +
     '</button>';
