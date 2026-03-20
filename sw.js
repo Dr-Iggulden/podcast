@@ -74,3 +74,41 @@ self.addEventListener('fetch', function(e) {
     })
   );
 });
+
+// ── Push notification display handler ──
+self.addEventListener('push', function(event) {
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; } catch(e) {}
+
+  var title   = data.title || 'The Precision Health Podcast';
+  var body    = data.body  || 'A new episode is available.';
+  var icon    = data.icon  || '/icon-192x192.png';
+  var badge   = data.badge || '/icon-96x96.png';
+  var url     = (data.data && data.data.url) ? data.data.url : 'https://podcast.precisionnaturalmedicine.com.au/';
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body:    body,
+      icon:    icon,
+      badge:   badge,
+      data:    { url: url },
+      actions: [{ action: 'listen', title: 'Listen Now' }]
+    })
+  );
+});
+
+// ── Notification click handler ──
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  var url = (event.notification.data && event.notification.data.url)
+    ? event.notification.data.url
+    : 'https://podcast.precisionnaturalmedicine.com.au/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].url === url && 'focus' in list[i]) return list[i].focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
+});
