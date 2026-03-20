@@ -19,6 +19,18 @@
   <link rel="canonical" href="https://podcast.precisionnaturalmedicine.com.au" />
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey:            "AIzaSyCs0aFTyPrCYUojYQBMdK35OQmlMgoMV3E",
+      projectId:         "the-precision-health-podcast",
+      messagingSenderId: "457399711361",
+      appId:             "1:457399711361:web:ef5d6374f18b73c307bf80"
+    });
+    window._fcmMessaging = firebase.messaging();
+  </script>
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -1858,14 +1870,15 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
         submitBtn.textContent = 'Subscribing...';
+        // Use Firebase SDK to get a proper FCM registration token
+        var messaging = window._fcmMessaging;
         navigator.serviceWorker.ready.then(function (reg) {
-          return reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUB)
+          return messaging.getToken({
+            vapidKey:                    'BC8tjkul4PUY82pS0KfHIr7QiMeX-6optd_aKY785g3enl3c90V-C5GuZCdIGQAHPjx4nxqzBOhPdWzLMwbFeKI',
+            serviceWorkerRegistration:   reg
           });
-        }).then(function (subscription) {
-          var sub  = subscription.toJSON();
-          var keys = sub.keys || {};
+        }).then(function (fcmToken) {
+          if (!fcmToken) throw new Error('No FCM token received');
           return fetch(API, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
@@ -1873,9 +1886,9 @@ document.addEventListener('DOMContentLoaded', function () {
               action:    'follow',
               name:      name,
               email:     email,
-              endpoint:  sub.endpoint,
-              p256dh:    keys.p256dh   || '',
-              auth:      keys.auth     || '',
+              endpoint:  fcmToken,
+              p256dh:    'fcm-v1',
+              auth:      'fcm-v1',
               userAgent: navigator.userAgent.substring(0, 100)
             })
           });
