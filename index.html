@@ -1443,7 +1443,7 @@
     if (installSection) installSection.classList.remove('hidden');
   });
 
-  // Hide banner if already installed
+  // Hide banner if already installed — then prompt to follow
   window.addEventListener('appinstalled', function () {
     if (installSection) installSection.classList.add('hidden');
     deferredPrompt = null;
@@ -1451,6 +1451,14 @@
     if (typeof gtag !== 'undefined') {
       gtag('event', 'pwa_install', { event_category: 'PWA', event_label: 'installed' });
     }
+    // Open the Follow modal after a short delay so the install animation settles
+    setTimeout(function () {
+      var followOverlay = document.getElementById('follow-modal-overlay');
+      if (followOverlay && localStorage.getItem('pnm_podcast_following') !== 'true') {
+        followOverlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+    }, 1200);
   });
 
   // If running as standalone (already installed), hide the banner
