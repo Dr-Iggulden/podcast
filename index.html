@@ -156,6 +156,12 @@
     .ep-player--featured { margin-top: 20px; }
     .ep-featured.playing .ep-player--featured { display: block; }
     .ep-more-header { margin-bottom: 8px; }
+    .ep-series-group { margin-bottom: 40px; }
+    .ep-series-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; margin-top: 36px; }
+    .ep-series-badge { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.25em; color: var(--white); background: var(--green-deep); padding: 4px 10px; border-radius: 2px; white-space: nowrap; text-transform: uppercase; }
+    .ep-series-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--green-deep); }
+    .ep-series-rule { flex: 1; height: 1px; background: var(--cream-dark); }
+    .ep-series-group:first-child .ep-series-header { margin-top: 0; }
 
     @media (max-width: 900px) {
       .ep-featured-inner { grid-template-columns: 220px 1fr; }
@@ -574,6 +580,20 @@
   var BASE_URL     = 'https://podcast.precisionnaturalmedicine.com.au/';
   var PROXIES      = ['https://corsproxy.io/?', 'https://api.allorigins.win/raw?url='];
   var LIKES_API    = 'https://script.google.com/macros/s/AKfycbzIC44j7FHrvE-9ZH-gdfD3zbCu7fzOiNWOhIfDtJp3kwd_PnFv_7HSUpWBuQ5avHGa/exec';
+
+  // ── Series names — edit this to add/rename series ──
+  // Key = itunes:season number from RSS feed (set on RSS.com per episode).
+  // 0 = catch-all for any episode with no season assigned.
+  // To add a new series: assign the season number on RSS.com, then add it here
+  // e.g.  3: 'Hormonal Health'
+  var SERIES_NAMES = {
+    2: 'Metabolic Masters',
+    1: 'Meditation Music',
+    0: 'Extras'
+  };
+  // Display order — newest/primary series first.
+  // Add new season numbers here too when you create them.
+  var SERIES_ORDER = [2, 1, 0];
   var LIKED_KEY    = 'pnm_podcast_liked'; // local: tracks which episodes THIS user liked
   var likeCounts   = {};  // fetched from server
 
@@ -876,6 +896,7 @@
         image:    imgUrl,
         slug:     slug,
         url:      BASE_URL + '#ep-' + slug,
+        season:   parseInt((item.getElementsByTagNameNS(NS, 'season')[0] || {}).textContent || '0') || 0,
         _audio:   null, _li: null, _setPlaying: null,
       };
     });
@@ -1060,24 +1081,63 @@
     container.innerHTML = '';
     allEls = [];
 
+    // Featured — always the latest episode regardless of series
     var featured = buildEpisodeEl(items[0], true);
     allEls.push(featured);
     container.appendChild(featured);
 
-    if (items.length > 1) {
-      var moreHeader = document.createElement('div');
-      moreHeader.className = 'ep-more-header';
-      moreHeader.innerHTML = '<p class="section-label" style="margin-bottom:10px;">More Episodes</p><div class="section-rule"></div>';
-      container.appendChild(moreHeader);
+    if (items.length < 2) {
+      fetchLikeCounts(refreshLikeButtons);
+      scrollToAnchor();
+      return;
+    }
+
+    // Group remaining episodes by season
+    var groups = {};
+    items.slice(1).forEach(function (ep) {
+      var s = ep.season;
+      if (!groups[s]) groups[s] = [];
+      groups[s].push(ep);
+    });
+
+    // Render in SERIES_ORDER
+    var hasAny = false;
+    SERIES_ORDER.forEach(function (seasonNum) {
+      var eps = groups[seasonNum];
+      if (!eps || eps.length === 0) return;
+
+      if (!hasAny) {
+        // "More Episodes" header — only once, above first group
+        var moreHeader = document.createElement('div');
+        moreHeader.className = 'ep-more-header';
+        moreHeader.innerHTML = '<p class="section-label" style="margin-bottom:10px;">More Episodes</p><div class="section-rule"></div>';
+        container.appendChild(moreHeader);
+        hasAny = true;
+      }
+
+      // Series group header
+      var seriesName = SERIES_NAMES[seasonNum] || ('Series ' + seasonNum);
+      var seriesLabel = seasonNum === 0 ? 'Extras' : 'Series ' + seasonNum;
+      var groupDiv = document.createElement('div');
+      groupDiv.className = 'ep-series-group';
+      groupDiv.innerHTML =
+        '<div class="ep-series-header">' +
+          '<span class="ep-series-badge">' + seriesLabel + '</span>' +
+          '<span class="ep-series-title">' + seriesName + '</span>' +
+          '<span class="ep-series-rule"></span>' +
+        '</div>';
+
       var ul = document.createElement('ul');
       ul.className = 'episode-list';
-      items.slice(1).forEach(function (ep) {
+      eps.forEach(function (ep) {
         var li = buildEpisodeEl(ep, false);
         allEls.push(li);
         ul.appendChild(li);
       });
-      container.appendChild(ul);
-    }
+      groupDiv.appendChild(ul);
+      container.appendChild(groupDiv);
+    });
+
     // Fetch live like counts from Google Sheets and update all buttons
     fetchLikeCounts(refreshLikeButtons);
     scrollToAnchor();
