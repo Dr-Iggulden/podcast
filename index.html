@@ -156,6 +156,21 @@
     .ep-player { grid-column: 2 / 4; grid-row: 2; display: none; padding-top: 20px; }
     .episode-item.playing .ep-player { display: block; }
     .ep-progress-wrap { display: flex; align-items: center; gap: 12px; }
+    /* REPEAT BUTTON */
+    .ep-repeat-btn, .np-repeat-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer; padding: 4px;
+      color: var(--grey-light); transition: color 0.2s; flex-shrink: 0; position: relative;
+    }
+    .ep-repeat-btn svg, .np-repeat-btn svg { display: block; }
+    .ep-repeat-btn:hover, .np-repeat-btn:hover { color: var(--green-mid); }
+    .ep-repeat-btn[data-mode="1"], .np-repeat-btn[data-mode="1"] { color: var(--gold); }
+    .ep-repeat-btn[data-mode="2"], .np-repeat-btn[data-mode="2"] { color: var(--gold); }
+    .ep-repeat-badge, .np-repeat-badge {
+      position: absolute; top: -2px; right: -2px;
+      font-family: 'Nunito Sans', sans-serif; font-size: 8px; font-weight: 800;
+      line-height: 1; color: var(--gold); pointer-events: none;
+    }
     .ep-time { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.1em; color: var(--grey-light); white-space: nowrap; min-width: 34px; }
     .ep-progress-bar { flex: 1; height: 2px; background: var(--cream-dark); border-radius: 2px; position: relative; cursor: pointer; }
     .ep-progress-fill { height: 100%; background: var(--gold); border-radius: 2px; width: 0%; pointer-events: none; }
@@ -653,6 +668,10 @@
         <button class="np-play-btn" id="np-play-btn" aria-label="Play/Pause">
           <svg id="np-play-icon" width="12" height="14" viewBox="0 0 14 16"><path d="M1 1l12 7L1 15V1z"/></svg>
         </button>
+        <button class="np-repeat-btn" id="np-repeat-btn" data-mode="0" aria-label="Repeat" title="Repeat: Off">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          <span class="np-repeat-badge" id="np-repeat-badge"></span>
+        </button>
         <div class="np-progress-wrap">
           <span class="np-time" id="np-cur">0:00</span>
           <div class="np-bar" id="np-bar">
@@ -753,6 +772,7 @@
   var currentEp    = null;
   var currentSetPlaying = null;
   var allEls       = [];
+  var repeatMode   = 0; // 0=off, 1=repeat once, 2=infinite loop
 
   /* ── helpers ── */
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -922,8 +942,39 @@
   var npPlayIcon = document.getElementById('np-play-icon');
   var npShareRow = document.getElementById('np-share-row');
   var npCloseBtn = document.getElementById('np-close-btn');
+  var npRepeatBtn   = document.getElementById('np-repeat-btn');
+  var npRepeatBadge = document.getElementById('np-repeat-badge');
   var PLAY_PATH  = '<path d="M1 1l12 7L1 15V1z"/>';
   var PAUSE_PATH = '<rect x="1" y="1" width="4" height="14" rx="1"/><rect x="9" y="1" width="4" height="14" rx="1"/>';
+
+  // Update all repeat button UIs to match current repeatMode
+  function updateRepeatUI() {
+    var titles = ['Repeat: Off', 'Repeat: Once (plays again once)', 'Repeat: Infinite loop'];
+    var badges = ['', '1', '\u221e']; // '', '1', '∞'
+    // NP bar button
+    if (npRepeatBtn) {
+      npRepeatBtn.setAttribute('data-mode', repeatMode);
+      npRepeatBtn.title = titles[repeatMode];
+      if (npRepeatBadge) npRepeatBadge.textContent = badges[repeatMode];
+    }
+    // All inline repeat buttons
+    document.querySelectorAll('.ep-repeat-btn').forEach(function (btn) {
+      btn.setAttribute('data-mode', repeatMode);
+      btn.title = titles[repeatMode];
+      var badge = btn.querySelector('.ep-repeat-badge');
+      if (badge) badge.textContent = badges[repeatMode];
+    });
+  }
+
+  // Cycle repeat mode on any repeat button click (delegated + NP bar)
+  function cycleRepeat() {
+    repeatMode = (repeatMode + 1) % 3;
+    updateRepeatUI();
+  }
+  if (npRepeatBtn) npRepeatBtn.addEventListener('click', cycleRepeat);
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.ep-repeat-btn')) cycleRepeat();
+  });
   var RESUME_KEY = 'pnm_podcast_resume';
 
   function showNP() {
@@ -1225,6 +1276,10 @@
             '<div class="ep-share"><span class="ep-share-label">Share</span>' + shareHtml + makeDownloadBtn(ep) + '</div>' +
             '<div class="ep-player ep-player--featured">' +
               '<div class="ep-progress-wrap">' +
+                '<button class="ep-repeat-btn" data-mode="0" aria-label="Repeat" title="Repeat: Off">' +
+                  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>' +
+                  '<span class="ep-repeat-badge"></span>' +
+                '</button>' +
                 '<span class="ep-time ep-time-cur">0:00</span>' +
                 '<div class="ep-progress-bar"><div class="ep-progress-fill"></div><div class="ep-progress-thumb"></div></div>' +
                 '<span class="ep-time ep-time-end">' + (ep.duration || '\u2013') + '</span>' +
@@ -1253,6 +1308,10 @@
           '</div>' +
           '<div class="ep-player">' +
             '<div class="ep-progress-wrap">' +
+              '<button class="ep-repeat-btn" data-mode="0" aria-label="Repeat" title="Repeat: Off">' +
+                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>' +
+                '<span class="ep-repeat-badge"></span>' +
+              '</button>' +
               '<span class="ep-time ep-time-cur">0:00</span>' +
               '<div class="ep-progress-bar"><div class="ep-progress-fill"></div><div class="ep-progress-thumb"></div></div>' +
               '<span class="ep-time ep-time-end">' + (ep.duration || '\u2013') + '</span>' +
@@ -1317,11 +1376,27 @@
       timeEnd.textContent = fmtTime(audio.duration);
       if (currentEp === ep) npEnd.textContent = fmtTime(audio.duration);
     });
+    var repeatPlays = 0; // counts extra plays for mode=1
     audio.addEventListener('ended', function () {
+      clearResume();
+      // Mode 2: infinite loop — just restart
+      if (repeatMode === 2) {
+        audio.currentTime = 0;
+        audio.play();
+        return;
+      }
+      // Mode 1: play once more, then stop repeat
+      if (repeatMode === 1 && repeatPlays < 1) {
+        repeatPlays++;
+        audio.currentTime = 0;
+        audio.play();
+        return;
+      }
+      // Off (or mode 1 exhausted): reset and advance
+      repeatPlays = 0;
       setPlaying(false); currentAudio = null; currentLi = null; currentEp = null;
       fill.style.width = '0%'; timeCur.textContent = '0:00';
       npPlayIcon.innerHTML = PLAY_PATH;
-      clearResume();
       var idx = allEls.indexOf(li);
       if (idx !== -1 && idx < allEls.length - 1) {
         var next = allEls[idx + 1];
