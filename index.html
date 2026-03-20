@@ -1137,6 +1137,25 @@
     btn.classList.add('done');
     if (label) label.textContent = 'Downloaded';
 
+    // Track download in Google Sheet
+    var slug = btn.getAttribute('data-audio') || '';
+    slug = slug.split('/').pop().replace(/\.mp3.*$/, '');
+    fetch('https://script.google.com/macros/s/AKfycbyGMMpAHiiPaw24Op8SnW_Jp74_im9TZgUM9zEZMEXfe59QIjhPGd_88nwe4Pvvh-NNwA/exec', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action:    'download',
+        title:     title,
+        slug:      slug,
+        userAgent: navigator.userAgent.substring(0, 150)
+      })
+    }).catch(function() {});
+
+    // GA event
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'episode_download', { event_category: 'Engagement', event_label: title });
+    }
+
     // If not already following, open the follow modal after download
     setTimeout(function () {
       if (localStorage.getItem('pnm_podcast_following') !== 'true') {
