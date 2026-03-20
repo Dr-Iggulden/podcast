@@ -386,6 +386,17 @@
     .favs-toggle-btn.active svg { fill: var(--gold); stroke: var(--gold); }
     .ep-no-favs { text-align: center; padding: 48px; color: var(--grey-light); font-family: 'Cormorant SC', serif; letter-spacing: 0.15em; font-size: 12px; }
 
+    /* SERIES COLLAPSE */
+    .ep-series-list { overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .ep-series-list.collapsed { max-height: var(--collapsed-height, 400px); }
+    .ep-series-list.expanded  { max-height: 9999px; }
+    .ep-series-more-wrap { text-align: center; padding: 10px 0 4px; position: relative; }
+    .ep-series-more-wrap::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 60px; transform: translateY(-100%); background: linear-gradient(to bottom, transparent, var(--cream)); pointer-events: none; }
+    .ep-series-more-btn { display: inline-flex; align-items: center; gap: 7px; background: none; border: 1.5px solid rgba(177,148,67,0.4); border-radius: 2px; padding: 8px 18px; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); cursor: pointer; transition: all 0.2s; }
+    .ep-series-more-btn:hover { border-color: var(--gold); background: rgba(177,148,67,0.06); }
+    .ep-series-more-btn svg { transition: transform 0.3s; fill: none; stroke: var(--gold); stroke-width: 2; stroke-linecap: round; }
+    .ep-series-more-btn.open svg { transform: rotate(180deg); }
+
     /* EPISODE MODAL */
     .ep-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(20,35,22,0.88); z-index: 500; overflow-y: auto; backdrop-filter: blur(4px); }
     .ep-modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px; }
@@ -1457,7 +1468,68 @@
         allEls.push(li);
         ul.appendChild(li);
       });
-      groupDiv.appendChild(ul);
+
+      // Wrap in collapsible container — show 2 episodes by default
+      var PREVIEW = 2;
+      var needsCollapse = eps.length > PREVIEW;
+      var listWrap = document.createElement('div');
+      listWrap.className = 'ep-series-list' + (needsCollapse ? ' collapsed' : ' expanded');
+      listWrap.appendChild(ul);
+
+      // Measure height of first 2 items after they are in DOM
+      if (needsCollapse) {
+        // Set initial collapsed height after render
+        requestAnimationFrame(function () {
+          var items = ul.querySelectorAll('li.episode-item');
+          var h = 0;
+          for (var j = 0; j < Math.min(PREVIEW, items.length); j++) {
+            h += items[j].offsetHeight;
+          }
+          // Add a little breathing room
+          listWrap.style.setProperty('--collapsed-height', (h + 16) + 'px');
+        });
+      }
+
+      groupDiv.appendChild(listWrap);
+
+      // Add "See more / See less" button
+      if (needsCollapse) {
+        var moreWrap = document.createElement('div');
+        moreWrap.className = 'ep-series-more-wrap';
+        var moreBtn = document.createElement('button');
+        moreBtn.className = 'ep-series-more-btn';
+        moreBtn.innerHTML =
+          'See all ' + eps.length + ' episodes' +
+          '<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
+        moreBtn.addEventListener('click', function () {
+          var isOpen = listWrap.classList.contains('expanded');
+          if (isOpen) {
+            // Collapse — first set explicit height so transition works
+            listWrap.style.maxHeight = listWrap.scrollHeight + 'px';
+            requestAnimationFrame(function () {
+              listWrap.style.maxHeight = '';
+              listWrap.classList.remove('expanded');
+              listWrap.classList.add('collapsed');
+              moreBtn.classList.remove('open');
+              moreBtn.innerHTML =
+                'See all ' + eps.length + ' episodes' +
+                '<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
+              // Scroll back to series header
+              groupDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+          } else {
+            listWrap.classList.remove('collapsed');
+            listWrap.classList.add('expanded');
+            moreBtn.classList.add('open');
+            moreBtn.innerHTML =
+              'See less' +
+              '<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
+          }
+        });
+        moreWrap.appendChild(moreBtn);
+        groupDiv.appendChild(moreWrap);
+      }
+
       container.appendChild(groupDiv);
     });
 
