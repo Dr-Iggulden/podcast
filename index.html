@@ -249,25 +249,40 @@
     /* EPISODE NUMBER */
     .ep-number { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.25em; color: var(--gold); margin-bottom: 5px; display: block; }
 
-    /* NOW PLAYING BAR */
-    #now-playing { display: none; background: var(--white); border-bottom: 2px solid var(--gold); border-top: 1px solid var(--cream-dark); }
-    #now-playing.active { display: block; }
-    .np-inner { max-width: 1200px; margin: 0 auto; padding: 20px 32px; display: grid; grid-template-columns: 80px 1fr; gap: 20px; align-items: center; }
-    .np-art { width: 80px; height: 80px; border-radius: 4px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 12px rgba(44,74,53,0.12); }
+    /* NOW PLAYING BAR — fixed pop-out player */
+    #now-playing { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300; background: var(--white); border-top: 2px solid var(--gold); box-shadow: 0 -4px 24px rgba(44,74,53,0.13); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+    #now-playing.active { display: block; transform: translateY(0); }
+    .np-inner { max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: grid; grid-template-columns: 60px 1fr auto; gap: 16px; align-items: center; }
+    .np-art { width: 60px; height: 60px; border-radius: 4px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 10px rgba(44,74,53,0.14); }
     .np-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .np-body { min-width: 0; }
-    .np-label { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.3em; color: var(--gold); margin-bottom: 4px; }
-    .np-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 400; color: var(--green-deep); line-height: 1.25; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .np-controls { display: flex; align-items: center; gap: 14px; }
-    .np-play-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: var(--green-deep); border: none; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
+    .np-label { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.3em; color: var(--gold); margin-bottom: 2px; }
+    .np-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 400; color: var(--green-deep); line-height: 1.2; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .np-controls { display: flex; align-items: center; gap: 10px; }
+    .np-play-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: var(--green-deep); border: none; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
     .np-play-btn:hover { background: var(--green-mid); }
     .np-play-btn svg { fill: var(--white); }
-    .np-progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
-    .np-time { font-family: 'Cormorant SC', serif; font-size: 11px; letter-spacing: 0.1em; color: var(--grey-light); white-space: nowrap; min-width: 36px; }
+    .np-progress-wrap { flex: 1; display: flex; align-items: center; gap: 8px; }
+    .np-time { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.1em; color: var(--grey-light); white-space: nowrap; min-width: 34px; }
     .np-bar { flex: 1; height: 2px; background: var(--cream-dark); border-radius: 2px; position: relative; cursor: pointer; }
     .np-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; width: 0%; pointer-events: none; }
     .np-bar-thumb { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); transform: translate(-50%, -50%); pointer-events: none; left: 0%; }
-    @media (max-width: 600px) { .np-inner { grid-template-columns: 60px 1fr; gap: 14px; padding: 16px 20px; } .np-art { width: 60px; height: 60px; } .np-title { font-size: 15px; } }
+    .np-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .np-close-btn { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--cream-dark); border: none; cursor: pointer; color: var(--grey-nav); font-size: 16px; transition: background 0.2s; flex-shrink: 0; }
+    .np-close-btn:hover { background: var(--cream); color: var(--green-deep); }
+    .np-share-row { display: flex; align-items: center; gap: 6px; }
+    .np-share-btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Nunito Sans', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid rgba(177,148,67,0.35); background: rgba(177,148,67,0.05); color: var(--green-deep); padding: 5px 9px; border-radius: 2px; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
+    .np-share-btn:hover { border-color: var(--gold); background: rgba(177,148,67,0.12); }
+    .np-share-btn.copied { border-color: #4caf7a; color: #4caf7a; }
+    /* Nudge page content up so player doesn't cover footer */
+    body.np-open { padding-bottom: 92px; }
+    @media (max-width: 760px) {
+      .np-inner { grid-template-columns: 50px 1fr; gap: 10px; padding: 10px 16px; }
+      .np-art { width: 50px; height: 50px; }
+      .np-title { font-size: 13px; }
+      .np-share-row { display: none; }
+      .np-actions { gap: 6px; }
+    }
 
     /* LIKE BUTTON */
     .ep-like-btn { display: inline-flex; align-items: center; gap: 5px; background: none; border: 1.5px solid #e8c0c0; border-radius: 2px; padding: 6px 11px; cursor: pointer; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #c0717a; transition: all 0.2s; white-space: nowrap; }
@@ -502,16 +517,16 @@
   </div>
 </div>
 
-<!-- NOW PLAYING BAR -->
+<!-- NOW PLAYING BAR — fixed pop-out player -->
 <div id="now-playing">
   <div class="np-inner">
     <div class="np-art"><img id="np-art-img" src="" alt="" /></div>
     <div class="np-body">
       <p class="np-label">Now Playing</p>
-      <p class="np-title" id="np-title">–</p>
+      <p class="np-title" id="np-title">&ndash;</p>
       <div class="np-controls">
         <button class="np-play-btn" id="np-play-btn" aria-label="Play/Pause">
-          <svg id="np-play-icon" width="14" height="16" viewBox="0 0 14 16"><path d="M1 1l12 7L1 15V1z"/></svg>
+          <svg id="np-play-icon" width="12" height="14" viewBox="0 0 14 16"><path d="M1 1l12 7L1 15V1z"/></svg>
         </button>
         <div class="np-progress-wrap">
           <span class="np-time" id="np-cur">0:00</span>
@@ -519,9 +534,13 @@
             <div class="np-bar-fill" id="np-fill"></div>
             <div class="np-bar-thumb" id="np-thumb"></div>
           </div>
-          <span class="np-time" id="np-end">–</span>
+          <span class="np-time" id="np-end">&ndash;</span>
         </div>
       </div>
+    </div>
+    <div class="np-actions">
+      <div class="np-share-row" id="np-share-row"></div>
+      <button class="np-close-btn" id="np-close-btn" aria-label="Close player">&times;</button>
     </div>
   </div>
 </div>
@@ -758,26 +777,73 @@
     });
   });
 
-  /* ── Now Playing bar ── */
-  var npBar    = document.getElementById('now-playing');
-  var npImg    = document.getElementById('np-art-img');
-  var npTitle  = document.getElementById('np-title');
-  var npCur    = document.getElementById('np-cur');
-  var npEnd    = document.getElementById('np-end');
-  var npFill   = document.getElementById('np-fill');
-  var npThumb  = document.getElementById('np-thumb');
-  var npBarEl  = document.getElementById('np-bar');
+  /* ── Now Playing bar — fixed pop-out player ── */
+  var npBar      = document.getElementById('now-playing');
+  var npImg      = document.getElementById('np-art-img');
+  var npTitle    = document.getElementById('np-title');
+  var npCur      = document.getElementById('np-cur');
+  var npEnd      = document.getElementById('np-end');
+  var npFill     = document.getElementById('np-fill');
+  var npThumb    = document.getElementById('np-thumb');
+  var npBarEl    = document.getElementById('np-bar');
   var npPlayBtn  = document.getElementById('np-play-btn');
   var npPlayIcon = document.getElementById('np-play-icon');
+  var npShareRow = document.getElementById('np-share-row');
+  var npCloseBtn = document.getElementById('np-close-btn');
   var PLAY_PATH  = '<path d="M1 1l12 7L1 15V1z"/>';
   var PAUSE_PATH = '<rect x="1" y="1" width="4" height="14" rx="1"/><rect x="9" y="1" width="4" height="14" rx="1"/>';
+  var RESUME_KEY = 'pnm_podcast_resume';
+
+  function showNP() {
+    npBar.classList.add('active');
+    document.body.classList.add('np-open');
+  }
+  function hideNP() {
+    npBar.classList.remove('active');
+    document.body.classList.remove('np-open');
+  }
 
   function updateNP(ep, playing) {
-    npBar.classList.add('active');
+    showNP();
     npImg.src = ep.image || FALLBACK_ART;
     npTitle.textContent = ep.title;
     npPlayIcon.innerHTML = playing ? PAUSE_PATH : PLAY_PATH;
+    // Share buttons for currently playing episode
+    var shareText = 'The Precision Health Podcast — ' + ep.title;
+    var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(ep.url) + '&quote=' + encodeURIComponent(shareText);
+    var x  = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(ep.url) + '&text=' + encodeURIComponent(shareText);
+    var li = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(ep.url) + '&title=' + encodeURIComponent(ep.title);
+    npShareRow.innerHTML =
+      '<a class="np-share-btn" href="' + fb + '" target="_blank" rel="noopener">Facebook</a>' +
+      '<a class="np-share-btn" href="' + x  + '" target="_blank" rel="noopener">&#x1D54F;</a>' +
+      '<a class="np-share-btn" href="' + li + '" target="_blank" rel="noopener">LinkedIn</a>' +
+      '<button class="np-share-btn np-copy-btn" data-url="' + ep.url + '"><span class="np-copy-label">Copy Link</span></button>';
+    // Scroll the player into view
+    setTimeout(function () {
+      npBar.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 100);
   }
+
+  // Copy link handler for NP share row
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.np-copy-btn');
+    if (!btn) return;
+    var url = btn.getAttribute('data-url');
+    navigator.clipboard.writeText(url).then(function () {
+      var lbl = btn.querySelector('.np-copy-label') || btn;
+      var orig = lbl.textContent;
+      lbl.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function () { lbl.textContent = orig; btn.classList.remove('copied'); }, 2000);
+    });
+  });
+
+  // Close button
+  npCloseBtn.addEventListener('click', function () {
+    if (currentAudio) { currentAudio.pause(); }
+    hideNP();
+    clearResume();
+  });
 
   npPlayBtn.addEventListener('click', function () {
     if (!currentAudio) return;
@@ -788,6 +854,25 @@
     var rect = npBarEl.getBoundingClientRect();
     currentAudio.currentTime = ((e.clientX - rect.left) / rect.width) * currentAudio.duration;
   });
+
+  /* ── Resume memory (localStorage) ── */
+  function saveResume(ep, time) {
+    try {
+      localStorage.setItem(RESUME_KEY, JSON.stringify({ slug: ep.slug, time: time, title: ep.title }));
+    } catch (e) {}
+  }
+  function loadResume() {
+    try { return JSON.parse(localStorage.getItem(RESUME_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function clearResume() {
+    try { localStorage.removeItem(RESUME_KEY); } catch (e) {}
+  }
+  // Save position every 5 seconds while playing
+  setInterval(function () {
+    if (currentAudio && !currentAudio.paused && currentEp) {
+      saveResume(currentEp, Math.floor(currentAudio.currentTime));
+    }
+  }, 5000);
 
   /* ── Episode Modal ── */
   var modalOverlay  = document.getElementById('ep-modal-overlay');
@@ -1036,6 +1121,7 @@
       setPlaying(false); currentAudio = null; currentLi = null; currentEp = null;
       fill.style.width = '0%'; timeCur.textContent = '0:00';
       npPlayIcon.innerHTML = PLAY_PATH;
+      clearResume();
       var idx = allEls.indexOf(li);
       if (idx !== -1 && idx < allEls.length - 1) {
         var next = allEls[idx + 1];
@@ -1073,6 +1159,59 @@
       var idx = allEls.indexOf(currentLi);
       if (idx > 0) { stopCurrent(); allEls[idx - 1].querySelector('.ep-play-btn').click(); }
     });
+  }
+
+  /* ── Resume prompt ── */
+  function checkResume(items) {
+    var saved = loadResume();
+    if (!saved || !saved.slug || !saved.time) return;
+    // Find the episode in the list
+    var ep = null;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].slug === saved.slug) { ep = items[i]; break; }
+    }
+    if (!ep || !ep._audio) return;
+    if (saved.time < 10) return; // don't prompt for near-start positions
+    // Show a non-intrusive resume banner
+    var banner = document.createElement('div');
+    banner.id = 'resume-banner';
+    banner.style.cssText = 'position:fixed;bottom:' + (npBar.classList.contains("active") ? "92px" : "0") + ';left:0;right:0;background:var(--green-deep);color:var(--white);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:299;font-family:Nunito Sans,sans-serif;font-size:13px;box-shadow:0 -2px 12px rgba(0,0,0,0.15);transform:translateY(100%);transition:transform 0.3s ease;';
+    banner.innerHTML =
+      '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Resume <strong>' + ep.title + '</strong> from ' + fmtTime(saved.time) + '?</span>' +
+      '<div style="display:flex;gap:8px;flex-shrink:0;">' +
+        '<button id="resume-yes" style="background:var(--gold);color:var(--green-deep);border:none;border-radius:2px;padding:7px 16px;font-family:Nunito Sans,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Resume</button>' +
+        '<button id="resume-no" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);border:none;border-radius:2px;padding:7px 12px;font-family:Nunito Sans,sans-serif;font-size:11px;cursor:pointer;">Dismiss</button>' +
+      '</div>';
+    document.body.appendChild(banner);
+    setTimeout(function () { banner.style.transform = 'translateY(0)'; }, 100);
+
+    document.getElementById('resume-yes').addEventListener('click', function () {
+      banner.style.transform = 'translateY(100%)';
+      setTimeout(function () { banner.remove(); }, 350);
+      // Start the episode then seek
+      ep._li.querySelector('.ep-play-btn').click();
+      setTimeout(function () {
+        if (ep._audio && ep._audio.duration) {
+          ep._audio.currentTime = saved.time;
+        } else {
+          ep._audio.addEventListener('loadedmetadata', function () {
+            ep._audio.currentTime = saved.time;
+          }, { once: true });
+        }
+      }, 400);
+    });
+    document.getElementById('resume-no').addEventListener('click', function () {
+      banner.style.transform = 'translateY(100%)';
+      setTimeout(function () { banner.remove(); }, 350);
+      clearResume();
+    });
+    // Auto-dismiss after 12 seconds
+    setTimeout(function () {
+      if (document.getElementById('resume-banner')) {
+        banner.style.transform = 'translateY(100%)';
+        setTimeout(function () { if (banner.parentNode) banner.remove(); }, 350);
+      }
+    }, 12000);
   }
 
   /* ── build list ── */
@@ -1141,6 +1280,8 @@
     // Fetch live like counts from Google Sheets and update all buttons
     fetchLikeCounts(refreshLikeButtons);
     scrollToAnchor();
+    // Check for saved resume position
+    checkResume(items);
   }
 
   /* ── anchor scroll ── */
