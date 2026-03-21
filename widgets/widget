@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>Now Playing — Precision Health Podcast</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#2C4A35"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Cormorant+SC:wght@400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green: #2C4A35; --gold: #B19443; --gold-l: #c9ab5a;
+      --cream: #f7f4ee; --grey: #777777; --white: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Nunito Sans', sans-serif;
+      background: var(--green);
+      display: flex; flex-direction: column;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.12); flex-shrink: 0; }
+    .tab { flex: 1; padding: 11px 8px; font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.25em; color: rgba(255,255,255,0.45); text-align: center; cursor: pointer; border: none; background: none; transition: color 0.2s; }
+    .tab.active { color: var(--gold); border-bottom: 2px solid var(--gold); margin-bottom: -1px; }
+
+    /* ── Panels ── */
+    .panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    .panel.active { display: flex; }
+
+    /* ── NOW PLAYING panel ── */
+    .np-art-wrap { position: relative; flex-shrink: 0; }
+    .np-art { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; filter: brightness(0.75); }
+    .np-art-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, var(--green) 100%); }
+    .np-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .np-eyebrow { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.3em; color: var(--gold); }
+    .np-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--white); line-height: 1.2; }
+    .np-progress-row { display: flex; align-items: center; gap: 8px; }
+    .np-time { font-size: 10px; color: rgba(255,255,255,0.45); min-width: 28px; font-family: 'Cormorant SC', serif; }
+    .np-bar { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 3px; cursor: pointer; position: relative; touch-action: none; }
+    .np-bar-fill { height: 100%; background: var(--gold); border-radius: 3px; width: 0%; pointer-events: none; }
+    .np-bar-thumb { position: absolute; top: 50%; left: 0%; width: 11px; height: 11px; border-radius: 50%; background: var(--gold); transform: translate(-50%,-50%); pointer-events: none; }
+    .np-controls { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 4px 0; }
+    .np-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.7); padding: 6px; display: flex; align-items: center; justify-content: center; transition: color 0.15s; }
+    .np-btn:hover, .np-btn:active { color: var(--white); }
+    .np-play { width: 52px; height: 52px; border-radius: 50%; background: var(--gold); color: var(--green); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+    .np-play:hover, .np-play:active { background: var(--gold-l); }
+    .np-speed { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); border: none; border-radius: 3px; padding: 4px 7px; cursor: pointer; }
+    .np-speed:hover { color: var(--white); background: rgba(255,255,255,0.18); }
+    .np-open-app { display: block; text-align: center; margin: 4px 16px 0; padding: 10px; background: rgba(255,255,255,0.08); border: none; border-radius: 4px; font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.6); cursor: pointer; text-decoration: none; transition: background 0.2s; }
+    .np-open-app:hover { background: rgba(255,255,255,0.14); color: var(--white); }
+    .no-episode { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 32px; text-align: center; }
+    .no-episode p { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: rgba(255,255,255,0.5); }
+
+    /* ── EPISODE LIST panel ── */
+    .ep-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .ep-list-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); cursor: pointer; transition: background 0.15s; }
+    .ep-list-item:hover, .ep-list-item:active { background: rgba(255,255,255,0.05); }
+    .ep-list-art { width: 44px; height: 44px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
+    .ep-list-body { flex: 1; min-width: 0; }
+    .ep-list-num { font-family: 'Cormorant SC', serif; font-size: 8px; letter-spacing: 0.2em; color: var(--gold); }
+    .ep-list-title { font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ep-list-dur { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .ep-list-play { color: rgba(255,255,255,0.4); flex-shrink: 0; }
+    .ep-list-item.playing .ep-list-play { color: var(--gold); }
+    .ep-list-loading { padding: 40px; text-align: center; color: rgba(255,255,255,0.3); font-family: 'Cormorant SC', serif; letter-spacing: 0.15em; font-size: 11px; }
+
+    /* ── LATEST panel ── */
+    .latest-wrap { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 0 16px; }
+    .latest-art { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .latest-body { padding: 16px; }
+    .latest-eyebrow { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.3em; color: var(--gold); margin-bottom: 6px; }
+    .latest-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--white); line-height: 1.25; margin-bottom: 8px; }
+    .latest-date { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 10px; }
+    .latest-desc { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.65; margin-bottom: 16px; }
+    .latest-play { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px; background: var(--gold); color: var(--green); border: none; border-radius: 4px; font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+    .latest-play:hover { background: var(--gold-l); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab active" data-panel="now-playing">Now Playing</button>
+  <button class="tab" data-panel="latest">Latest</button>
+  <button class="tab" data-panel="episodes">Episodes</button>
+</div>
+
+<!-- NOW PLAYING -->
+<div class="panel active" id="panel-now-playing">
+  <div id="np-content">
+    <div class="no-episode">
+      <p>Nothing playing yet</p>
+      <a href="/" class="np-open-app">Open the podcast</a>
+    </div>
+  </div>
+</div>
+
+<!-- LATEST EPISODE -->
+<div class="panel" id="panel-latest">
+  <div class="latest-wrap" id="latest-content">
+    <div class="ep-list-loading">Loading...</div>
+  </div>
+</div>
+
+<!-- EPISODE LIST -->
+<div class="panel" id="panel-episodes">
+  <div class="ep-list" id="ep-list-content">
+    <div class="ep-list-loading">Loading episodes...</div>
+  </div>
+</div>
+
+<script>
+var RSS     = 'https://media.rss.com/sacredherbology/feed.xml';
+var FALLBACK= 'https://podcast.precisionnaturalmedicine.com.au/icon-512x512.png';
+var allEps  = [];
+var currentAudio = null;
+var currentSlug  = null;
+var speeds = [1, 1.25, 1.5, 1.75, 2, 0.75, 0.5];
+var speedIdx = 0;
+
+/* ── Tabs ── */
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+  });
+});
+
+/* ── Helpers ── */
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function fmtTime(s) { s = Math.floor(s||0); return pad(Math.floor(s/60)) + ':' + pad(s%60); }
+function fmtDate(str) { return str ? new Date(str).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}) : ''; }
+function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').substring(0,60); }
+function stripHtml(h) { var d=document.createElement('div'); d.innerHTML=h; return (d.textContent||d.innerText||'').replace(/\s+/g,' ').trim(); }
+
+/* ── Parse RSS ── */
+function parseRSS(text) {
+  var parser = new DOMParser();
+  var doc    = parser.parseFromString(text, 'text/xml');
+  var NS     = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
+  var items  = Array.from(doc.querySelectorAll('item'));
+  return items.map(function(item, i) {
+    var enc    = item.querySelector('enclosure');
+    var imgEl  = item.getElementsByTagNameNS(NS,'image')[0];
+    var title  = (item.querySelector('title')||{}).textContent||'';
+    var rawDesc= (item.querySelector('description')||{}).textContent||'';
+    var dur    = (item.getElementsByTagNameNS(NS,'duration')[0]||{}).textContent||'';
+    var pub    = (item.querySelector('pubDate')||{}).textContent||'';
+    return {
+      num: items.length - i,
+      title: title, slug: slugify(title),
+      audioUrl: enc ? enc.getAttribute('url') : '',
+      image: imgEl ? imgEl.getAttribute('href') : FALLBACK,
+      desc: stripHtml(rawDesc).substring(0,200),
+      duration: dur, pubDate: pub
+    };
+  });
+}
+
+/* ── NP Panel ── */
+function renderNP(ep) {
+  var npContent = document.getElementById('np-content');
+  if (!ep) {
+    npContent.innerHTML = '<div class="no-episode"><p>Nothing playing yet</p><a href="/" class="np-open-app">Open the podcast</a></div>';
+    return;
+  }
+  var PLAY_ICON  = '<svg width="14" height="16" viewBox="0 0 14 16"><path d="M1 1l12 7L1 15V1z" fill="currentColor"/></svg>';
+  var PAUSE_ICON = '<svg width="14" height="16" viewBox="0 0 14 16"><rect x="1" y="1" width="4" height="14" rx="1" fill="currentColor"/><rect x="9" y="1" width="4" height="14" rx="1" fill="currentColor"/></svg>';
+  npContent.innerHTML =
+    '<div class="np-art-wrap">' +
+      '<img class="np-art" id="wg-art" src="' + ep.image + '" onerror="this.src=\'' + FALLBACK + '\'">' +
+      '<div class="np-art-overlay"></div>' +
+    '</div>' +
+    '<div class="np-body">' +
+      '<div class="np-eyebrow">Now Playing</div>' +
+      '<div class="np-title" id="wg-title">' + ep.title + '</div>' +
+      '<div class="np-progress-row">' +
+        '<span class="np-time" id="wg-cur">0:00</span>' +
+        '<div class="np-bar" id="wg-bar"><div class="np-bar-fill" id="wg-fill"></div><div class="np-bar-thumb" id="wg-thumb"></div></div>' +
+        '<span class="np-time" id="wg-end">' + (ep.duration || '--:--') + '</span>' +
+      '</div>' +
+      '<div class="np-controls">' +
+        '<button class="np-btn" id="wg-back" title="Back 15s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.84"/></svg></button>' +
+        '<button class="np-play" id="wg-play">' + PLAY_ICON + '</button>' +
+        '<button class="np-btn" id="wg-fwd" title="Forward 15s"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3.84"/></svg></button>' +
+        '<button class="np-speed" id="wg-speed">1×</button>' +
+      '</div>' +
+    '</div>' +
+    '<a href="/" class="np-open-app">Open Full App</a>';
+
+  var audio   = new Audio(ep.audioUrl);
+  audio.preload = 'metadata';
+  currentAudio  = audio;
+  currentSlug   = ep.slug;
+
+  var playBtn = document.getElementById('wg-play');
+  var fill    = document.getElementById('wg-fill');
+  var thumb   = document.getElementById('wg-thumb');
+  var curEl   = document.getElementById('wg-cur');
+  var endEl   = document.getElementById('wg-end');
+  var bar     = document.getElementById('wg-bar');
+  var speedBtn= document.getElementById('wg-speed');
+
+  playBtn.addEventListener('click', function() {
+    if (audio.paused) { audio.play(); playBtn.innerHTML = PAUSE_ICON; }
+    else { audio.pause(); playBtn.innerHTML = PLAY_ICON; }
+  });
+  document.getElementById('wg-back').addEventListener('click', function() {
+    audio.currentTime = Math.max(0, audio.currentTime - 15);
+  });
+  document.getElementById('wg-fwd').addEventListener('click', function() {
+    audio.currentTime = Math.min(audio.duration||0, audio.currentTime + 15);
+  });
+  speedBtn.addEventListener('click', function() {
+    speedIdx = (speedIdx + 1) % speeds.length;
+    audio.playbackRate = speeds[speedIdx];
+    speedBtn.textContent = speeds[speedIdx] + '\u00d7';
+  });
+  audio.addEventListener('timeupdate', function() {
+    if (!audio.duration) return;
+    var pct = (audio.currentTime / audio.duration) * 100;
+    fill.style.width = pct + '%'; thumb.style.left = pct + '%';
+    curEl.textContent = fmtTime(audio.currentTime);
+  });
+  audio.addEventListener('loadedmetadata', function() {
+    endEl.textContent = fmtTime(audio.duration);
+  });
+  // Scrubber
+  (function() {
+    function getPct(e) {
+      var r = bar.getBoundingClientRect();
+      var cx = e.touches ? e.touches[0].clientX : e.clientX;
+      return Math.max(0, Math.min(1, (cx - r.left) / r.width));
+    }
+    function seek(pct) { audio.currentTime = getPct({clientX: 0}) * 0; audio.currentTime = pct * (audio.duration||0); }
+    bar.addEventListener('mousedown', function(e) {
+      e.preventDefault(); audio.currentTime = getPct(e) * (audio.duration||0);
+      function mv(ev) { audio.currentTime = getPct(ev) * (audio.duration||0); }
+      function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); }
+      document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
+    });
+    bar.addEventListener('touchstart', function(e) {
+      e.preventDefault(); audio.currentTime = getPct(e) * (audio.duration||0);
+      function mv(ev) { ev.preventDefault(); audio.currentTime = getPct(ev) * (audio.duration||0); }
+      function up() { document.removeEventListener('touchmove',mv); document.removeEventListener('touchend',up); }
+      document.addEventListener('touchmove',mv,{passive:false}); document.addEventListener('touchend',up);
+    }, {passive:false});
+  })();
+}
+
+/* ── Episode List ── */
+function renderEpList(eps) {
+  var container = document.getElementById('ep-list-content');
+  container.innerHTML = eps.map(function(ep) {
+    return '<div class="ep-list-item" data-slug="' + ep.slug + '" data-audio="' + ep.audioUrl + '">' +
+      '<img class="ep-list-art" src="' + ep.image + '" onerror="this.src=\'' + FALLBACK + '\'" loading="lazy">' +
+      '<div class="ep-list-body">' +
+        '<div class="ep-list-num">Ep ' + ep.num + '</div>' +
+        '<div class="ep-list-title">' + ep.title + '</div>' +
+        '<div class="ep-list-dur">' + (ep.duration || '') + '</div>' +
+      '</div>' +
+      '<div class="ep-list-play"><svg width="14" height="14" viewBox="0 0 14 16"><path d="M1 1l12 7L1 15V1z" fill="currentColor"/></svg></div>' +
+    '</div>';
+  }).join('');
+  container.querySelectorAll('.ep-list-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var ep = eps.find(function(e){ return e.slug === item.dataset.slug; });
+      if (ep) {
+        renderNP(ep);
+        // Switch to now playing tab
+        document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+        document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+        document.querySelector('[data-panel="now-playing"]').classList.add('active');
+        document.getElementById('panel-now-playing').classList.add('active');
+        // Auto-play
+        setTimeout(function() {
+          var playBtn = document.getElementById('wg-play');
+          if (playBtn) playBtn.click();
+        }, 100);
+      }
+    });
+  });
+}
+
+/* ── Latest Episode ── */
+function renderLatest(ep) {
+  var container = document.getElementById('latest-content');
+  container.innerHTML =
+    '<img class="latest-art" src="' + ep.image + '" onerror="this.src=\'' + FALLBACK + '\'">' +
+    '<div class="latest-body">' +
+      '<div class="latest-eyebrow">Latest Episode · Ep ' + ep.num + '</div>' +
+      '<div class="latest-title">' + ep.title + '</div>' +
+      '<div class="latest-date">' + fmtDate(ep.pubDate) + '</div>' +
+      '<div class="latest-desc">' + ep.desc + '...</div>' +
+      '<button class="latest-play" id="latest-play-btn">' +
+        '<svg width="14" height="14" viewBox="0 0 14 16"><path d="M1 1l12 7L1 15V1z" fill="currentColor"/></svg>' +
+        'Play Episode' +
+      '</button>' +
+    '</div>';
+  document.getElementById('latest-play-btn').addEventListener('click', function() {
+    renderNP(ep);
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelector('[data-panel="now-playing"]').classList.add('active');
+    document.getElementById('panel-now-playing').classList.add('active');
+    setTimeout(function() {
+      var pb = document.getElementById('wg-play'); if (pb) pb.click();
+    }, 100);
+  });
+}
+
+/* ── Load feed ── */
+function loadFeed() {
+  fetch(RSS)
+    .then(function(r) { return r.text(); })
+    .then(function(text) {
+      allEps = parseRSS(text);
+      if (!allEps.length) return;
+      renderLatest(allEps[0]);
+      renderEpList(allEps);
+      // Check if something is playing in the main app via localStorage
+      try {
+        var resume = JSON.parse(localStorage.getItem('pnm_podcast_resume') || 'null');
+        if (resume && resume.slug) {
+          var ep = allEps.find(function(e){ return e.slug === resume.slug; });
+          if (ep) { renderNP(ep); return; }
+        }
+      } catch(ex) {}
+      renderNP(allEps[0]);
+    })
+    .catch(function() {
+      document.getElementById('ep-list-content').innerHTML = '<div class="ep-list-loading">Could not load episodes</div>';
+    });
+}
+
+loadFeed();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+</script>
+</body>
+</html>
