@@ -1,0 +1,119 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "ColumnSet",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "Image",
+              "url": "${image}",
+              "size": "Medium",
+              "style": "RoundedCorners"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "NOW PLAYING",
+              "size": "Small",
+              "color": "Warning",
+              "weight": "Bolder",
+              "spacing": "None"
+            },
+            {
+              "type": "TextBlock",
+              "text": "${title}",
+              "wrap": true,
+              "maxLines": 2,
+              "weight": "Bolder",
+              "size": "Default"
+            },
+            {
+              "type": "TextBlock",
+              "text": "Dr Luke Iggulden, ND",
+              "size": "Small",
+              "isSubtle": true,
+              "spacing": "None"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ColumnSet",
+      "spacing": "Small",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "${currentTime}",
+              "size": "Small",
+              "isSubtle": true
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "Container",
+              "height": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": " ",
+                  "size": "Small"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "${duration}",
+              "size": "Small",
+              "isSubtle": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Execute",
+      "title": "${isPlaying ? '⏸ Pause' : '▶ Play'}",
+      "verb": "toggle-play",
+      "data": { "tag": "now-playing" }
+    },
+    {
+      "type": "Action.Execute",
+      "title": "⏭ Next",
+      "verb": "next-episode",
+      "data": { "tag": "now-playing" }
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "Open App",
+      "url": "https://podcast.precisionnaturalmedicine.com.au/"
+    }
+  ]
+}
