@@ -1,17 +1,15 @@
 // ── Precision Health Podcast — Service Worker ──
-// VERSION: 4
-const CACHE_VERSION = 4;
+// VERSION: 5
+const CACHE_VERSION = 5;
 const CACHE_NAME    = 'php-v' + CACHE_VERSION;
 const OFFLINE_URL   = '/index.html';
 
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/notes.html',
   '/manifest.json',
-  '/icon-72x72.png',
   '/icon-96x96.png',
-  '/icon-128x128.png',
-  '/icon-144x144.png',
   '/icon-192x192.png',
   '/icon-512x512.png'
 ];
@@ -20,7 +18,20 @@ const STATIC_ASSETS = [
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(function(cache) { return cache.addAll(STATIC_ASSETS); })
+      .then(function(cache) {
+        return cache.addAll(STATIC_ASSETS).then(function() {
+          // Explicitly cache root as /index.html too so offline fallback
+          // hits regardless of how the browser requests the page
+          return fetch('/index.html').then(function(res) {
+            if (!res || !res.ok) return;
+            var clone = res.clone();
+            return Promise.all([
+              cache.put('/', clone),
+              cache.put('/index.html', res)
+            ]);
+          }).catch(function(){});
+        });
+      })
       .then(function() { return self.skipWaiting(); })
   );
 });
@@ -82,9 +93,13 @@ self.addEventListener('fetch', function(e) {
           return res;
         })
         .catch(function() {
-          // Offline — serve cached shell
+          // Offline — try the exact request, then /index.html, then /
           return caches.match(req)
-            .then(function(cached) { return cached || caches.match(OFFLINE_URL); });
+            .then(function(cached) {
+              if (cached) return cached;
+              return caches.match('/index.html')
+                .then(function(c) { return c || caches.match('/'); });
+            });
         })
     );
     return;
