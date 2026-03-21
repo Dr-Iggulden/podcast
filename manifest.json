@@ -29,56 +29,56 @@
   "screenshots": [
     {
       "src": "screenshot-mobile-1.png",
-      "sizes": "390x844",
+      "sizes": "3375x6000",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Home Screen"
     },
     {
       "src": "screenshot-mobile-2.png",
-      "sizes": "390x844",
+      "sizes": "3375x6000",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "About Dr Luke Iggulden, ND"
     },
     {
       "src": "screenshot-mobile-3.png",
-      "sizes": "390x844",
+      "sizes": "3375x6000",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Topics Covered"
     },
     {
       "src": "screenshot-mobile-4.png",
-      "sizes": "390x844",
+      "sizes": "3375x6000",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "About The Podcast"
       },
     {
       "src": "screenshot-mobile-5.png",
-      "sizes": "390x844",
+      "sizes": "3375x6000",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Latest Episode"
       },
     {
       "src": "screenshot-mobile-6.png",
-      "sizes": "390x844",
+      "sizes": "3375x6000",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Stay In The Loop"
       },
     {
       "src": "screenshot-mobile-7.png",
-      "sizes": "390x844",
+      "sizes": "897x1690",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Latest Episode Player"
     },
     {
       "src": "screenshot-desktop.png",
-      "sizes": "1280x800",
+      "sizes": "3754x1874",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Desktop player view"
