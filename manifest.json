@@ -31,7 +31,7 @@
     ]
   },
   "note_taking": {
-    "new_note_url": "/notes"
+    "new_note_url": "/notes.html"
   },
   "edge_side_panel": {
     "preferred_width": 400
@@ -264,7 +264,7 @@
     {
       "name": "Player Widget",
       "short_name": "Widget",
-      "url": "/widget",
+      "url": "/widget.html",
       "description": "Compact player widget \u2014 now playing, latest episode, episode list",
       "icons": [
         {
@@ -276,7 +276,7 @@
     {
       "name": "My Notes",
       "short_name": "Notes",
-      "url": "/notes",
+      "url": "/notes.html",
       "description": "Open your episode notes",
       "icons": [
         {
