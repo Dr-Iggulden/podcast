@@ -1,9 +1,10 @@
 // ── Precision Health Podcast — Service Worker ──
-// VERSION: 5
-const CACHE_VERSION = 5;
+// VERSION: 6
+const CACHE_VERSION = 6;
 const CACHE_NAME    = 'php-v' + CACHE_VERSION;
 
 // Pages to pre-cache at install — ensures offline works from first visit
+var ORIGIN = 'https://podcast.precisionnaturalmedicine.com.au';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -19,19 +20,23 @@ const STATIC_ASSETS = [
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      // Cache all static assets
-      return cache.addAll(STATIC_ASSETS).then(function() {
-        // Also explicitly double-cache root as /index.html
-        // so the offline fallback hits regardless of request form
-        return fetch('/index.html').then(function(res) {
-          if (!res || !res.ok) return;
-          var clone = res.clone();
-          return Promise.all([
-            cache.put('/', clone),
-            cache.put('/index.html', res)
-          ]);
-        }).catch(function() {});
+      // Fetch and cache each asset individually using absolute URLs
+      // so cache keys exactly match navigation request URLs
+      var fetches = STATIC_ASSETS.map(function(path) {
+        var absUrl = ORIGIN + path;
+        return fetch(absUrl, { cache: 'no-cache' })
+          .then(function(res) {
+            if (!res || !res.ok) return;
+            var clone = res.clone();
+            // Store under BOTH relative path and absolute URL
+            // so caches.match() hits regardless of how it's requested
+            return Promise.all([
+              cache.put(path, clone),
+              cache.put(absUrl, res)
+            ]);
+          }).catch(function() {});
       });
+      return Promise.all(fetches);
     }).then(function() {
       return self.skipWaiting();
     })
@@ -98,15 +103,25 @@ self.addEventListener('fetch', function(e) {
         caches.open(CACHE_NAME).then(function(c) { c.put(req, clone); });
         return res;
       }).catch(function() {
-        // Offline — try exact URL, then /index.html, then /
-        return caches.match(req).then(function(cached) {
+        // Offline — try multiple cache key forms
+        return caches.match(req, { ignoreSearch: true }).then(function(cached) {
           if (cached) return cached;
-          // Map extensionless paths to .html versions
-          if (url.endsWith('/notes'))  return caches.match('/notes.html');
-          if (url.endsWith('/widget')) return caches.match('/widget.html');
-          return caches.match('/index.html').then(function(c) {
-            return c || caches.match('/');
-          });
+          // Try absolute URL form
+          return caches.match(ORIGIN + new URL(req.url).pathname, { ignoreSearch: true })
+            .then(function(cached2) {
+              if (cached2) return cached2;
+              // Map extensionless paths to .html versions
+              if (url.endsWith('/notes'))  {
+                return caches.match(ORIGIN + '/notes.html').then(function(c) { return c || caches.match('/notes.html'); });
+              }
+              if (url.endsWith('/widget')) {
+                return caches.match(ORIGIN + '/widget.html').then(function(c) { return c || caches.match('/widget.html'); });
+              }
+              // Final fallback — serve index
+              return caches.match(ORIGIN + '/index.html').then(function(c) {
+                return c || caches.match(ORIGIN + '/') || caches.match('/index.html') || caches.match('/');
+              });
+            });
         });
       })
     );
