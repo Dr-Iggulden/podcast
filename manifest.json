@@ -1,73 +1,119 @@
 {
-  "name": " The Precision Health Podcast",
-  "short_name": "Precision Health Podcast",
-  "description": "Evidence-based natural medicine podcast from Dr Luke Iggulden. Listen to episodes, favourite your picks, and never lose your place.",
+  "id": "com.precisionnaturalmedicine.podcast",
+  "name": "The Precision Health Podcast",
+  "short_name": "Precision Health",
+  "description": "Australia's evidence-based natural medicine podcast. Clinical-grade insight into herbal medicine, integrative health, longevity, and the science of living well. Hosted by Dr Luke Iggulden — Medical Herbalist, Clinical Naturopath & Pharmacognosist.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#f7f4ee",
   "theme_color": "#2C4A35",
   "orientation": "any",
-  "categories": [
-    "health",
-    "education",
-    "lifestyle"
-  ],
+  "lang": "en-AU",
+  "dir": "ltr",
+  "categories": ["health", "education", "lifestyle", "music"],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "icons": [
+    { "src": "icon-72x72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any" },
+    { "src": "icon-96x96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any" },
+    { "src": "icon-128x128.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "icon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "icon-152x152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-384x384.png", "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
     {
-      "src": "icon-72x72.png",
-      "sizes": "72x72",
+      "src": "screenshot-mobile-1.png",
+      "sizes": "390x844",
       "type": "image/png",
-      "purpose": "any"
+      "form_factor": "narrow",
+      "label": "Home Screen"
     },
     {
-      "src": "icon-96x96.png",
-      "sizes": "96x96",
+      "src": "screenshot-mobile-2.png",
+      "sizes": "390x844",
       "type": "image/png",
-      "purpose": "any"
+      "form_factor": "narrow",
+      "label": "About Dr Luke Iggulden, ND"
     },
     {
-      "src": "icon-128x128.png",
-      "sizes": "128x128",
+      "src": "screenshot-mobile-3.png",
+      "sizes": "390x844",
       "type": "image/png",
-      "purpose": "any"
+      "form_factor": "narrow",
+      "label": "Topics Covered"
     },
     {
-      "src": "icon-144x144.png",
-      "sizes": "144x144",
+      "src": "screenshot-mobile-4.png",
+      "sizes": "390x844",
       "type": "image/png",
-      "purpose": "any"
+      "form_factor": "narrow",
+      "label": "About The Podcast"
+      },
+    {
+      "src": "screenshot-mobile-5.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Latest Episode"
+      },
+    {
+      "src": "screenshot-mobile-6.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Stay In The Loop"
+      },
+    {
+      "src": "screenshot-mobile-7.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Latest Episode Player"
     },
     {
-      "src": "icon-152x152.png",
-      "sizes": "152x152",
+      "src": "screenshot-desktop.png",
+      "sizes": "1280x800",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "form_factor": "wide",
+      "label": "Desktop player view"
     }
   ],
-  "screenshots": [],
   "shortcuts": [
     {
       "name": "Latest Episode",
+      "short_name": "Latest",
       "url": "/",
-      "description": "Play the latest episode"
+      "description": "Play the latest episode",
+      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Metabolic Masters",
+      "short_name": "Metabolic",
+      "url": "/#series-2",
+      "description": "Browse the Metabolic Masters series",
+      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Meditation Music",
+      "short_name": "Meditation",
+      "url": "/#series-1",
+      "description": "Browse the Meditation Music series",
+      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
