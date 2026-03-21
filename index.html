@@ -630,6 +630,7 @@
       <li><a href="https://precisionnaturalmedicine.com.au/dispensary">Dispensary</a></li>
       <li><a href="https://precisionnaturalmedicine.com.au/blog">Blog</a></li>
       <li><a href="#" class="active">Podcast</a></li>
+      <li><a href="/notes">My Notes</a></li>
       <li><a href="https://precisionnaturalmedicine.com.au/contact">Contact</a></li>
       <li><a href="https://precisionnaturalmedicine.com.au/bookings" class="nav-book">Bookings</a></li>
     </ul>
@@ -646,6 +647,7 @@
     <a href="https://precisionnaturalmedicine.com.au/dispensary">Dispensary</a>
     <a href="https://precisionnaturalmedicine.com.au/blog">Blog</a>
     <a href="#" class="active">Podcast</a>
+    <a href="/notes">My Notes</a>
     <a href="https://precisionnaturalmedicine.com.au/contact">Contact</a>
   </div>
 </nav>
@@ -742,8 +744,8 @@
   </div>
 </div>
 
-<!-- INSTALL APP BANNER -->
-<section class="install-section" id="install-section">
+<!-- INSTALL APP BANNER — starts hidden, shown only by beforeinstallprompt when not already installed -->
+<section class="install-section hidden" id="install-section">
   <div class="install-inner">
     <div class="install-icon">
       <img src="/icon-192x192.png" alt="Precision Health Podcast" />
@@ -2326,8 +2328,14 @@ if ('launchQueue' in window) {
     }, 1200);
   });
 
-  // If running as standalone (already installed), hide the banner
-  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  // Hide banner if already installed (standalone, window-controls-overlay, tabbed, or iOS standalone)
+  var isInstalled =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+    window.matchMedia('(display-mode: tabbed)').matches ||
+    window.navigator.standalone === true;
+
+  if (isInstalled) {
     if (installSection) installSection.classList.add('hidden');
   }
 
