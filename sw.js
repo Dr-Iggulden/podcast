@@ -1,15 +1,18 @@
 // ── Precision Health Podcast — Service Worker ──
-const CACHE_NAME = 'php-v1';
+// VERSION: 3 — bump this number each deploy to force cache refresh
+const CACHE_VERSION = 3;
+const CACHE_NAME = 'php-v' + CACHE_VERSION;
+
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/icon-192x192.png',
   '/icon-512x512.png',
-  'https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,600;0,6..12,700;1,6..12,300&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400;500&display=swap'
+  '/icon-96x96.png'
 ];
 
-// Install — cache static assets
+// Install — pre-cache shell assets including index.html for offline
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
@@ -20,7 +23,7 @@ self.addEventListener('install', function(e) {
   );
 });
 
-// Activate — clean old caches
+// Activate — clean old caches, take control immediately
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
@@ -34,16 +37,54 @@ self.addEventListener('activate', function(e) {
   );
 });
 
-// Fetch — network first for RSS feed, cache first for static assets
+// Fetch strategy:
+//   index.html / root   → network first, cache fallback (always get fresh UI)
+//   audio files         → pass through, never cache
+//   RSS / proxy URLs    → network first, cache fallback
+//   Google Analytics    → pass through, never cache
+//   Firebase SDK        → pass through, never cache
+//   everything else     → cache first, network fallback + cache update
 self.addEventListener('fetch', function(e) {
   var url = e.request.url;
 
-  // Never cache audio files — always stream from network
+  // Never intercept audio — always stream from network
   if (url.includes('.mp3') || url.includes('.m4a') || url.includes('.ogg')) {
     return;
   }
 
-  // RSS feed — network first, fall back to cache
+  // Never cache analytics / tag manager
+  if (url.includes('google-analytics') || url.includes('googletagmanager')) {
+    return;
+  }
+
+  // Never cache Firebase SDK calls
+  if (url.includes('firebasejs') || url.includes('firebase') || url.includes('fcm')) {
+    return;
+  }
+
+  // index.html — network first so the app always loads the latest version
+  if (
+    url.endsWith('/') ||
+    url.includes('index.html') ||
+    url.match(/podcast\.precisionnaturalmedicine\.com\.au\/?$/)
+  ) {
+    e.respondWith(
+      fetch(e.request).then(function(response) {
+        var clone = response.clone();
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(e.request, clone);
+        });
+        return response;
+      }).catch(function() {
+        return caches.match(e.request).then(function(cached) {
+          return cached || caches.match('/index.html');
+        });
+      })
+    );
+    return;
+  }
+
+  // RSS feed and CORS proxies — network first, cache fallback
   if (url.includes('rss.com') || url.includes('corsproxy') || url.includes('allorigins')) {
     e.respondWith(
       fetch(e.request).catch(function() {
@@ -53,12 +94,7 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // Google Analytics — always network, don't cache
-  if (url.includes('google-analytics') || url.includes('googletagmanager')) {
-    return;
-  }
-
-  // Everything else — cache first, network fallback
+  // Everything else (fonts, icons, manifest) — cache first, network fallback + update
   e.respondWith(
     caches.match(e.request).then(function(cached) {
       if (cached) return cached;
@@ -75,16 +111,23 @@ self.addEventListener('fetch', function(e) {
   );
 });
 
+// Listen for skipWaiting message from the page
+self.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // ── Push notification display handler ──
 self.addEventListener('push', function(event) {
   var data = {};
   try { data = event.data ? event.data.json() : {}; } catch(e) {}
 
-  var title   = data.title || 'The Precision Health Podcast';
-  var body    = data.body  || 'A new episode is available.';
-  var icon    = data.icon  || '/icon-192x192.png';
-  var badge   = data.badge || '/icon-96x96.png';
-  var url     = (data.data && data.data.url) ? data.data.url : 'https://podcast.precisionnaturalmedicine.com.au/';
+  var title  = data.title || 'The Precision Health Podcast';
+  var body   = data.body  || 'A new episode is available.';
+  var icon   = data.icon  || '/icon-192x192.png';
+  var badge  = data.badge || '/icon-96x96.png';
+  var url    = (data.data && data.data.url) ? data.data.url : 'https://podcast.precisionnaturalmedicine.com.au/';
 
   event.waitUntil(
     self.registration.showNotification(title, {
@@ -92,7 +135,9 @@ self.addEventListener('push', function(event) {
       icon:    icon,
       badge:   badge,
       data:    { url: url },
-      actions: [{ action: 'listen', title: 'Listen Now' }]
+      actions: [{ action: 'listen', title: 'Listen Now' }],
+      tag:     'new-episode',
+      renotify: true
     })
   );
 });
