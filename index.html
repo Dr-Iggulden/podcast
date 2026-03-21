@@ -1315,6 +1315,7 @@
     function seekToPct(pct) {
       if (!currentAudio || !currentAudio.duration) return;
       currentAudio.currentTime = pct * currentAudio.duration;
+      syncPositionState(); // update car/Bluetooth scrubber immediately
     }
     var dragging = false;
     npBarEl.addEventListener('mousedown', function(e) {
@@ -1461,6 +1462,7 @@
     if (currentLi) currentLi.classList.remove('playing');
     currentAudio = null; currentLi = null; currentEp = null; currentSetPlaying = null;
     npPlayIcon.innerHTML = PLAY_PATH;
+    syncPlaybackState('paused');
   }
 
   function playEpisode(ep) {
@@ -1507,30 +1509,94 @@
     }
   }
 
-  /* ── Media session ── */
+  /* ── Media session — full car/Bluetooth/lock-screen integration ── */
   function updateMediaSession(ep) {
     if (!('mediaSession' in navigator)) return;
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: ep.title, artist: 'Dr Luke Iggulden, ND', album: 'The Precision Health Podcast',
-      artwork: [{ src: ep.image, sizes: '512x512', type: 'image/png' }]
+    var ms = navigator.mediaSession;
+
+    // Provide artwork at multiple sizes — Bluetooth head units request different
+    // resolutions; car screens typically need 96×96 or 256×256
+    ms.metadata = new MediaMetadata({
+      title:  ep.title,
+      artist: 'Dr Luke Iggulden, ND',
+      album:  'The Precision Health Podcast',
+      artwork: [
+        { src: ep.image, sizes: '96x96',   type: 'image/png' },
+        { src: ep.image, sizes: '128x128', type: 'image/png' },
+        { src: ep.image, sizes: '192x192', type: 'image/png' },
+        { src: ep.image, sizes: '256x256', type: 'image/png' },
+        { src: ep.image, sizes: '512x512', type: 'image/png' }
+      ]
     });
-    navigator.mediaSession.setActionHandler('play',  function() { if (currentAudio) currentAudio.play(); });
-    navigator.mediaSession.setActionHandler('pause', function() { if (currentAudio) currentAudio.pause(); });
-    navigator.mediaSession.setActionHandler('stop',  function() { stopCurrent(); });
-    navigator.mediaSession.setActionHandler('nexttrack', function() {
+
+    // Play / Pause
+    ms.setActionHandler('play',  function() {
+      if (currentAudio) currentAudio.play();
+    });
+    ms.setActionHandler('pause', function() {
+      if (currentAudio) currentAudio.pause();
+    });
+    ms.setActionHandler('stop', function() { stopCurrent(); });
+
+    // Next track
+    ms.setActionHandler('nexttrack', function() {
       var idx = currentEp ? allEps.indexOf(currentEp) : -1;
       if (idx !== -1 && idx < allEps.length - 1) { stopCurrent(); playEpisode(allEps[idx + 1]); }
     });
-    navigator.mediaSession.setActionHandler('previoustrack', function() {
+
+    // Previous track — restart if >3s in (standard car behaviour), else go to previous
+    ms.setActionHandler('previoustrack', function() {
+      if (currentAudio && currentAudio.currentTime > 3) {
+        currentAudio.currentTime = 0;
+        return;
+      }
       var idx = currentEp ? allEps.indexOf(currentEp) : -1;
       if (idx > 0) { stopCurrent(); playEpisode(allEps[idx - 1]); }
     });
-    navigator.mediaSession.setActionHandler('seekbackward', function() {
-      if (currentAudio) currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 15);
+
+    // Skip backward / forward 15s (steering wheel long-press on most cars)
+    ms.setActionHandler('seekbackward', function(details) {
+      if (!currentAudio) return;
+      var skip = (details && details.seekOffset) ? details.seekOffset : 15;
+      currentAudio.currentTime = Math.max(0, currentAudio.currentTime - skip);
     });
-    navigator.mediaSession.setActionHandler('seekforward', function() {
-      if (currentAudio) currentAudio.currentTime = Math.min(currentAudio.duration || 0, currentAudio.currentTime + 15);
+    ms.setActionHandler('seekforward', function(details) {
+      if (!currentAudio) return;
+      var skip = (details && details.seekOffset) ? details.seekOffset : 15;
+      currentAudio.currentTime = Math.min(currentAudio.duration || 0, currentAudio.currentTime + skip);
     });
+
+    // seekto — used by CarPlay/Android Auto seek bar drag, and iOS lock screen scrubber
+    try {
+      ms.setActionHandler('seekto', function(details) {
+        if (!currentAudio || !details || details.seekTime == null) return;
+        currentAudio.currentTime = details.seekTime;
+        syncPositionState();
+      });
+    } catch(e) { /* not supported on all platforms */ }
+
+    // Set initial playback state
+    ms.playbackState = 'playing';
+    syncPositionState();
+  }
+
+  // Update the car/lock-screen progress bar — called on timeupdate and seek
+  function syncPositionState() {
+    if (!('mediaSession' in navigator)) return;
+    if (!currentAudio || !currentAudio.duration || isNaN(currentAudio.duration)) return;
+    try {
+      navigator.mediaSession.setPositionState({
+        duration:     currentAudio.duration,
+        playbackRate: currentAudio.playbackRate || 1,
+        position:     Math.min(currentAudio.currentTime, currentAudio.duration)
+      });
+    } catch(e) { /* ignore if not supported */ }
+  }
+
+  // Sync playback state to car/lock screen on play and pause
+  function syncPlaybackState(state) {
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.playbackState = state; // 'playing' | 'paused'
   }
 
   /* ── XML parse ── */
@@ -1696,11 +1762,19 @@
         npFill.style.width  = pct + '%';
         npThumb.style.left  = pct + '%';
         npCur.textContent   = fmtTime(audio.currentTime);
+        // Sync car/Bluetooth progress bar — throttle to ~1s
+        if (!audio._lastPositionSync || audio.currentTime - audio._lastPositionSync > 1) {
+          audio._lastPositionSync = audio.currentTime;
+          syncPositionState();
+        }
       }
     });
     audio.addEventListener('loadedmetadata', function() {
       timeEnd.textContent = fmtTime(audio.duration);
-      if (currentEp === ep) npEnd.textContent = fmtTime(audio.duration);
+      if (currentEp === ep) {
+        npEnd.textContent = fmtTime(audio.duration);
+        syncPositionState(); // tell car the episode duration as soon as known
+      }
       // Update saved progress bar now we have duration
       var sv = getEpProgress(ep.slug);
       if (sv > 10) fill.style.width = ((sv / audio.duration) * 100) + '%';
@@ -1744,8 +1818,12 @@
       }
     });
 
-    audio.addEventListener('pause', function() { if (currentEp === ep) setPlaying(false); });
-    audio.addEventListener('play',  function() { if (currentEp === ep) setPlaying(true);  });
+    audio.addEventListener('pause', function() {
+      if (currentEp === ep) { setPlaying(false); syncPlaybackState('paused'); }
+    });
+    audio.addEventListener('play', function() {
+      if (currentEp === ep) { setPlaying(true); syncPlaybackState('playing'); }
+    });
 
     // Inline progress bar — full drag scrubber (mouse + touch)
     (function(barEl, audioEl) {
@@ -1757,6 +1835,7 @@
       function seekToPct(pct) {
         if (!audioEl.duration) return;
         audioEl.currentTime = pct * audioEl.duration;
+        if (currentEp && currentEp._audio === audioEl) syncPositionState();
       }
       barEl.addEventListener('mousedown', function(e) {
         e.preventDefault();
