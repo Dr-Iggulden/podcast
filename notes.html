@@ -588,6 +588,13 @@ function saveCurrentNote() {
   document.getElementById('header-sub').textContent = note.episodeTitle || 'The Precision Health Podcast';
   var ind = document.getElementById('save-indicator');
   ind.textContent = 'All changes saved'; ind.className = 'save-indicator saved';
+  // Auto-sync to Google Drive after every save if signed in
+  if (gdriveToken) {
+    clearTimeout(gdriveAutoSyncTimer);
+    gdriveAutoSyncTimer = setTimeout(function() {
+      gdriveSync(true); // silent=true, no banner on auto-sync
+    }, 3000); // 3 second debounce after typing stops
+  }
 }
 
 /* ── Format commands ── */
@@ -1146,15 +1153,17 @@ function showBanner(msg, isError) {
 // 3. Create OAuth 2.0 Client ID → Web application
 // 4. Add Authorised JS origins: https://podcast.precisionnaturalmedicine.com.au
 // 5. Paste Client ID below
-var GOOGLE_CLIENT_ID = '457399711361-309shr0s5ef3jk5lu86n7bq8mcrfsp43.apps.googleusercontent.com';
+var GOOGLE_CLIENT_ID = '457399711361-309shr0s5ef3jk5lu86n7bq8mcrfsp43a.apps.googleusercontent.com';
 var GDRIVE_SCOPE     = 'https://www.googleapis.com/auth/drive.appdata';
 var GDRIVE_FILE_NAME = 'precision-health-podcast-notes.json';
 var GDRIVE_API       = 'https://www.googleapis.com/drive/v3';
 var GDRIVE_UPLOAD    = 'https://www.googleapis.com/upload/drive/v3';
 
-var gdriveToken    = null;
-var gdriveFileId   = null;
-var gdriveUser     = null;
+var gdriveToken         = null;
+var gdriveFileId        = null;
+var gdriveUser          = null;
+var gdriveAutoSyncTimer = null;
+var gdrivePeriodicTimer = null;
 
 function isGdriveConfigured() {
   return GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com';
@@ -1179,6 +1188,13 @@ function gdriveSignIn() {
         gdriveUser = u.name || u.email || 'Google user';
         document.getElementById('gdrive-status').textContent = gdriveUser;
         document.getElementById('gdrive-status').className = 'sync-status ok';
+        // Start periodic auto-sync every 5 minutes
+        clearInterval(gdrivePeriodicTimer);
+        gdrivePeriodicTimer = setInterval(function() {
+          if (gdriveToken) gdriveSync(true);
+        }, 5 * 60 * 1000);
+        // Immediately load any existing notes from Drive on sign-in
+        loadFromGdrive();
         localStorage.setItem('pnm_gdrive_user', gdriveUser);
       }).catch(function(){});
       gdriveSync();
@@ -1187,7 +1203,7 @@ function gdriveSignIn() {
   client.requestAccessToken();
 }
 
-function gdriveSync() {
+function gdriveSync(silent) {
   if (!gdriveToken) { gdriveSignIn(); return; }
   exportMenu.classList.remove('open');
   var statusEl = document.getElementById('gdrive-status');
@@ -1222,7 +1238,12 @@ function gdriveSync() {
   }).then(function(){
     statusEl.textContent = gdriveUser || 'Synced';
     statusEl.className = 'sync-status ok';
-    showBanner('\u2713 Synced ' + notes.length + ' notes to Google Drive');
+    if (!silent) {
+      showBanner('\u2713 Synced ' + notes.length + ' notes to Google Drive');
+    } else {
+      var ind2 = document.getElementById('save-indicator');
+      if (ind2) { ind2.textContent = 'Synced to Drive'; ind2.className = 'save-indicator saved'; }
+    }
   }).catch(function(e){
     statusEl.textContent = 'Error'; statusEl.className = 'sync-status err';
     showBanner('Drive sync failed: ' + e.message, true);
@@ -1244,6 +1265,38 @@ function gdriveUpload() {
     headers: { Authorization: 'Bearer ' + gdriveToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
     body: multipart
   }).then(function(r){ return r.json(); }).then(function(d){ if (d.id) gdriveFileId = d.id; });
+}
+
+// Load notes from Drive on sign-in (pulls any notes saved from other devices)
+function loadFromGdrive() {
+  if (!gdriveToken) return;
+  fetch(GDRIVE_API + '/files?spaces=appDataFolder&q=name%3D%22' + GDRIVE_FILE_NAME + '%22&fields=files(id,modifiedTime)', {
+    headers: { Authorization: 'Bearer ' + gdriveToken }
+  }).then(function(r){ return r.json(); }).then(function(d){
+    var files = d.files || [];
+    if (!files.length) {
+      // No Drive file yet — upload local notes
+      gdriveSync(true); return;
+    }
+    gdriveFileId = files[0].id;
+    return fetch(GDRIVE_API + '/files/' + gdriveFileId + '?alt=media', {
+      headers: { Authorization: 'Bearer ' + gdriveToken }
+    }).then(function(r){ return r.json(); }).then(function(remoteNotes){
+      if (Array.isArray(remoteNotes) && remoteNotes.length > 0) {
+        // Merge local + remote keeping most recently updated version of each
+        var merged = {};
+        notes.concat(remoteNotes).forEach(function(n){
+          if (!merged[n.id] || (n.updatedAt||0) > (merged[n.id].updatedAt||0)) merged[n.id] = n;
+        });
+        notes = Object.values(merged).sort(function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); });
+        saveNotes(); renderNotesList();
+        // Reopen current note if it still exists
+        if (currentId && notes.find(function(n){ return n.id === currentId; })) openNote(currentId);
+        else if (notes.length > 0) openNote(notes[0].id);
+        showBanner('\u2713 Notes synced from Google Drive (' + notes.length + ' notes)');
+      }
+    });
+  }).catch(function(){});
 }
 
 // Wire up Google Drive button
