@@ -121,6 +121,39 @@
     .note-body .timestamp-link { color: var(--gold); font-weight: 700; cursor: pointer; text-decoration: none; }
     .note-body .timestamp-link:hover { text-decoration: underline; }
 
+    /* ── Export dropdown ── */
+    .export-wrap { position: relative; flex-shrink: 0; }
+    .export-menu {
+      display: none; position: absolute; top: calc(100% + 6px); right: 0;
+      background: var(--white); border: 1px solid var(--cream-dark); border-radius: 4px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.13); z-index: 500; width: 240px; padding: 6px 0;
+    }
+    .export-menu.open { display: block; }
+    .export-menu-title { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.25em; color: var(--gold); padding: 8px 14px 4px; }
+    .export-item { display: flex; align-items: center; gap: 9px; padding: 8px 14px; cursor: pointer; font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--text-body); transition: background 0.12s; }
+    .export-item:hover { background: var(--cream); color: var(--green-deep); }
+    .export-item svg { flex-shrink: 0; }
+    .export-desc { font-size: 10px; font-weight: 400; color: var(--grey-light); margin-left: auto; white-space: nowrap; }
+    .export-sep { height: 1px; background: var(--cream-dark); margin: 4px 0; }
+    .sync-status { font-size: 10px; font-weight: 400; color: var(--grey-light); margin-left: auto; }
+    .sync-status.ok { color: #4caf7a; }
+    .sync-status.err { color: var(--danger); }
+    .sync-status.loading { color: var(--gold); }
+    /* ── Sync banner ── */
+    .sync-banner {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--green-deep); color: var(--white); padding: 10px 20px;
+      border-radius: 4px; font-family: 'Nunito Sans', sans-serif; font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 800;
+      display: flex; align-items: center; gap: 12px; white-space: nowrap;
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+    .sync-banner button { background: rgba(255,255,255,0.2); border: none; color: var(--white); border-radius: 2px; padding: 3px 10px; cursor: pointer; font-size: 11px; }
+    /* ── Google sign-in button ── */
+    .google-signin-btn { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1.5px solid var(--cream-dark); border-radius: 3px; padding: 8px 16px; font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--text-body); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+    .google-signin-btn:hover { border-color: #4285F4; box-shadow: 0 0 0 2px rgba(66,133,244,0.15); }
+
     /* ── Context menu ── */
     .ctx-menu {
       position: fixed; background: var(--white); border: 1px solid var(--cream-dark);
@@ -236,7 +269,50 @@
 
         <div class="tb-right">
           <span class="save-indicator" id="save-indicator">All changes saved</span>
-          <button class="tb-btn" id="tb-export">Export</button>
+          <!-- Export dropdown -->
+          <div class="export-wrap" id="export-wrap">
+            <button class="tb-btn" id="tb-export">Export &#9660;</button>
+            <div class="export-menu" id="export-menu">
+              <div class="export-menu-title">Export Note As</div>
+              <div class="export-item" data-fmt="html">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                HTML <span class="export-desc">Formatted, with highlights</span>
+              </div>
+              <div class="export-item" data-fmt="txt">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                TXT <span class="export-desc">Plain text</span>
+              </div>
+              <div class="export-item" data-fmt="rtf">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                RTF <span class="export-desc">Word-compatible rich text</span>
+              </div>
+              <div class="export-item" data-fmt="md">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h16"/></svg>
+                Markdown <span class="export-desc">.md file</span>
+              </div>
+              <div class="export-item" data-fmt="json">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/></svg>
+                JSON Backup <span class="export-desc">All notes, re-importable</span>
+              </div>
+              <div class="export-sep"></div>
+              <div class="export-menu-title">Sync</div>
+              <div class="export-item" id="sync-gdrive-item">
+                <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 2L2 19.5h20L12 2z" fill="#4285F4"/><path d="M2 19.5L9.5 7l5 8.5H2z" fill="#34A853" opacity=".6"/><path d="M14.5 15.5H22L17 7l-5 8.5h2.5z" fill="#FBBC05" opacity=".8"/></svg>
+                Save to Google Drive
+                <span class="sync-status" id="gdrive-status"></span>
+              </div>
+              <div class="export-item" id="sync-onenote-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#7719AA"><path d="M3 3h18v18H3z" opacity=".15"/><path d="M7 7h4l3 7 3-7h4v10h-3V11l-2.5 6H14l-2.5-6V17H8V7H7z"/></svg>
+                Send to OneNote
+                <span class="sync-status" id="onenote-status"></span>
+              </div>
+              <div class="export-item" id="import-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import JSON Backup
+              </div>
+            </div>
+          </div>
+          <input type="file" id="import-file-input" accept=".json" style="display:none;" />
           <button class="tb-btn delete-btn" id="tb-delete">Delete</button>
         </div>
       </div>
@@ -698,24 +774,403 @@ document.getElementById('tb-delete').addEventListener('click', function(){
   document.getElementById('notes-welcome').style.display = 'flex';
   renderNotesList();
 });
-document.getElementById('tb-export').addEventListener('click', function(){
-  if (!currentId) return;
-  var note = notes.find(function(n){ return n.id===currentId; });
-  if (!note) return;
-  // Export as HTML with styles for highlights
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+escHtml(note.title||'Note')+'</title>'
-    +'<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;line-height:1.7;color:#333;}h1{color:#2C4A35;}blockquote{border-left:3px solid #B19443;padding:4px 12px;background:#fffef0;}</style>'
-    +'</head><body><h1>'+escHtml(note.title||'Untitled')+'</h1>'
-    +(note.episodeTitle ? '<p><strong>Episode:</strong> '+escHtml(note.episodeTitle)+'</p>' : '')
-    +(note.bodyHtml || escHtml(note.body||''))
-    +'<hr><p><small>The Precision Health Podcast — precisionnaturalmedicine.com.au</small></p>'
-    +'</body></html>';
-  var blob = new Blob([html], { type: 'text/html' });
+/* ── Export dropdown ── */
+var exportMenu = document.getElementById('export-menu');
+document.getElementById('tb-export').addEventListener('click', function(e){
+  e.stopPropagation();
+  exportMenu.classList.toggle('open');
+});
+document.addEventListener('click', function(e){
+  if (!document.getElementById('export-wrap').contains(e.target)) exportMenu.classList.remove('open');
+});
+
+// Export format handlers
+document.getElementById('export-menu').querySelectorAll('.export-item[data-fmt]').forEach(function(item){
+  item.addEventListener('click', function(){
+    exportMenu.classList.remove('open');
+    var fmt = item.getAttribute('data-fmt');
+    if (fmt) exportNote(fmt);
+  });
+});
+document.getElementById('import-item').addEventListener('click', function(){
+  exportMenu.classList.remove('open');
+  document.getElementById('import-file-input').click();
+});
+document.getElementById('import-file-input').addEventListener('change', function(e){
+  var file = e.target.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      var imported = JSON.parse(ev.target.result);
+      if (!Array.isArray(imported)) throw new Error('Invalid format');
+      var merged = 0;
+      imported.forEach(function(n){
+        if (!notes.find(function(x){ return x.id === n.id; })) {
+          notes.push(n); merged++;
+        }
+      });
+      saveNotes(); renderNotesList();
+      showBanner('✓ Imported ' + merged + ' note' + (merged!==1?'s':''));
+    } catch(ex) { showBanner('Import failed — invalid JSON backup', true); }
+  };
+  reader.readAsText(file);
+  this.value = '';
+});
+
+function getNote() {
+  if (!currentId) return null;
+  return notes.find(function(n){ return n.id===currentId; }) || null;
+}
+
+function exportNote(fmt) {
+  var note = getNote(); if (!note) return;
+  var slug = (note.title||'note').replace(/[^a-z0-9 ]/gi,'').trim() || 'note';
+  var bodyHtml  = note.bodyHtml || '<p>' + escHtml(note.body||'') + '</p>';
+  var bodyText  = note.body || (note.bodyHtml||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+  var epLine    = note.episodeTitle ? 'Episode: ' + note.episodeTitle + '\n\n' : '';
+  var footer    = 'The Precision Health Podcast — precisionnaturalmedicine.com.au';
+
+  if (fmt === 'html') {
+    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + escHtml(note.title||'Note') + '</title>'
+      + '<style>body{font-family:Georgia,serif;max-width:720px;margin:48px auto;line-height:1.8;color:#222;padding:0 24px;}'
+      + 'h1{color:#2C4A35;font-size:28px;margin-bottom:6px;}h2{color:#2C4A35;margin-top:24px;}'
+      + '.meta{color:#888;font-size:13px;margin-bottom:24px;border-bottom:1px solid #eee;padding-bottom:12px;}'
+      + 'blockquote{border-left:3px solid #B19443;padding:4px 16px;background:#fffef0;margin:16px 0;}'
+      + 'mark{border-radius:2px;padding:0 2px;}</style>'
+      + '</head><body>'
+      + '<h1>' + escHtml(note.title||'Untitled') + '</h1>'
+      + '<p class="meta">' + (note.episodeTitle ? 'Episode: ' + escHtml(note.episodeTitle) + ' &nbsp;|&nbsp; ' : '') + new Date(note.updatedAt||Date.now()).toLocaleDateString('en-AU') + '</p>'
+      + bodyHtml
+      + '<hr style="margin-top:40px;border:none;border-top:1px solid #eee;">'
+      + '<p style="color:#aaa;font-size:12px;">' + footer + '</p>'
+      + '</body></html>';
+    downloadBlob(html, slug + '.html', 'text/html');
+
+  } else if (fmt === 'txt') {
+    var txt = (note.title||'Untitled') + '\n' + '='.repeat(40) + '\n\n'
+      + epLine + bodyText + '\n\n---\n' + footer;
+    downloadBlob(txt, slug + '.txt', 'text/plain');
+
+  } else if (fmt === 'rtf') {
+    // RTF — preserves bold, italic, underline. Highlights map to RTF highlight colours.
+    var rtfBody = bodyText
+      .replace(/\\/g,'\\\\').replace(/\{/g,'\\{').replace(/\}/g,'\\}')
+      .replace(/\n/g,'\\par ');
+    var rtf = '{\\rtf1\\ansi\\deff0'
+      + '{\\fonttbl{\\f0 Georgia;}{\\f1 Arial;}}'
+      + '{\\colortbl;\\red44\\green74\\blue53;\\red177\\green148\\blue67;}'
+      + '\\f0\\fs28\\b ' + (note.title||'Untitled').replace(/[\\{}]/g,'') + '\\b0\\par\\par'
+      + (note.episodeTitle ? '\\f1\\fs20\\i Episode: ' + note.episodeTitle.replace(/[\\{}]/g,'') + '\\i0\\par\\par' : '')
+      + '\\f0\\fs22 ' + rtfBody
+      + '\\par\\par\\f1\\fs18\\cf2 ' + footer + '}';
+    downloadBlob(rtf, slug + '.rtf', 'application/rtf');
+
+  } else if (fmt === 'md') {
+    // Markdown — convert basic HTML to markdown
+    var md = '# ' + (note.title||'Untitled') + '\n\n'
+      + epLine
+      + bodyHtml
+        .replace(/<h2[^>]*>/gi,'## ').replace(/<\/h2>/gi,'\n')
+        .replace(/<strong[^>]*>|<b[^>]*>/gi,'**').replace(/<\/strong>|<\/b>/gi,'**')
+        .replace(/<em[^>]*>|<i[^>]*>/gi,'_').replace(/<\/em>|<\/i>/gi,'_')
+        .replace(/<u[^>]*>/gi,'__').replace(/<\/u>/gi,'__')
+        .replace(/<mark[^>]*>/gi,'==').replace(/<\/mark>/gi,'==')
+        .replace(/<br\s*\/?>/gi,'\n')
+        .replace(/<p[^>]*>/gi,'').replace(/<\/p>/gi,'\n\n')
+        .replace(/<li[^>]*>/gi,'- ').replace(/<\/li>/gi,'\n')
+        .replace(/<[^>]+>/g,'')
+        .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
+      + '\n\n---\n*' + footer + '*';
+    downloadBlob(md, slug + '.md', 'text/markdown');
+
+  } else if (fmt === 'json') {
+    // Full backup of ALL notes
+    downloadBlob(JSON.stringify(notes, null, 2), 'precision-health-notes-backup.json', 'application/json');
+    showBanner('\u2713 All ' + notes.length + ' notes exported as backup');
+    return;
+  }
+  showBanner('\u2713 Exported as ' + fmt.toUpperCase());
+}
+
+function downloadBlob(content, filename, mimeType) {
+  var blob = new Blob([content], { type: mimeType });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = (note.title||'note').replace(/[^a-z0-9 ]/gi,'').trim() + '.html';
+  a.download = filename;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+}
+
+function showBanner(msg, isError) {
+  var existing = document.getElementById('sync-banner');
+  if (existing) existing.remove();
+  var banner = document.createElement('div');
+  banner.id = 'sync-banner'; banner.className = 'sync-banner';
+  if (isError) banner.style.background = 'var(--danger)';
+  banner.innerHTML = msg + '<button onclick="this.parentNode.remove()">\u00d7</button>';
+  document.body.appendChild(banner);
+  setTimeout(function(){ if (banner.parentNode) banner.remove(); }, 4000);
+}
+
+/* ═══════════════════════════════════════════════════
+   GOOGLE DRIVE SYNC
+   Uses Drive AppData folder — hidden from user's Drive,
+   only accessible by this app. Free, unlimited users.
+   Requires: Google Cloud OAuth Client ID in GOOGLE_CLIENT_ID below.
+   ═══════════════════════════════════════════════════ */
+
+// ── CONFIGURATION — replace with your own Client ID ──────────────────────
+// 1. Go to console.cloud.google.com
+// 2. Create/select project → APIs & Services → Credentials
+// 3. Create OAuth 2.0 Client ID → Web application
+// 4. Add Authorised JS origins: https://podcast.precisionnaturalmedicine.com.au
+// 5. Paste Client ID below
+var GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com';
+var GDRIVE_SCOPE     = 'https://www.googleapis.com/auth/drive.appdata';
+var GDRIVE_FILE_NAME = 'precision-health-podcast-notes.json';
+var GDRIVE_API       = 'https://www.googleapis.com/drive/v3';
+var GDRIVE_UPLOAD    = 'https://www.googleapis.com/upload/drive/v3';
+
+var gdriveToken    = null;
+var gdriveFileId   = null;
+var gdriveUser     = null;
+
+function isGdriveConfigured() {
+  return GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com';
+}
+
+function gdriveSignIn() {
+  if (!isGdriveConfigured()) {
+    showBanner('Google Drive: Add your Client ID to notes.html first', true);
+    return;
+  }
+  // Use Google Identity Services (GIS) token model
+  var client = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: GDRIVE_SCOPE,
+    callback: function(resp) {
+      if (resp.error) { showBanner('Google sign-in failed: ' + resp.error, true); return; }
+      gdriveToken = resp.access_token;
+      // Get user info
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: 'Bearer ' + gdriveToken }
+      }).then(function(r){ return r.json(); }).then(function(u){
+        gdriveUser = u.name || u.email || 'Google user';
+        document.getElementById('gdrive-status').textContent = gdriveUser;
+        document.getElementById('gdrive-status').className = 'sync-status ok';
+        localStorage.setItem('pnm_gdrive_user', gdriveUser);
+      }).catch(function(){});
+      gdriveSync();
+    }
+  });
+  client.requestAccessToken();
+}
+
+function gdriveSync() {
+  if (!gdriveToken) { gdriveSignIn(); return; }
+  exportMenu.classList.remove('open');
+  var statusEl = document.getElementById('gdrive-status');
+  statusEl.textContent = 'Syncing...'; statusEl.className = 'sync-status loading';
+
+  // Find existing file
+  fetch(GDRIVE_API + '/files?spaces=appDataFolder&q=name%3D%22' + GDRIVE_FILE_NAME + '%22&fields=files(id,modifiedTime)', {
+    headers: { Authorization: 'Bearer ' + gdriveToken }
+  }).then(function(r){ return r.json(); }).then(function(d){
+    var files = d.files || [];
+    if (files.length > 0) {
+      gdriveFileId = files[0].id;
+      // Download existing and merge
+      return fetch(GDRIVE_API + '/files/' + gdriveFileId + '?alt=media', {
+        headers: { Authorization: 'Bearer ' + gdriveToken }
+      }).then(function(r){ return r.json(); }).then(function(remoteNotes){
+        if (Array.isArray(remoteNotes)) {
+          // Merge: keep most recent version of each note by updatedAt
+          var merged = {};
+          notes.concat(remoteNotes).forEach(function(n){ 
+            if (!merged[n.id] || (n.updatedAt||0) > (merged[n.id].updatedAt||0)) merged[n.id] = n;
+          });
+          notes = Object.values(merged);
+          saveNotes(); renderNotesList();
+          if (currentId) openNote(currentId);
+        }
+        return gdriveUpload();
+      });
+    } else {
+      return gdriveUpload();
+    }
+  }).then(function(){
+    statusEl.textContent = gdriveUser || 'Synced';
+    statusEl.className = 'sync-status ok';
+    showBanner('\u2713 Synced ' + notes.length + ' notes to Google Drive');
+  }).catch(function(e){
+    statusEl.textContent = 'Error'; statusEl.className = 'sync-status err';
+    showBanner('Drive sync failed: ' + e.message, true);
+  });
+}
+
+function gdriveUpload() {
+  var body = JSON.stringify(notes);
+  var metadata = { name: GDRIVE_FILE_NAME, mimeType: 'application/json', parents: gdriveFileId ? undefined : ['appDataFolder'] };
+  var boundary = 'notes_boundary_' + Date.now();
+  var multipart = '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'
+    + JSON.stringify(metadata) + '\r\n--' + boundary + '\r\nContent-Type: application/json\r\n\r\n'
+    + body + '\r\n--' + boundary + '--';
+  var url = gdriveFileId
+    ? GDRIVE_UPLOAD + '/files/' + gdriveFileId + '?uploadType=multipart'
+    : GDRIVE_UPLOAD + '/files?uploadType=multipart&spaces=appDataFolder';
+  return fetch(url, {
+    method: gdriveFileId ? 'PATCH' : 'POST',
+    headers: { Authorization: 'Bearer ' + gdriveToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
+    body: multipart
+  }).then(function(r){ return r.json(); }).then(function(d){ if (d.id) gdriveFileId = d.id; });
+}
+
+// Wire up Google Drive button
+document.getElementById('sync-gdrive-item').addEventListener('click', function(){
+  if (!isGdriveConfigured()) {
+    showBanner('Add GOOGLE_CLIENT_ID to notes.html — see setup instructions', true);
+    exportMenu.classList.remove('open'); return;
+  }
+  if (!window.google || !window.google.accounts) {
+    // Load GIS script
+    var script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.onload = function(){ gdriveSignIn(); };
+    script.onerror = function(){ showBanner('Could not load Google Sign-In', true); };
+    document.head.appendChild(script);
+  } else { gdriveSync(); }
 });
+
+// Restore user label on load
+(function(){
+  var u = localStorage.getItem('pnm_gdrive_user');
+  if (u) {
+    var el = document.getElementById('gdrive-status');
+    if (el) { el.textContent = u; el.className = 'sync-status ok'; }
+  }
+})();
+
+/* ═══════════════════════════════════════════════════
+   ONENOTE SYNC via Microsoft Graph
+   Creates a notebook "Precision Health Podcast" with
+   one section per episode. Each note becomes a page.
+   Requires: Azure App Registration (Client ID below)
+   ═══════════════════════════════════════════════════ */
+
+// ── CONFIGURATION — replace with your Azure App Client ID ────────────────
+// 1. Go to portal.azure.com → Azure Active Directory → App registrations
+// 2. New registration → name it "Precision Health Podcast Notes"
+// 3. Supported account types: "Accounts in any organizational directory and personal Microsoft accounts"
+// 4. Redirect URI: Single-page application → https://podcast.precisionnaturalmedicine.com.au/notes.html
+// 5. Copy Application (client) ID and paste below
+var MSAL_CLIENT_ID   = 'YOUR_AZURE_APP_CLIENT_ID_HERE';
+var MSAL_SCOPES      = ['Notes.ReadWrite', 'User.Read'];
+var GRAPH_API        = 'https://graph.microsoft.com/v1.0';
+var msalToken        = null;
+var oneNoteNotebookId = null;
+var oneNoteSectionIds = {};
+
+function isMsalConfigured() {
+  return MSAL_CLIENT_ID && MSAL_CLIENT_ID !== 'YOUR_AZURE_APP_CLIENT_ID_HERE';
+}
+
+function msalSignIn() {
+  if (!isMsalConfigured()) {
+    showBanner('OneNote: Add your Azure Client ID to notes.html first', true);
+    return;
+  }
+  if (!window.msal) {
+    var script = document.createElement('script');
+    script.src = 'https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js';
+    script.onload = function(){ msalAuth(); };
+    script.onerror = function(){ showBanner('Could not load Microsoft Auth', true); };
+    document.head.appendChild(script);
+  } else { msalAuth(); }
+}
+
+function msalAuth() {
+  var msalApp = new msal.PublicClientApplication({
+    auth: {
+      clientId: MSAL_CLIENT_ID,
+      authority: 'https://login.microsoftonline.com/common',
+      redirectUri: window.location.origin + '/notes.html'
+    }, cache: { cacheLocation: 'localStorage' }
+  });
+  msalApp.acquireTokenSilent({ scopes: MSAL_SCOPES }).then(function(r){
+    msalToken = r.accessToken; syncToOneNote();
+  }).catch(function(){
+    msalApp.acquireTokenPopup({ scopes: MSAL_SCOPES }).then(function(r){
+      msalToken = r.accessToken; syncToOneNote();
+    }).catch(function(e){ showBanner('Microsoft sign-in failed: ' + e.message, true); });
+  });
+}
+
+function graphRequest(method, path, body, contentType) {
+  return fetch(GRAPH_API + path, {
+    method: method || 'GET',
+    headers: Object.assign({ Authorization: 'Bearer ' + msalToken }, contentType ? { 'Content-Type': contentType } : {}),
+    body: body || undefined
+  }).then(function(r){
+    if (!r.ok) return r.json().then(function(e){ throw new Error(e.error && e.error.message || r.status); });
+    return r.status === 204 ? {} : r.json();
+  });
+}
+
+function syncToOneNote() {
+  if (!msalToken) { msalSignIn(); return; }
+  exportMenu.classList.remove('open');
+  var statusEl = document.getElementById('onenote-status');
+  statusEl.textContent = 'Syncing...'; statusEl.className = 'sync-status loading';
+
+  var note = getNote();
+  if (!note) { showBanner('Open a note to sync to OneNote', true); statusEl.textContent = ''; return; }
+
+  // Get or create notebook
+  graphRequest('GET', '/me/onenote/notebooks?$filter=displayName eq \'Precision Health Podcast\'')
+    .then(function(d){
+      if (d.value && d.value.length > 0) { oneNoteNotebookId = d.value[0].id; return; }
+      return graphRequest('POST', '/me/onenote/notebooks', JSON.stringify({ displayName: 'Precision Health Podcast' }), 'application/json')
+        .then(function(nb){ oneNoteNotebookId = nb.id; });
+    })
+    .then(function(){
+      var sectionName = note.episodeTitle || 'General Notes';
+      return graphRequest('GET', '/me/onenote/notebooks/' + oneNoteNotebookId + '/sections?$filter=displayName eq \'' + encodeURIComponent(sectionName) + '\'')
+        .then(function(d){
+          if (d.value && d.value.length > 0) return d.value[0].id;
+          return graphRequest('POST', '/me/onenote/notebooks/' + oneNoteNotebookId + '/sections', JSON.stringify({ displayName: sectionName }), 'application/json')
+            .then(function(s){ return s.id; });
+        });
+    })
+    .then(function(sectionId){
+      // Build OneNote page HTML
+      var pageHtml = '<!DOCTYPE html><html><head><title>' + escHtml(note.title||'Untitled') + '</title>'
+        + '<meta name="created" content="' + new Date(note.createdAt||Date.now()).toISOString() + '"/>'
+        + '</head><body>'
+        + '<h1>' + escHtml(note.title||'Untitled') + '</h1>'
+        + (note.episodeTitle ? '<p><b>Episode:</b> ' + escHtml(note.episodeTitle) + '</p>' : '')
+        + (note.bodyHtml || '<p>' + escHtml(note.body||'') + '</p>')
+        + '<p><cite>The Precision Health Podcast — precisionnaturalmedicine.com.au</cite></p>'
+        + '</body></html>';
+      return graphRequest('POST', '/me/onenote/sections/' + sectionId + '/pages', pageHtml, 'text/html');
+    })
+    .then(function(){
+      statusEl.textContent = 'Synced'; statusEl.className = 'sync-status ok';
+      showBanner('\u2713 Sent to OneNote — Precision Health Podcast notebook');
+    })
+    .catch(function(e){
+      statusEl.textContent = 'Error'; statusEl.className = 'sync-status err';
+      showBanner('OneNote sync failed: ' + e.message, true);
+    });
+}
+
+document.getElementById('sync-onenote-item').addEventListener('click', function(){
+  if (!isMsalConfigured()) {
+    showBanner('Add MSAL_CLIENT_ID to notes.html — see setup instructions', true);
+    exportMenu.classList.remove('open'); return;
+  }
+  syncToOneNote();
+});
+
 function escHtml(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
