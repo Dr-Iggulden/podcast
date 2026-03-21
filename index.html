@@ -407,12 +407,22 @@
     .favs-toggle-btn.active svg { fill: var(--gold); stroke: var(--gold); }
     .ep-no-favs { text-align: center; padding: 48px; color: var(--grey-light); font-family: 'Cormorant SC', serif; letter-spacing: 0.15em; font-size: 12px; }
 
-    /* SERIES COLLAPSE */
-    .ep-series-list { overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
-    .ep-series-list.collapsed { max-height: 320px; } /* overridden by inline style once measured */
-    .ep-series-list.expanded  { max-height: 9999px; }
-    .ep-series-more-wrap { text-align: center; padding: 10px 0 4px; position: relative; }
-    .ep-series-more-wrap::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 60px; transform: translateY(-100%); background: linear-gradient(to bottom, transparent, var(--cream)); pointer-events: none; }
+    /* SERIES COLLAPSE — pure CSS, no JS measurement needed */
+    .ep-series-list.collapsed .episode-item:nth-child(n+3) {
+      display: none;
+    }
+    .ep-series-list.expanded .episode-item {
+      display: block; /* or list-item for li */
+    }
+    /* Fade-in when expanding */
+    .ep-series-list.expanded .episode-item:nth-child(n+3) {
+      animation: epFadeIn 0.25s ease forwards;
+    }
+    @keyframes epFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .ep-series-more-wrap { text-align: center; padding: 10px 0 4px; }
     .ep-series-more-btn { display: inline-flex; align-items: center; gap: 7px; background: none; border: 1.5px solid rgba(177,148,67,0.4); border-radius: 2px; padding: 8px 18px; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); cursor: pointer; transition: all 0.2s; }
     .ep-series-more-btn:hover { border-color: var(--gold); background: rgba(177,148,67,0.06); }
     .ep-series-more-btn svg { transition: transform 0.3s; fill: none; stroke: var(--gold); stroke-width: 2; stroke-linecap: round; }
@@ -1590,22 +1600,6 @@
       listWrap.className = 'ep-series-list' + (needsCollapse ? ' collapsed' : ' expanded');
       listWrap.appendChild(ul);
 
-      // Set collapsed height precisely once rendered
-      if (needsCollapse) {
-        // Start with a safe tiny height so nothing bleeds through before measurement
-        listWrap.style.maxHeight = '0px';
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () { // double-rAF ensures layout is complete
-            var liEls = ul.querySelectorAll('li.episode-item');
-            var h = 0;
-            for (var j = 0; j < Math.min(PREVIEW, liEls.length); j++) {
-              h += liEls[j].offsetHeight;
-            }
-            listWrap.style.maxHeight = (h + 24) + 'px'; // 24px breathing room
-          });
-        });
-      }
-
       groupDiv.appendChild(listWrap);
 
       // Add "See more / See less" button
@@ -1620,30 +1614,18 @@
         moreBtn.addEventListener('click', function () {
           var isOpen = listWrap.classList.contains('expanded');
           if (isOpen) {
-            // Collapse — re-measure the preview height
-            var liEls = ul.querySelectorAll('li.episode-item');
-            var h = 0;
-            for (var j = 0; j < Math.min(PREVIEW, liEls.length); j++) { h += liEls[j].offsetHeight; }
-            // First pin current height, then on next frame shrink to measured
-            listWrap.style.maxHeight = listWrap.scrollHeight + 'px';
-            requestAnimationFrame(function () {
-              listWrap.classList.remove('expanded');
-              listWrap.classList.add('collapsed');
-              listWrap.style.maxHeight = (h + 24) + 'px';
-              moreBtn.classList.remove('open');
-              moreBtn.innerHTML =
-                'See all ' + eps.length + ' episodes' +
-                '<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
-              setTimeout(function () {
-                groupDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }, 420);
-            });
+            listWrap.classList.remove('expanded');
+            listWrap.classList.add('collapsed');
+            moreBtn.classList.remove('open');
+            moreBtn.innerHTML =
+              'See all ' + eps.length + ' episodes' +
+              '<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
+            setTimeout(function () {
+              groupDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 420);
           } else {
             listWrap.classList.remove('collapsed');
             listWrap.classList.add('expanded');
-            listWrap.style.maxHeight = listWrap.scrollHeight + 'px';
-            // After transition, set to 'none' so content can grow freely
-            setTimeout(function () { if (listWrap.classList.contains('expanded')) listWrap.style.maxHeight = '9999px'; }, 450);
             moreBtn.classList.add('open');
             moreBtn.innerHTML =
               'See less' +
