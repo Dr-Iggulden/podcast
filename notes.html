@@ -63,7 +63,27 @@
     .tb-btn:hover { border-color: var(--gold); color: var(--green-deep); }
     .tb-btn.active { background: var(--green-deep); color: var(--white); border-color: var(--green-deep); }
     .tb-sep { width: 1px; height: 20px; background: var(--cream-dark); margin: 0 4px; flex-shrink: 0; }
-    .tb-right { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+    .tb-right { margin-left: auto; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .tb-action-btn { display: inline-flex; align-items: center; gap: 5px; }
+    .tb-action-btn svg { flex-shrink: 0; }
+    /* Tooltip on hover for all toolbar buttons */
+    .tb-btn[title] { position: relative; }
+    .tb-btn[title]:hover::after {
+      content: attr(title);
+      position: absolute; bottom: calc(100% + 6px); left: 50%;
+      transform: translateX(-50%);
+      background: var(--green-deep); color: var(--white);
+      font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 600;
+      white-space: nowrap; padding: 4px 8px; border-radius: 3px;
+      pointer-events: none; z-index: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .tb-btn[title]:hover::before {
+      content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent; border-top-color: var(--green-deep);
+      pointer-events: none; z-index: 600;
+    }
     .save-indicator { font-size: 10px; color: var(--grey-light); font-weight: 400; letter-spacing: 0.05em; }
     .save-indicator.saved { color: #4caf7a; }
     .delete-btn { color: var(--danger) !important; border-color: rgba(192,57,74,0.25) !important; }
@@ -191,7 +211,7 @@
   <!-- html2canvas for PDF rendering -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- docx.js for Word export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
 </head>
 <body>
 
@@ -235,10 +255,10 @@
       <div class="notes-editor-toolbar" id="toolbar">
 
         <!-- Format buttons -->
-        <button class="tb-btn" id="tb-bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
-        <button class="tb-btn" id="tb-italic" title="Italic (Ctrl+I)"><em>I</em></button>
-        <button class="tb-btn" id="tb-underline" title="Underline (Ctrl+U)"><u>U</u></button>
-        <button class="tb-btn" id="tb-heading" title="Heading">H</button>
+        <button class="tb-btn" id="tb-bold" title="Bold — Ctrl+B"><strong>B</strong></button>
+        <button class="tb-btn" id="tb-italic" title="Italic — Ctrl+I"><em>I</em></button>
+        <button class="tb-btn" id="tb-underline" title="Underline — Ctrl+U"><u>U</u></button>
+        <button class="tb-btn" id="tb-heading" title="Heading — H2 style">H</button>
         <button class="tb-btn" id="tb-bullet" title="Bullet list">&#8226; List</button>
         <button class="tb-btn" id="tb-numbered" title="Numbered list">1. List</button>
 
@@ -246,7 +266,7 @@
 
         <!-- Highlight -->
         <div class="hl-wrap" id="hl-wrap">
-          <button class="tb-btn hl-btn" id="tb-highlight" title="Highlight selected text">
+          <button class="tb-btn hl-btn" id="tb-highlight" title="Highlight — Ctrl+H">
             <span style="display:inline-flex;align-items:center;gap:5px;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               Highlight
@@ -273,10 +293,66 @@
         </div>
 
         <div class="tb-sep"></div>
-        <button class="tb-btn" id="tb-timestamp" title="Insert current playback time">&#9201; Timestamp</button>
+        <button class="tb-btn" id="tb-timestamp" title="Insert playback timestamp">&#9201; Timestamp</button>
 
         <div class="tb-right">
           <span class="save-indicator" id="save-indicator">All changes saved</span>
+
+          <!-- Save button -->
+          <button class="tb-btn tb-action-btn" id="tb-save" title="Save note (Ctrl+S)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save
+          </button>
+
+          <!-- Share dropdown -->
+          <div class="export-wrap" id="share-wrap">
+            <button class="tb-btn tb-action-btn" id="tb-share" title="Share this note">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share &#9660;
+            </button>
+            <div class="export-menu" id="share-menu">
+              <div class="export-menu-title">Share Note</div>
+              <div class="export-item" id="share-native-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share via App <span class="export-desc">Email, Messages, WhatsApp...</span>
+              </div>
+              <div class="export-item" id="share-copy-link-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                Copy as Text <span class="export-desc">Copy full note to clipboard</span>
+              </div>
+              <div class="export-item" id="share-print-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Print Note <span class="export-desc">With podcast header</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sync dropdown -->
+          <div class="export-wrap" id="sync-wrap">
+            <button class="tb-btn tb-action-btn" id="tb-sync" title="Sync notes across devices">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+              Sync &#9660;
+            </button>
+            <div class="export-menu" id="sync-menu">
+              <div class="export-menu-title">Sync &amp; Cloud</div>
+              <div class="export-item" id="sync-gdrive-item">
+                <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 2L2 19.5h20L12 2z" fill="#4285F4"/><path d="M2 19.5L9.5 7l5 8.5H2z" fill="#34A853" opacity=".6"/><path d="M14.5 15.5H22L17 7l-5 8.5h2.5z" fill="#FBBC05" opacity=".8"/></svg>
+                Google Drive <span class="sync-status" id="gdrive-status"></span>
+                <span class="export-desc">Sync across all your devices</span>
+              </div>
+              <div class="export-item" id="sync-onenote-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#7719AA"><path d="M3 3h18v18H3z" opacity=".15"/><path d="M7 7h4l3 7 3-7h4v10h-3V11l-2.5 6H14l-2.5-6V17H8V7H7z"/></svg>
+                OneNote <span class="sync-status" id="onenote-status"></span>
+                <span class="export-desc">Send to Microsoft OneNote</span>
+              </div>
+              <div class="export-sep"></div>
+              <div class="export-item" id="import-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import JSON Backup
+              </div>
+            </div>
+          </div>
+
           <!-- Export dropdown -->
           <div class="export-wrap" id="export-wrap">
             <button class="tb-btn" id="tb-export">Export &#9660;</button>
@@ -306,50 +382,16 @@
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h16"/></svg>
                 Markdown <span class="export-desc">.md file</span>
               </div>
-              <div class="export-item" data-fmt="pdf">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
-                PDF <span class="export-desc">Print-ready document</span>
-              </div>
-              <div class="export-item" data-fmt="docx">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 12l1.5 4L12 12l1.5 4L15 12"/></svg>
-                Word (DOCX) <span class="export-desc">Microsoft Word document</span>
-              </div>
+
               <div class="export-item" data-fmt="json">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/></svg>
                 JSON Backup <span class="export-desc">All notes, re-importable</span>
               </div>
-              <div class="export-sep"></div>
-              <div class="export-menu-title">Share</div>
-              <div class="export-item" id="share-native-item">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                Share Note
-                <span class="export-desc">Via email, messages, apps</span>
-              </div>
-              <div class="export-item" id="share-copy-link-item">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-                Copy as Text
-                <span class="export-desc">Copy note to clipboard</span>
-              </div>
-              <div class="export-sep"></div>
-              <div class="export-menu-title">Sync</div>
-              <div class="export-item" id="sync-gdrive-item">
-                <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 2L2 19.5h20L12 2z" fill="#4285F4"/><path d="M2 19.5L9.5 7l5 8.5H2z" fill="#34A853" opacity=".6"/><path d="M14.5 15.5H22L17 7l-5 8.5h2.5z" fill="#FBBC05" opacity=".8"/></svg>
-                Save to Google Drive
-                <span class="sync-status" id="gdrive-status"></span>
-              </div>
-              <div class="export-item" id="sync-onenote-item">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="#7719AA"><path d="M3 3h18v18H3z" opacity=".15"/><path d="M7 7h4l3 7 3-7h4v10h-3V11l-2.5 6H14l-2.5-6V17H8V7H7z"/></svg>
-                Send to OneNote
-                <span class="sync-status" id="onenote-status"></span>
-              </div>
-              <div class="export-item" id="import-item">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Import JSON Backup
-              </div>
+
             </div>
           </div>
           <input type="file" id="import-file-input" accept=".json" style="display:none;" />
-          <button class="tb-btn delete-btn" id="tb-delete">Delete</button>
+          <button class="tb-btn delete-btn" id="tb-delete" title="Delete this note">Delete</button>
         </div>
       </div>
 
@@ -808,6 +850,21 @@ document.getElementById('note-body').addEventListener('keydown', function(e){
 });
 
 /* ── Delete / Export ── */
+/* ── Save button ── */
+document.getElementById('tb-save').addEventListener('click', function(){
+  saveCurrentNote();
+  showBanner('\u2713 Note saved');
+});
+// Ctrl+S keyboard shortcut
+document.addEventListener('keydown', function(e){
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    saveCurrentNote();
+    var ind = document.getElementById('save-indicator');
+    if (ind) { ind.textContent = 'Saved'; ind.className = 'save-indicator saved'; }
+  }
+});
+
 document.getElementById('tb-delete').addEventListener('click', function(){
   if (!currentId) return;
   if (!confirm('Delete this note? This cannot be undone.')) return;
@@ -819,6 +876,31 @@ document.getElementById('tb-delete').addEventListener('click', function(){
 });
 /* ── Export dropdown ── */
 var exportMenu = document.getElementById('export-menu');
+var shareMenu  = document.getElementById('share-menu');
+var syncMenu   = document.getElementById('sync-menu');
+
+// Share dropdown
+document.getElementById('tb-share').addEventListener('click', function(e){
+  e.stopPropagation();
+  shareMenu.classList.toggle('open');
+  exportMenu.classList.remove('open');
+  syncMenu.classList.remove('open');
+});
+document.addEventListener('click', function(e){
+  if (!document.getElementById('share-wrap').contains(e.target)) shareMenu.classList.remove('open');
+});
+
+// Sync dropdown
+document.getElementById('tb-sync').addEventListener('click', function(e){
+  e.stopPropagation();
+  syncMenu.classList.toggle('open');
+  exportMenu.classList.remove('open');
+  shareMenu.classList.remove('open');
+});
+document.addEventListener('click', function(e){
+  if (!document.getElementById('sync-wrap').contains(e.target)) syncMenu.classList.remove('open');
+});
+
 document.getElementById('tb-export').addEventListener('click', function(e){
   e.stopPropagation();
   exportMenu.classList.toggle('open');
@@ -836,6 +918,51 @@ document.getElementById('export-menu').querySelectorAll('.export-item[data-fmt]'
   });
 });
 /* ── Share handlers ── */
+/* ── Print handler ── */
+document.getElementById('share-print-item').addEventListener('click', function(){
+  shareMenu.classList.remove('open');
+  var note = getNote(); if (!note) return;
+  var bodyHtml = note.bodyHtml || '<p>' + escHtml(note.body||'') + '</p>';
+  var printWin = window.open('', '_blank', 'width=800,height=600');
+  printWin.document.write([
+    '<!DOCTYPE html><html><head><meta charset="UTF-8">',
+    '<title>' + escHtml(note.title||'Note') + ' — The Precision Health Podcast</title>',
+    '<style>',
+    '  @page { margin: 20mm; }',
+    '  body { font-family: Georgia, serif; max-width: 720px; margin: 0 auto; color: #222; font-size: 13px; line-height: 1.8; }',
+    '  .print-header { border-bottom: 2px solid #B19443; padding-bottom: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }',
+    '  .print-header-brand { font-family: Arial, sans-serif; font-size: 10px; font-weight: bold; letter-spacing: 0.2em; text-transform: uppercase; color: #2C4A35; }',
+    '  .print-header-sub { font-family: Arial, sans-serif; font-size: 9px; color: #888; }',
+    '  .print-title { font-family: Georgia, serif; font-size: 24px; color: #2C4A35; margin: 0 0 4px; }',
+    '  .print-episode { font-family: Arial, sans-serif; font-size: 11px; color: #B19443; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }',
+    '  .print-date { font-family: Arial, sans-serif; font-size: 11px; color: #888; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #eee; }',
+    '  h2 { color: #2C4A35; font-size: 18px; margin: 20px 0 8px; }',
+    '  mark { border-radius: 2px; padding: 0 2px; }',
+    '  blockquote { border-left: 3px solid #B19443; padding: 4px 16px; background: #fffef0; margin: 16px 0; }',
+    '  .print-footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #eee; font-family: Arial, sans-serif; font-size: 10px; color: #aaa; display: flex; justify-content: space-between; }',
+    '  @media print { .noprint { display: none; } }',
+    '</style></head><body>',
+    '<div class="print-header">',
+    '  <div>',
+    '    <div class="print-header-brand">Precision Natural Medicine</div>',
+    '    <div class="print-header-sub">The Precision Health Podcast — precisionnaturalmedicine.com.au</div>',
+    '  </div>',
+    '  <div class="print-header-sub">' + new Date().toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'}) + '</div>',
+    '</div>',
+    note.episodeTitle ? '<div class="print-episode">Episode ' + escHtml(note.episodeNum||'') + ' &mdash; ' + escHtml(note.episodeTitle) + '</div>' : '',
+    '<h1 class="print-title">' + escHtml(note.title||'Untitled Note') + '</h1>',
+    '<div class="print-date">Last updated: ' + new Date(note.updatedAt||Date.now()).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}) + '</div>',
+    bodyHtml,
+    '<div class="print-footer">',
+    '  <span>The Precision Health Podcast</span>',
+    '  <span>precisionnaturalmedicine.com.au</span>',
+    '</div>',
+    '</body></html>'
+  ].join(''));
+  printWin.document.close();
+  setTimeout(function(){ printWin.focus(); printWin.print(); }, 400);
+});
+
 document.getElementById('share-native-item').addEventListener('click', function(){
   exportMenu.classList.remove('open');
   var note = getNote(); if (!note) return;
@@ -849,8 +976,8 @@ document.getElementById('share-native-item').addEventListener('click', function(
   if (navigator.share) {
     navigator.share({
       title: shareTitle,
-      text: shareText,
-      url: 'https://podcast.precisionnaturalmedicine.com.au/'
+      text: shareText
+      // No URL — we want the note content, not the podcast link
     }).catch(function(e){
       // User cancelled or share failed — silently ignore
       if (e.name !== 'AbortError') showBanner('Share failed: ' + e.message, true);
@@ -1302,9 +1429,10 @@ function loadFromGdrive() {
 // Wire up Google Drive button
 document.getElementById('sync-gdrive-item').addEventListener('click', function(){
   if (!isGdriveConfigured()) {
-    showBanner('Add GOOGLE_CLIENT_ID to notes.html — see setup instructions', true);
-    exportMenu.classList.remove('open'); return;
+    showBanner('Google Drive: Client ID not configured', true);
+    exportMenu.classList.remove('open'); syncMenu.classList.remove('open'); return;
   }
+  syncMenu.classList.remove('open');
   if (!window.google || !window.google.accounts) {
     // Load GIS script
     var script = document.createElement('script');
@@ -1438,6 +1566,25 @@ function syncToOneNote() {
 }
 
 document.getElementById('sync-onenote-item').addEventListener('click', function(){
+  syncMenu.classList.remove('open');
+  var note = getNote();
+  if (!note) { showBanner('Open a note first', true); return; }
+  // Use OneNote web URL scheme — opens OneNote in browser/app
+  // User can then save it to their notebook manually
+  var bodyText = (note.bodyHtml||'').replace(/<[^>]+>/g,'')
+    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+  var title = encodeURIComponent(note.title || 'Precision Health Note');
+  var body  = encodeURIComponent(
+    (note.episodeTitle ? 'Episode: ' + note.episodeTitle + '\n\n' : '') +
+    bodyText +
+    '\n\n\u2014 The Precision Health Podcast\nprecisionnaturalmedicine.com.au'
+  );
+  // Try to open OneNote new page URL
+  var oneNoteUrl = 'https://www.onenote.com/pages?title=' + title + '&body=' + body;
+  window.open(oneNoteUrl, '_blank');
+  showBanner('OneNote opened \u2014 paste your note content there');
+  return; // Skip old MSAL code below
+  // ── Legacy MSAL code (requires Azure registration) ──
   if (!isMsalConfigured()) {
     showBanner('Add MSAL_CLIENT_ID to notes.html — see setup instructions', true);
     exportMenu.classList.remove('open'); return;
