@@ -172,10 +172,12 @@
       line-height: 1; color: var(--gold); pointer-events: none;
     }
     .ep-time { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.1em; color: var(--grey-light); white-space: nowrap; min-width: 34px; }
-    .ep-progress-bar { flex: 1; height: 2px; background: var(--cream-dark); border-radius: 2px; position: relative; cursor: pointer; }
-    .ep-progress-fill { height: 100%; background: var(--gold); border-radius: 2px; width: 0%; pointer-events: none; }
-    .ep-progress-thumb { position: absolute; top: 50%; right: -5px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); transform: translateY(-50%); pointer-events: none; opacity: 0; transition: opacity 0.15s; }
-    .ep-progress-bar:hover .ep-progress-thumb { opacity: 1; }
+    .ep-progress-bar { flex: 1; height: 4px; background: var(--cream-dark); border-radius: 4px; position: relative; cursor: pointer; touch-action: none; }
+    .ep-progress-fill { height: 100%; background: var(--gold); border-radius: 4px; width: 0%; pointer-events: none; }
+    .ep-progress-thumb { position: absolute; top: 50%; right: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--gold); transform: translateY(-50%); pointer-events: none; opacity: 0; transition: opacity 0.15s, transform 0.1s; }
+    .ep-progress-bar:hover .ep-progress-thumb,
+    .ep-progress-bar.dragging .ep-progress-thumb { opacity: 1; }
+    .ep-progress-bar.dragging .ep-progress-thumb { transform: translateY(-50%) scale(1.3); }
 
     /* FEATURED EPISODE */
     .ep-featured { background: var(--cream); border-radius: 6px; margin-bottom: 48px; border: 1px solid var(--cream-dark); overflow: hidden; }
@@ -302,36 +304,79 @@
     /* NOW PLAYING BAR — fixed pop-out player */
     #now-playing { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300; background: var(--white); border-top: 2px solid var(--gold); box-shadow: 0 -4px 24px rgba(44,74,53,0.13); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
     #now-playing.active { display: block; transform: translateY(0); }
-    .np-inner { max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: grid; grid-template-columns: 60px 1fr auto; gap: 16px; align-items: center; }
-    .np-art { width: 60px; height: 60px; border-radius: 4px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 10px rgba(44,74,53,0.14); }
+    .np-inner { max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+    .np-art { width: 56px; height: 56px; border-radius: 4px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 10px rgba(44,74,53,0.14); }
     .np-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .np-body { min-width: 0; }
-    .np-label { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.3em; color: var(--gold); margin-bottom: 2px; }
-    .np-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 400; color: var(--green-deep); line-height: 1.2; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .np-controls { display: flex; align-items: center; gap: 10px; }
-    .np-play-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: var(--green-deep); border: none; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
+    .np-label { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.3em; color: var(--gold); margin-bottom: 1px; }
+    .np-title { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 400; color: var(--green-deep); line-height: 1.2; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .np-controls { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+    /* Play button */
+    .np-play-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: var(--green-deep); border: none; cursor: pointer; flex-shrink: 0; transition: background 0.2s; -webkit-tap-highlight-color: transparent; }
     .np-play-btn:hover { background: var(--green-mid); }
     .np-play-btn svg { fill: var(--white); }
-    .np-progress-wrap { flex: 1; display: flex; align-items: center; gap: 8px; }
-    .np-time { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.1em; color: var(--grey-light); white-space: nowrap; min-width: 34px; }
-    .np-bar { flex: 1; height: 2px; background: var(--cream-dark); border-radius: 2px; position: relative; cursor: pointer; }
-    .np-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; width: 0%; pointer-events: none; }
-    .np-bar-thumb { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); transform: translate(-50%, -50%); pointer-events: none; left: 0%; }
-    .np-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .np-close-btn { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--cream-dark); border: none; cursor: pointer; color: var(--grey-nav); font-size: 16px; transition: background 0.2s; flex-shrink: 0; }
+    /* Skip buttons */
+    .np-skip-btn { display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: var(--grey-nav); padding: 3px; flex-shrink: 0; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
+    .np-skip-btn:hover { color: var(--green-deep); }
+    .np-skip-btn svg text { fill: var(--grey-nav); }
+    .np-skip-btn:hover svg text { fill: var(--green-deep); }
+    /* Speed button */
+    .np-speed-btn { background: none; border: 1.5px solid var(--cream-dark); border-radius: 3px; padding: 2px 5px; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; color: var(--grey-nav); cursor: pointer; flex-shrink: 0; transition: all 0.15s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+    .np-speed-btn:hover, .np-speed-btn.active { border-color: var(--gold); color: var(--green-deep); }
+    /* Sleep timer */
+    .np-sleep-btn { display: flex; align-items: center; gap: 3px; background: none; border: none; cursor: pointer; color: var(--grey-light); padding: 3px; flex-shrink: 0; font-family: 'Nunito Sans', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
+    .np-sleep-btn:hover { color: var(--green-deep); }
+    .np-sleep-btn.active { color: var(--gold); }
+    .np-sleep-label { min-width: 18px; }
+    /* Progress */
+    .np-progress-wrap { flex: 1; display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .np-time { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.1em; color: var(--grey-light); white-space: nowrap; min-width: 32px; }
+    .np-bar { flex: 1; height: 4px; background: var(--cream-dark); border-radius: 4px; position: relative; cursor: pointer; min-width: 40px; touch-action: none; }
+    .np-bar-fill { height: 100%; background: var(--gold); border-radius: 4px; width: 0%; pointer-events: none; }
+    .np-bar-thumb { position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%; background: var(--gold); transform: translate(-50%, -50%); pointer-events: none; left: 0%; transition: transform 0.1s; }
+    .np-bar:hover .np-bar-thumb,
+    .np-bar.dragging .np-bar-thumb { transform: translate(-50%, -50%) scale(1.3); }
+    /* Volume */
+    .np-vol-wrap { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .np-vol-btn { background: none; border: none; cursor: pointer; color: var(--grey-light); padding: 2px; display: flex; align-items: center; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
+    .np-vol-btn:hover { color: var(--green-deep); }
+    .np-vol-slider { -webkit-appearance: none; appearance: none; width: 64px; height: 3px; background: var(--cream-dark); border-radius: 3px; outline: none; cursor: pointer; flex-shrink: 0; }
+    .np-vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%; background: var(--green-deep); cursor: pointer; }
+    .np-vol-slider::-moz-range-thumb { width: 11px; height: 11px; border-radius: 50%; background: var(--green-deep); border: none; cursor: pointer; }
+    /* Actions / close */
+    .np-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .np-close-btn { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--cream-dark); border: none; cursor: pointer; color: var(--grey-nav); font-size: 15px; transition: background 0.2s; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
     .np-close-btn:hover { background: var(--cream); color: var(--green-deep); }
-    .np-share-row { display: flex; align-items: center; gap: 6px; }
-    .np-share-btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Nunito Sans', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid rgba(177,148,67,0.35); background: rgba(177,148,67,0.05); color: var(--green-deep); padding: 5px 9px; border-radius: 2px; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
+    .np-share-row { display: flex; align-items: center; gap: 5px; }
+    .np-share-btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Nunito Sans', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid rgba(177,148,67,0.35); background: rgba(177,148,67,0.05); color: var(--green-deep); padding: 4px 8px; border-radius: 2px; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
     .np-share-btn:hover { border-color: var(--gold); background: rgba(177,148,67,0.12); }
     .np-share-btn.copied { border-color: #4caf7a; color: #4caf7a; }
-    /* Nudge page content up so player doesn't cover footer */
-    body.np-open { padding-bottom: 92px; }
-    @media (max-width: 760px) {
-      .np-inner { grid-template-columns: 50px 1fr; gap: 10px; padding: 10px 16px; }
-      .np-art { width: 50px; height: 50px; }
-      .np-title { font-size: 13px; }
+    body.np-open { padding-bottom: 88px; }
+    /* Speed picker popover */
+    .np-speed-menu { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--white); border: 1px solid var(--cream-dark); border-radius: 4px; box-shadow: 0 -4px 16px rgba(0,0,0,0.1); padding: 6px 0; display: none; z-index: 400; min-width: 64px; margin-bottom: 8px; }
+    .np-speed-menu.open { display: block; }
+    .np-speed-menu button { display: block; width: 100%; padding: 7px 16px; background: none; border: none; font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--grey-nav); cursor: pointer; text-align: center; transition: background 0.15s, color 0.15s; }
+    .np-speed-menu button:hover { background: var(--cream); color: var(--green-deep); }
+    .np-speed-menu button.active { color: var(--gold); font-weight: 700; }
+    .np-speed-wrap { position: relative; flex-shrink: 0; }
+    /* Sleep timer menu */
+    .np-sleep-menu { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--white); border: 1px solid var(--cream-dark); border-radius: 4px; box-shadow: 0 -4px 16px rgba(0,0,0,0.1); padding: 6px 0; display: none; z-index: 400; min-width: 100px; margin-bottom: 8px; }
+    .np-sleep-menu.open { display: block; }
+    .np-sleep-menu button { display: block; width: 100%; padding: 7px 16px; background: none; border: none; font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--grey-nav); cursor: pointer; text-align: center; transition: background 0.15s, color 0.15s; white-space: nowrap; }
+    .np-sleep-menu button:hover { background: var(--cream); color: var(--green-deep); }
+    .np-sleep-menu button.active { color: var(--gold); font-weight: 700; }
+    .np-sleep-wrap { position: relative; flex-shrink: 0; }
+    @media (max-width: 900px) {
+      .np-vol-wrap { display: none; }
       .np-share-row { display: none; }
-      .np-actions { gap: 6px; }
+    }
+    @media (max-width: 640px) {
+      .np-inner { grid-template-columns: 46px 1fr auto; gap: 10px; padding: 8px 12px; }
+      .np-art { width: 46px; height: 46px; }
+      .np-title { font-size: 12px; }
+      .np-controls { gap: 4px; }
+      .np-speed-btn { display: none; }
+      .np-sleep-btn { display: none; }
     }
 
     /* LIKE BUTTON */
@@ -406,6 +451,17 @@
     .favs-toggle-btn svg { fill: none; stroke: currentColor; stroke-width: 1.8; width: 13px; height: 13px; }
     .favs-toggle-btn.active svg { fill: var(--gold); stroke: var(--gold); }
     .ep-no-favs { text-align: center; padding: 48px; color: var(--grey-light); font-family: 'Cormorant SC', serif; letter-spacing: 0.15em; font-size: 12px; }
+    /* EPISODE SEARCH */
+    .ep-search-wrap { position: relative; display: flex; align-items: center; }
+    .ep-search-icon { position: absolute; left: 10px; width: 14px; height: 14px; color: var(--grey-light); pointer-events: none; }
+    .ep-search-input { font-family: 'Nunito Sans', sans-serif; font-size: 13px; color: var(--text-body); background: var(--cream); border: 1.5px solid var(--cream-dark); border-radius: 2px; padding: 8px 32px 8px 32px; outline: none; width: 240px; transition: border-color 0.2s, width 0.2s; }
+    .ep-search-input:focus { border-color: var(--green-mid); background: var(--white); width: 300px; }
+    .ep-search-input::placeholder { color: var(--grey-light); }
+    .ep-search-clear { position: absolute; right: 8px; background: none; border: none; cursor: pointer; color: var(--grey-light); font-size: 16px; line-height: 1; padding: 2px 4px; display: none; transition: color 0.15s; }
+    .ep-search-clear:hover { color: var(--green-deep); }
+    .ep-search-clear.visible { display: block; }
+    .ep-search-no-results { text-align: center; padding: 48px; color: var(--grey-light); font-family: 'Cormorant SC', serif; letter-spacing: 0.15em; font-size: 12px; }
+    @media (max-width: 480px) { .ep-search-input { width: 180px; } .ep-search-input:focus { width: 200px; } }
 
     /* SERIES COLLAPSE — pure CSS, no JS measurement needed */
     .ep-series-list.collapsed .episode-item:nth-child(n+3) {
@@ -707,13 +763,31 @@
       <p class="np-label">Now Playing</p>
       <p class="np-title" id="np-title">&ndash;</p>
       <div class="np-controls">
+        <!-- Skip back 15s -->
+        <button class="np-skip-btn" id="np-skip-back" aria-label="Skip back 15 seconds" title="Back 15s">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.84"/><text x="8" y="17" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif" font-weight="bold">15</text></svg>
+        </button>
+        <!-- Play/Pause -->
         <button class="np-play-btn" id="np-play-btn" aria-label="Play/Pause">
           <svg id="np-play-icon" width="12" height="14" viewBox="0 0 14 16"><path d="M1 1l12 7L1 15V1z"/></svg>
         </button>
+        <!-- Skip forward 15s -->
+        <button class="np-skip-btn" id="np-skip-fwd" aria-label="Skip forward 15 seconds" title="Forward 15s">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3.84"/><text x="7.5" y="17" font-size="6" fill="currentColor" stroke="none" font-family="sans-serif" font-weight="bold">15</text></svg>
+        </button>
+        <!-- Repeat -->
         <button class="np-repeat-btn" id="np-repeat-btn" data-mode="0" aria-label="Repeat" title="Repeat: Off">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
           <span class="np-repeat-badge" id="np-repeat-badge"></span>
         </button>
+        <!-- Speed -->
+        <button class="np-speed-btn" id="np-speed-btn" title="Playback speed">1×</button>
+        <!-- Sleep timer -->
+        <button class="np-sleep-btn" id="np-sleep-btn" title="Sleep timer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span class="np-sleep-label" id="np-sleep-label"></span>
+        </button>
+        <!-- Progress -->
         <div class="np-progress-wrap">
           <span class="np-time" id="np-cur">0:00</span>
           <div class="np-bar" id="np-bar">
@@ -721,6 +795,13 @@
             <div class="np-bar-thumb" id="np-thumb"></div>
           </div>
           <span class="np-time" id="np-end">&ndash;</span>
+        </div>
+        <!-- Volume -->
+        <div class="np-vol-wrap" id="np-vol-wrap">
+          <button class="np-vol-btn" id="np-vol-btn" title="Volume">
+            <svg id="np-vol-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </button>
+          <input type="range" class="np-vol-slider" id="np-vol-slider" min="0" max="1" step="0.02" value="1" aria-label="Volume" />
         </div>
       </div>
     </div>
@@ -769,8 +850,12 @@
     <p class="section-label">Latest Episodes</p>
     <div class="section-rule"></div>
     <h2 class="section-title">Listen Now</h2>
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
-      <div></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+      <div class="ep-search-wrap">
+        <svg class="ep-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="ep-search" class="ep-search-input" placeholder="Search episodes..." autocomplete="off" />
+        <button class="ep-search-clear" id="ep-search-clear" aria-label="Clear search">&times;</button>
+      </div>
       <button class="favs-toggle-btn" id="favs-toggle-btn">
         <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
         Favourites
@@ -787,34 +872,33 @@
 
 <script>
 (function () {
+  /* ── CONFIG ── */
   var RSS_FEED     = 'https://media.rss.com/sacredherbology/feed.xml';
   var FALLBACK_ART = 'https://img.rss.com/sacredherbology/536/20260319_050354_abd3b4c55ca870bf346d5bef81cab69a.png';
   var BASE_URL     = 'https://podcast.precisionnaturalmedicine.com.au/';
   var PROXIES      = ['https://corsproxy.io/?', 'https://api.allorigins.win/raw?url='];
   var LIKES_API    = 'https://script.google.com/macros/s/AKfycbyGMMpAHiiPaw24Op8SnW_Jp74_im9TZgUM9zEZMEXfe59QIjhPGd_88nwe4Pvvh-NNwA/exec';
 
-  // ── Series names — edit this to add/rename series ──
-  // Key = itunes:season number from RSS feed (set on RSS.com per episode).
-  // 0 = catch-all for any episode with no season assigned.
-  // To add a new series: assign the season number on RSS.com, then add it here
-  // e.g.  3: 'Hormonal Health'
-  var SERIES_NAMES = {
-    2: 'Metabolic Masters',
-    1: 'Meditation Music',
-    0: 'Extras'
-  };
-  // Display order — newest/primary series first.
-  // Add new season numbers here too when you create them.
+  var SERIES_NAMES = { 2: 'Metabolic Masters', 1: 'Meditation Music', 0: 'Extras' };
   var SERIES_ORDER = [2, 1, 0];
-  var LIKED_KEY    = 'pnm_podcast_liked'; // local: tracks which episodes THIS user liked
-  var likeCounts   = {};  // fetched from server
 
-  var currentAudio = null;
-  var currentLi    = null;
-  var currentEp    = null;
+  var LIKED_KEY    = 'pnm_podcast_liked';
+  var PROGRESS_KEY = 'pnm_ep_progress'; // per-episode progress store
+  var RESUME_KEY   = 'pnm_podcast_resume';
+  var likeCounts   = {};
+
+  /* ── Player state ── */
+  var currentAudio      = null;
+  var currentLi         = null;
+  var currentEp         = null;
   var currentSetPlaying = null;
-  var allEls       = [];
-  var repeatMode   = 0; // 0=off, 1=repeat once, 2=infinite loop
+  var allEps            = []; // flat ordered array of ALL episode objects (source of truth for autoplay)
+  var allEls            = []; // parallel array of DOM li elements
+  var repeatMode        = 0;  // 0=off 1=once 2=infinite
+  var playbackRate      = 1;
+  var sleepTimerId      = null;
+  var sleepEndTime      = 0;
+  var sleepTickId       = null;
 
   /* ── helpers ── */
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -827,6 +911,12 @@
     var d = document.createElement('div'); d.innerHTML = h;
     return (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
   }
+  function renderHtml(h) {
+    // Sanitise: allow basic formatting tags, strip script/iframe etc.
+    return (h || '').replace(/<script[\s\S]*?<\/script>/gi, '')
+                    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+                    .replace(/on\w+="[^"]*"/gi, '');
+  }
   function secsToHMS(raw) {
     if (!raw) return '';
     if (/^\d+:\d+/.test(raw)) return raw;
@@ -838,140 +928,136 @@
     return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 60);
   }
 
-  /* ── likes — Google Sheets backend ── */
+  /* ── Per-episode progress store ── */
+  function loadAllProgress() {
+    try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}'); } catch(e) { return {}; }
+  }
+  function saveEpProgress(slug, time) {
+    var all = loadAllProgress();
+    all[slug] = Math.floor(time);
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(all)); } catch(e) {}
+  }
+  function getEpProgress(slug) {
+    return loadAllProgress()[slug] || 0;
+  }
+  function clearEpProgress(slug) {
+    var all = loadAllProgress();
+    delete all[slug];
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(all)); } catch(e) {}
+  }
 
-  // Voter fingerprint: hash of userAgent + timezone — not PII, just prevents double-voting
+  /* ── Likes ── */
   function getVoterHash() {
     var raw = navigator.userAgent + Intl.DateTimeFormat().resolvedOptions().timeZone;
     var h = 0;
     for (var i = 0; i < raw.length; i++) { h = ((h << 5) - h + raw.charCodeAt(i)) | 0; }
     return Math.abs(h).toString(36);
   }
-
   function getLikedSet() {
-    try { return new Set(JSON.parse(localStorage.getItem(LIKED_KEY) || '[]')); } catch (e) { return new Set(); }
+    try { return new Set(JSON.parse(localStorage.getItem(LIKED_KEY) || '[]')); } catch(e) { return new Set(); }
   }
   function saveLikedSet(s) {
-    try { localStorage.setItem(LIKED_KEY, JSON.stringify(Array.from(s))); } catch (e) {}
+    try { localStorage.setItem(LIKED_KEY, JSON.stringify(Array.from(s))); } catch(e) {}
   }
-  function getLikeCount(slug) {
-    return likeCounts[slug] || 0;
-  }
-
-  // Fetch all like counts from Google Sheets on page load
-  function fetchLikeCounts(callback) {
+  function getLikeCount(slug) { return likeCounts[slug] || 0; }
+  function fetchLikeCounts(cb) {
     fetch(LIKES_API)
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        likeCounts = data || {};
-        if (callback) callback();
-      })
-      .catch(function () { likeCounts = {}; if (callback) callback(); });
+      .then(function(r) { return r.json(); })
+      .then(function(d) { likeCounts = d || {}; if (cb) cb(); })
+      .catch(function() { likeCounts = {}; if (cb) cb(); });
   }
-
-  // Update all like buttons on the page with fresh counts
   function refreshLikeButtons() {
     var liked = getLikedSet();
-    document.querySelectorAll('.ep-like-btn').forEach(function (btn) {
-      var slug = btn.getAttribute('data-slug');
-      if (!slug) return;
-      var countEl = btn.querySelector('.ep-like-count');
-      if (countEl) countEl.textContent = likeCounts[slug] || 0;
+    document.querySelectorAll('.ep-like-btn').forEach(function(btn) {
+      var slug = btn.getAttribute('data-slug'); if (!slug) return;
+      var c = btn.querySelector('.ep-like-count'); if (c) c.textContent = likeCounts[slug] || 0;
       if (liked.has(slug)) { btn.classList.add('liked'); btn.title = 'Liked!'; }
     });
   }
-
-  function toggleLike(slug, epTitle, btn, countEl) {
-    var liked = getLikedSet();
-    if (liked.has(slug)) return; // already liked on this device
-
-    // Optimistic UI update immediately
-    liked.add(slug);
-    saveLikedSet(liked);
-    var newCount = (likeCounts[slug] || 0) + 1;
-    likeCounts[slug] = newCount;
-    btn.classList.add('liked');
-    btn.title = 'Liked!';
-    countEl.textContent = newCount;
-    // sync any other like buttons for same episode
-    document.querySelectorAll('.ep-like-btn[data-slug="' + slug + '"]').forEach(function (b) {
-      b.classList.add('liked');
-      b.title = 'Liked!';
-      var c = b.querySelector('.ep-like-count');
-      if (c) c.textContent = newCount;
+  function toggleLike(slug, title, btn, countEl) {
+    var liked = getLikedSet(); if (liked.has(slug)) return;
+    liked.add(slug); saveLikedSet(liked);
+    var n = (likeCounts[slug] || 0) + 1; likeCounts[slug] = n;
+    btn.classList.add('liked'); btn.title = 'Liked!'; countEl.textContent = n;
+    document.querySelectorAll('.ep-like-btn[data-slug="' + slug + '"]').forEach(function(b) {
+      b.classList.add('liked'); b.title = 'Liked!';
+      var c = b.querySelector('.ep-like-count'); if (c) c.textContent = n;
     });
-
-    // POST to Google Sheets
-    fetch(LIKES_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ slug: slug, title: epTitle, voter: getVoterHash() })
-    })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      // Server is source of truth — update with real count
-      if (typeof data.likes === 'number') {
-        likeCounts[slug] = data.likes;
-        document.querySelectorAll('.ep-like-btn[data-slug="' + slug + '"]').forEach(function (b) {
-          var c = b.querySelector('.ep-like-count');
-          if (c) c.textContent = data.likes;
+    fetch(LIKES_API, { method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ slug: slug, title: title, voter: getVoterHash() }) })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (typeof d.likes === 'number') {
+        likeCounts[slug] = d.likes;
+        document.querySelectorAll('.ep-like-btn[data-slug="' + slug + '"]').forEach(function(b) {
+          var c = b.querySelector('.ep-like-count'); if (c) c.textContent = d.likes;
         });
-        if (data.voted === false) {
-          // Server says already voted — keep liked state but revert local
-          liked.delete(slug);
-          saveLikedSet(liked);
-        }
+        if (d.voted === false) { liked.delete(slug); saveLikedSet(liked); }
       }
-    })
-    .catch(function () {}); // optimistic update already applied, silent fail is fine
+    }).catch(function(){});
   }
-
-  // Delegated like handler
-  document.addEventListener('click', function (e) {
-    var btn = e.target.closest('.ep-like-btn');
-    if (!btn) return;
-    var slug    = btn.getAttribute('data-slug');
-    var epTitle = btn.getAttribute('data-title') || '';
-    var countEl = btn.querySelector('.ep-like-count');
-    if (slug && countEl) toggleLike(slug, epTitle, btn, countEl);
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.ep-like-btn'); if (!btn) return;
+    var slug = btn.getAttribute('data-slug');
+    var c    = btn.querySelector('.ep-like-count');
+    if (slug && c) toggleLike(slug, btn.getAttribute('data-title') || '', btn, c);
   });
 
-  /* ── share HTML — title pre-filled in tweet/linkedin text ── */
+  /* ── Share helpers ── */
   function makeShareHtml(epUrl, epTitle, epSlug) {
-    var liked   = getLikedSet();
-    var count   = getLikeCount(epSlug);
-    var isLiked = liked.has(epSlug);
-    var shareText = 'The Precision Health Podcast \u2014 ' + epTitle;
-    var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(epUrl) + '&quote=' + encodeURIComponent(shareText);
-    var x  = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(epUrl) + '&text=' + encodeURIComponent(shareText);
-    var li = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(epUrl) + '&title=' + encodeURIComponent(epTitle) + '&summary=' + encodeURIComponent('The Precision Health Podcast by Dr Luke Iggulden');
-    var heartSvg = '<svg width="13" height="12" viewBox="0 0 24 22"><path class="ep-like-heart" d="M12 21s-9-6.35-9-12.5A6.5 6.5 0 0112 3.33 6.5 6.5 0 0121 8.5C21 14.65 12 21 12 21z"/></svg>';
-    return (
-      '<a class="ep-share-btn" href="' + fb + '" target="_blank" rel="noopener">Facebook</a>' +
+    var liked = getLikedSet(); var count = getLikeCount(epSlug); var isLiked = liked.has(epSlug);
+    var st = 'The Precision Health Podcast \u2014 ' + epTitle;
+    var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(epUrl) + '&quote=' + encodeURIComponent(st);
+    var x  = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(epUrl) + '&text=' + encodeURIComponent(st);
+    var li = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(epUrl) + '&title=' + encodeURIComponent(epTitle);
+    var hrt = '<svg width="13" height="12" viewBox="0 0 24 22"><path class="ep-like-heart" d="M12 21s-9-6.35-9-12.5A6.5 6.5 0 0112 3.33 6.5 6.5 0 0121 8.5C21 14.65 12 21 12 21z"/></svg>';
+    return '<a class="ep-share-btn" href="' + fb + '" target="_blank" rel="noopener">Facebook</a>' +
       '<a class="ep-share-btn" href="' + x  + '" target="_blank" rel="noopener">&#x1D54F;</a>' +
       '<a class="ep-share-btn" href="' + li + '" target="_blank" rel="noopener">LinkedIn</a>' +
       '<button class="ep-share-btn ep-copy-btn" data-url="' + epUrl + '"><span class="ep-copy-label">Copy Link</span></button>' +
-      '<button class="ep-like-btn' + (isLiked ? ' liked' : '') + '" data-slug="' + epSlug + '" data-title="' + epTitle.replace(/"/g, '&quot;') + '" title="' + (isLiked ? 'Liked!' : 'Like this episode') + '">' +
-        heartSvg + '<span class="ep-like-count">' + count + '</span>' +
-      '</button>'
-    );
+      '<button class="ep-like-btn' + (isLiked ? ' liked' : '') + '" data-slug="' + epSlug + '" data-title="' + epTitle.replace(/"/g,'&quot;') + '" title="' + (isLiked ? 'Liked!' : 'Like') + '">' +
+        hrt + '<span class="ep-like-count">' + count + '</span></button>';
   }
-
-  /* ── copy button handler (delegated) ── */
-  document.addEventListener('click', function (e) {
-    var btn = e.target.closest('.ep-copy-btn');
-    if (!btn) return;
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.ep-copy-btn'); if (!btn) return;
     var url = btn.getAttribute('data-url');
-    navigator.clipboard.writeText(url).then(function () {
-      var lbl = btn.querySelector('.ep-copy-label') || btn;
-      var orig = lbl.textContent;
-      lbl.textContent = 'Copied!';
-      btn.classList.add('copied');
-      setTimeout(function () { lbl.textContent = orig; btn.classList.remove('copied'); }, 2000);
+    navigator.clipboard.writeText(url).then(function() {
+      var lbl = btn.querySelector('.ep-copy-label') || btn; var orig = lbl.textContent;
+      lbl.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(function() { lbl.textContent = orig; btn.classList.remove('copied'); }, 2000);
     });
   });
 
-  /* ── Now Playing bar — fixed pop-out player ── */
+  /* ── Download ── */
+  function makeDownloadBtn(ep) {
+    if (!ep.audioUrl) return '';
+    return '<button class="ep-download-btn" data-audio="' + ep.audioUrl + '" data-title="' + ep.title.replace(/"/g,'&quot;') + '" title="Download episode">' +
+      '<svg viewBox="0 0 24 24"><path d="M12 2v13m0 0l-4-4m4 4l4-4M2 17v3a2 2 0 002 2h16a2 2 0 002-2v-3"/></svg>' +
+      '<span class="ep-dl-label">Download</span></button>';
+  }
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.ep-download-btn'); if (!btn) return;
+    if (btn.classList.contains('downloading') || btn.classList.contains('done')) return;
+    var url = btn.getAttribute('data-audio');
+    var ttl = btn.getAttribute('data-title') || 'episode';
+    var lbl = btn.querySelector('.ep-dl-label');
+    btn.classList.add('downloading'); if (lbl) lbl.textContent = 'Downloading...';
+    var a = document.createElement('a'); a.href = url;
+    a.download = ttl.replace(/[^a-z0-9 ]/gi,'').trim() + '.mp3'; a.target = '_blank';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    btn.classList.remove('downloading'); btn.classList.add('done'); if (lbl) lbl.textContent = 'Downloaded';
+    fetch(LIKES_API, { method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'download', title: ttl, slug: url.split('/').pop().replace(/\.mp3.*$/,''), userAgent: navigator.userAgent.substring(0,150) }) }).catch(function(){});
+    if (typeof gtag !== 'undefined') gtag('event', 'episode_download', { event_category: 'Engagement', event_label: ttl });
+    setTimeout(function() {
+      if (localStorage.getItem('pnm_podcast_following') !== 'true') {
+        var fo = document.getElementById('follow-modal-overlay');
+        if (fo) { fo.classList.add('open'); document.body.style.overflow = 'hidden'; }
+      }
+    }, 1500);
+  });
+
+  /* ── Now Playing bar DOM refs ── */
   var npBar      = document.getElementById('now-playing');
   var npImg      = document.getElementById('np-art-img');
   var npTitle    = document.getElementById('np-title');
@@ -986,116 +1072,281 @@
   var npCloseBtn = document.getElementById('np-close-btn');
   var npRepeatBtn   = document.getElementById('np-repeat-btn');
   var npRepeatBadge = document.getElementById('np-repeat-badge');
+  var npSkipBack = document.getElementById('np-skip-back');
+  var npSkipFwd  = document.getElementById('np-skip-fwd');
+  var npSpeedBtn = document.getElementById('np-speed-btn');
+  var npSleepBtn = document.getElementById('np-sleep-btn');
+  var npSleepLbl = document.getElementById('np-sleep-label');
+  var npVolBtn   = document.getElementById('np-vol-btn');
+  var npVolSlider= document.getElementById('np-vol-slider');
+
   var PLAY_PATH  = '<path d="M1 1l12 7L1 15V1z"/>';
   var PAUSE_PATH = '<rect x="1" y="1" width="4" height="14" rx="1"/><rect x="9" y="1" width="4" height="14" rx="1"/>';
 
-  // Update all repeat button UIs to match current repeatMode
+  /* ── Repeat ── */
   function updateRepeatUI() {
-    var titles = ['Repeat: Off', 'Repeat: Once (plays again once)', 'Repeat: Infinite loop'];
-    var badges = ['', '1', '\u221e']; // '', '1', '∞'
-    // NP bar button
-    if (npRepeatBtn) {
-      npRepeatBtn.setAttribute('data-mode', repeatMode);
-      npRepeatBtn.title = titles[repeatMode];
-      if (npRepeatBadge) npRepeatBadge.textContent = badges[repeatMode];
-    }
-    // All inline repeat buttons
-    document.querySelectorAll('.ep-repeat-btn').forEach(function (btn) {
-      btn.setAttribute('data-mode', repeatMode);
-      btn.title = titles[repeatMode];
-      var badge = btn.querySelector('.ep-repeat-badge');
-      if (badge) badge.textContent = badges[repeatMode];
+    var titles  = ['Repeat: Off', 'Repeat: Once', 'Repeat: Infinite loop'];
+    var badges  = ['', '1', '\u221e'];
+    if (npRepeatBtn)   { npRepeatBtn.setAttribute('data-mode', repeatMode); npRepeatBtn.title = titles[repeatMode]; }
+    if (npRepeatBadge) npRepeatBadge.textContent = badges[repeatMode];
+    document.querySelectorAll('.ep-repeat-btn').forEach(function(b) {
+      b.setAttribute('data-mode', repeatMode); b.title = titles[repeatMode];
+      var bg = b.querySelector('.ep-repeat-badge'); if (bg) bg.textContent = badges[repeatMode];
     });
   }
-
-  // Cycle repeat mode on any repeat button click (delegated + NP bar)
-  function cycleRepeat() {
-    repeatMode = (repeatMode + 1) % 3;
-    updateRepeatUI();
-  }
+  function cycleRepeat() { repeatMode = (repeatMode + 1) % 3; updateRepeatUI(); }
   if (npRepeatBtn) npRepeatBtn.addEventListener('click', cycleRepeat);
-  document.addEventListener('click', function (e) {
-    if (e.target.closest('.ep-repeat-btn')) cycleRepeat();
-  });
-  var RESUME_KEY = 'pnm_podcast_resume';
+  document.addEventListener('click', function(e) { if (e.target.closest('.ep-repeat-btn')) cycleRepeat(); });
 
-  function showNP() {
-    npBar.classList.add('active');
-    document.body.classList.add('np-open');
+  /* ── Speed ── */
+  var SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+  function buildSpeedMenu() {
+    var wrap = document.querySelector('.np-speed-wrap');
+    if (!wrap) {
+      wrap = document.createElement('div'); wrap.className = 'np-speed-wrap';
+      if (npSpeedBtn) npSpeedBtn.parentNode.insertBefore(wrap, npSpeedBtn);
+      wrap.appendChild(npSpeedBtn);
+    }
+    var menu = document.createElement('div'); menu.className = 'np-speed-menu'; menu.id = 'np-speed-menu';
+    SPEEDS.forEach(function(s) {
+      var b = document.createElement('button');
+      b.textContent = s === 1 ? '1\u00d7 Normal' : s + '\u00d7';
+      b.setAttribute('data-speed', s);
+      if (s === 1) b.classList.add('active');
+      b.addEventListener('click', function(e) { e.stopPropagation(); setSpeed(s); menu.classList.remove('open'); });
+      menu.appendChild(b);
+    });
+    wrap.appendChild(menu);
   }
-  function hideNP() {
-    npBar.classList.remove('active');
-    document.body.classList.remove('np-open');
+  function setSpeed(s) {
+    playbackRate = s;
+    if (currentAudio) currentAudio.playbackRate = s;
+    if (npSpeedBtn) npSpeedBtn.textContent = s === 1 ? '1\u00d7' : s + '\u00d7';
+    if (npSpeedBtn) npSpeedBtn.classList.toggle('active', s !== 1);
+    var menu = document.getElementById('np-speed-menu');
+    if (menu) menu.querySelectorAll('button').forEach(function(b) {
+      b.classList.toggle('active', parseFloat(b.getAttribute('data-speed')) === s);
+    });
   }
+  if (npSpeedBtn) {
+    npSpeedBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var menu = document.getElementById('np-speed-menu');
+      if (menu) menu.classList.toggle('open');
+    });
+  }
+  document.addEventListener('click', function(e) {
+    var menu = document.getElementById('np-speed-menu');
+    if (menu && !e.target.closest('.np-speed-wrap')) menu.classList.remove('open');
+  });
+
+  /* ── Sleep timer ── */
+  var SLEEP_OPTIONS = [
+    { label: 'Off', mins: 0 },
+    { label: '5 min', mins: 5 },
+    { label: '10 min', mins: 10 },
+    { label: '15 min', mins: 15 },
+    { label: '20 min', mins: 20 },
+    { label: '30 min', mins: 30 },
+    { label: '45 min', mins: 45 },
+    { label: '60 min', mins: 60 },
+    { label: 'End of episode', mins: -1 }
+  ];
+  function buildSleepMenu() {
+    var wrap = document.querySelector('.np-sleep-wrap');
+    if (!wrap) {
+      wrap = document.createElement('div'); wrap.className = 'np-sleep-wrap';
+      if (npSleepBtn) npSleepBtn.parentNode.insertBefore(wrap, npSleepBtn);
+      wrap.appendChild(npSleepBtn);
+    }
+    var menu = document.createElement('div'); menu.className = 'np-sleep-menu'; menu.id = 'np-sleep-menu';
+    SLEEP_OPTIONS.forEach(function(o) {
+      var b = document.createElement('button'); b.textContent = o.label; b.setAttribute('data-mins', o.mins);
+      if (o.mins === 0) b.classList.add('active');
+      b.addEventListener('click', function(e) { e.stopPropagation(); setSleepTimer(o.mins); menu.classList.remove('open'); });
+      menu.appendChild(b);
+    });
+    wrap.appendChild(menu);
+  }
+  function setSleepTimer(mins) {
+    clearTimeout(sleepTimerId); clearInterval(sleepTickId);
+    var menu = document.getElementById('np-sleep-menu');
+    if (menu) menu.querySelectorAll('button').forEach(function(b) {
+      b.classList.toggle('active', parseInt(b.getAttribute('data-mins')) === mins);
+    });
+    if (mins === 0) {
+      if (npSleepBtn) { npSleepBtn.classList.remove('active'); npSleepBtn.title = 'Sleep timer'; }
+      if (npSleepLbl) npSleepLbl.textContent = '';
+      sleepEndTime = 0; return;
+    }
+    if (mins === -1) {
+      // End of episode — handled in ended handler by checking sleepEndTime === -1
+      sleepEndTime = -1;
+      if (npSleepBtn) { npSleepBtn.classList.add('active'); npSleepBtn.title = 'Sleep: end of episode'; }
+      if (npSleepLbl) npSleepLbl.textContent = 'end';
+      return;
+    }
+    var ms = mins * 60 * 1000;
+    sleepEndTime = Date.now() + ms;
+    if (npSleepBtn) { npSleepBtn.classList.add('active'); }
+    // Countdown tick every second
+    function tick() {
+      var remaining = sleepEndTime - Date.now();
+      if (remaining <= 0) {
+        clearInterval(sleepTickId);
+        if (currentAudio) {
+          // Fade out over 3 seconds
+          var fadeSteps = 30; var origVol = currentAudio.volume;
+          var fade = setInterval(function() {
+            fadeSteps--;
+            currentAudio.volume = Math.max(0, origVol * (fadeSteps / 30));
+            if (fadeSteps <= 0) { clearInterval(fade); if (currentAudio) { currentAudio.pause(); currentAudio.volume = origVol; } }
+          }, 100);
+        }
+        if (npSleepBtn) npSleepBtn.classList.remove('active');
+        if (npSleepLbl) npSleepLbl.textContent = '';
+        sleepEndTime = 0;
+        var menu2 = document.getElementById('np-sleep-menu');
+        if (menu2) menu2.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', parseInt(b.getAttribute('data-mins')) === 0); });
+        return;
+      }
+      var s = Math.ceil(remaining / 1000);
+      var m = Math.floor(s / 60); s = s % 60;
+      if (npSleepLbl) npSleepLbl.textContent = m + ':' + pad(s);
+      if (npSleepBtn) npSleepBtn.title = 'Sleep: ' + m + ':' + pad(s) + ' remaining';
+    }
+    tick();
+    sleepTickId = setInterval(tick, 1000);
+  }
+  if (npSleepBtn) {
+    npSleepBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var menu = document.getElementById('np-sleep-menu');
+      if (menu) menu.classList.toggle('open');
+    });
+  }
+  document.addEventListener('click', function(e) {
+    var menu = document.getElementById('np-sleep-menu');
+    if (menu && !e.target.closest('.np-sleep-wrap')) menu.classList.remove('open');
+  });
+
+  /* ── Volume ── */
+  if (npVolBtn) {
+    npVolBtn.addEventListener('click', function() {
+      if (!currentAudio) return;
+      if (currentAudio.volume > 0) { currentAudio._mutedVol = currentAudio.volume; currentAudio.volume = 0; if (npVolSlider) npVolSlider.value = 0; }
+      else { currentAudio.volume = currentAudio._mutedVol || 1; if (npVolSlider) npVolSlider.value = currentAudio.volume; }
+      updateVolIcon();
+    });
+  }
+  if (npVolSlider) {
+    npVolSlider.addEventListener('input', function() {
+      if (currentAudio) currentAudio.volume = parseFloat(npVolSlider.value);
+      updateVolIcon();
+    });
+  }
+  function updateVolIcon() {
+    if (!npVolBtn) return;
+    var v = currentAudio ? currentAudio.volume : 1;
+    var icon = npVolBtn.querySelector('#np-vol-icon');
+    if (!icon) return;
+    if (v === 0) {
+      icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>';
+    } else if (v < 0.5) {
+      icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+    } else {
+      icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>';
+    }
+  }
+
+  /* ── Skip buttons ── */
+  if (npSkipBack) npSkipBack.addEventListener('click', function() {
+    if (currentAudio) currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 15);
+  });
+  if (npSkipFwd) npSkipFwd.addEventListener('click', function() {
+    if (currentAudio) currentAudio.currentTime = Math.min(currentAudio.duration || 0, currentAudio.currentTime + 15);
+  });
+
+  /* ── NP bar show/hide ── */
+  function showNP() { npBar.classList.add('active'); document.body.classList.add('np-open'); }
+  function hideNP() { npBar.classList.remove('active'); document.body.classList.remove('np-open'); }
 
   function updateNP(ep, playing) {
     showNP();
     npImg.src = ep.image || FALLBACK_ART;
     npTitle.textContent = ep.title;
     npPlayIcon.innerHTML = playing ? PAUSE_PATH : PLAY_PATH;
-    // Share buttons for currently playing episode
-    var shareText = 'The Precision Health Podcast — ' + ep.title;
-    var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(ep.url) + '&quote=' + encodeURIComponent(shareText);
-    var x  = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(ep.url) + '&text=' + encodeURIComponent(shareText);
+    if (npVolSlider && currentAudio) npVolSlider.value = currentAudio.volume;
+    var st = 'The Precision Health Podcast \u2014 ' + ep.title;
+    var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(ep.url) + '&quote=' + encodeURIComponent(st);
+    var x  = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(ep.url) + '&text=' + encodeURIComponent(st);
     var li = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(ep.url) + '&title=' + encodeURIComponent(ep.title);
     npShareRow.innerHTML =
       '<a class="np-share-btn" href="' + fb + '" target="_blank" rel="noopener">Facebook</a>' +
       '<a class="np-share-btn" href="' + x  + '" target="_blank" rel="noopener">&#x1D54F;</a>' +
       '<a class="np-share-btn" href="' + li + '" target="_blank" rel="noopener">LinkedIn</a>' +
       '<button class="np-share-btn np-copy-btn" data-url="' + ep.url + '"><span class="np-copy-label">Copy Link</span></button>';
-    // Scroll the player into view
-    setTimeout(function () {
-      npBar.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 100);
   }
-
-  // Copy link handler for NP share row
-  document.addEventListener('click', function (e) {
-    var btn = e.target.closest('.np-copy-btn');
-    if (!btn) return;
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.np-copy-btn'); if (!btn) return;
     var url = btn.getAttribute('data-url');
-    navigator.clipboard.writeText(url).then(function () {
-      var lbl = btn.querySelector('.np-copy-label') || btn;
-      var orig = lbl.textContent;
-      lbl.textContent = 'Copied!';
-      btn.classList.add('copied');
-      setTimeout(function () { lbl.textContent = orig; btn.classList.remove('copied'); }, 2000);
+    navigator.clipboard.writeText(url).then(function() {
+      var lbl = btn.querySelector('.np-copy-label') || btn; var orig = lbl.textContent;
+      lbl.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(function() { lbl.textContent = orig; btn.classList.remove('copied'); }, 2000);
     });
   });
 
-  // Close button
-  npCloseBtn.addEventListener('click', function () {
-    if (currentAudio) { currentAudio.pause(); }
-    hideNP();
-    clearResume();
+  npCloseBtn.addEventListener('click', function() {
+    if (currentAudio) currentAudio.pause();
+    hideNP(); clearResume();
   });
-
-  npPlayBtn.addEventListener('click', function () {
+  npPlayBtn.addEventListener('click', function() {
     if (!currentAudio) return;
-    if (currentAudio.paused) { currentAudio.play(); } else { currentAudio.pause(); }
+    if (currentAudio.paused) currentAudio.play(); else currentAudio.pause();
   });
-  npBarEl.addEventListener('click', function (e) {
-    if (!currentAudio || !currentAudio.duration) return;
-    var rect = npBarEl.getBoundingClientRect();
-    currentAudio.currentTime = ((e.clientX - rect.left) / rect.width) * currentAudio.duration;
-  });
+  // NP bar — full drag scrubber (mouse + touch)
+  (function() {
+    function getPct(e, barEl) {
+      var r = barEl.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      return Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    }
+    function seekToPct(pct) {
+      if (!currentAudio || !currentAudio.duration) return;
+      currentAudio.currentTime = pct * currentAudio.duration;
+    }
+    var dragging = false;
+    npBarEl.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      dragging = true; npBarEl.classList.add('dragging');
+      seekToPct(getPct(e, npBarEl));
+      function onMove(ev) { if (dragging) seekToPct(getPct(ev, npBarEl)); }
+      function onUp()   { dragging = false; npBarEl.classList.remove('dragging'); document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    npBarEl.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      dragging = true; npBarEl.classList.add('dragging');
+      seekToPct(getPct(e, npBarEl));
+      function onMove(ev) { ev.preventDefault(); if (dragging) seekToPct(getPct(ev, npBarEl)); }
+      function onEnd()   { dragging = false; npBarEl.classList.remove('dragging'); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onEnd); }
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onEnd);
+    }, { passive: false });
+  })();
 
-  /* ── Resume memory (localStorage) ── */
+  /* ── Resume ── */
   function saveResume(ep, time) {
-    try {
-      localStorage.setItem(RESUME_KEY, JSON.stringify({ slug: ep.slug, time: time, title: ep.title }));
-    } catch (e) {}
+    try { localStorage.setItem(RESUME_KEY, JSON.stringify({ slug: ep.slug, time: time, title: ep.title })); } catch(e) {}
   }
-  function loadResume() {
-    try { return JSON.parse(localStorage.getItem(RESUME_KEY) || 'null'); } catch (e) { return null; }
-  }
-  function clearResume() {
-    try { localStorage.removeItem(RESUME_KEY); } catch (e) {}
-  }
-  // Save position every 5 seconds while playing
-  setInterval(function () {
+  function loadResume() { try { return JSON.parse(localStorage.getItem(RESUME_KEY) || 'null'); } catch(e) { return null; } }
+  function clearResume() { try { localStorage.removeItem(RESUME_KEY); } catch(e) {} }
+  setInterval(function() {
     if (currentAudio && !currentAudio.paused && currentEp) {
       saveResume(currentEp, Math.floor(currentAudio.currentTime));
+      saveEpProgress(currentEp.slug, currentAudio.currentTime);
     }
   }, 5000);
 
@@ -1118,191 +1369,230 @@
     modalTitle.textContent   = ep.title;
     modalDate.textContent    = ep.pubDate ? fmtDate(ep.pubDate) : '';
     modalArt.src             = ep.image || FALLBACK_ART;
-    modalDesc.textContent    = ep.desc;
+    // Rich show notes — render HTML from RSS if available, else plain text
+    var descEl = document.getElementById('ep-modal-desc');
+    if (ep.descHtml) {
+      descEl.innerHTML = renderHtml(ep.descHtml);
+      descEl.style.whiteSpace = 'normal';
+    } else {
+      descEl.textContent = ep.desc;
+      descEl.style.whiteSpace = 'pre-wrap';
+    }
+    // Detect and linkify timestamps in show notes (e.g. "12:34 Section name")
+    var nodes = descEl.querySelectorAll('p, li, span, div');
+    if (!nodes.length) { nodes = [descEl]; }
+    nodes.forEach(function(node) {
+      node.innerHTML = node.innerHTML.replace(/\b(\d{1,2}:\d{2}(?::\d{2})?)\b(?!\s*<)/g, function(m, ts) {
+        var parts = ts.split(':').map(Number);
+        var secs = parts.length === 3 ? parts[0]*3600 + parts[1]*60 + parts[2] : parts[0]*60 + parts[1];
+        return '<a href="#" class="ep-timestamp-link" data-secs="' + secs + '" style="color:var(--gold);font-weight:700;">' + m + '</a>';
+      });
+    });
     modalPlayLbl.textContent = (currentEp === ep && currentAudio && !currentAudio.paused) ? 'Pause' : 'Play Episode';
-    // share + like row in modal
-    var liked   = getLikedSet();
-    var count   = getLikeCount(ep.slug);
-    var isLiked = liked.has(ep.slug);
-    var heartSvg = '<svg width="13" height="12" viewBox="0 0 24 22"><path class="ep-like-heart" d="M12 21s-9-6.35-9-12.5A6.5 6.5 0 0112 3.33 6.5 6.5 0 0121 8.5C21 14.65 12 21 12 21z"/></svg>';
-    var shareText = 'The Precision Health Podcast \u2014 ' + ep.title;
-    var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(ep.url) + '&quote=' + encodeURIComponent(shareText);
-    var x  = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(ep.url) + '&text=' + encodeURIComponent(shareText);
+    var liked = getLikedSet(); var count = getLikeCount(ep.slug); var isLiked = liked.has(ep.slug);
+    var hrt = '<svg width="13" height="12" viewBox="0 0 24 22"><path class="ep-like-heart" d="M12 21s-9-6.35-9-12.5A6.5 6.5 0 0112 3.33 6.5 6.5 0 0121 8.5C21 14.65 12 21 12 21z"/></svg>';
+    var st = 'The Precision Health Podcast \u2014 ' + ep.title;
+    var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(ep.url) + '&quote=' + encodeURIComponent(st);
+    var x  = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(ep.url) + '&text=' + encodeURIComponent(st);
     var li = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(ep.url) + '&title=' + encodeURIComponent(ep.title);
     modalShareRow.innerHTML =
       '<a class="ep-share-btn" href="' + fb + '" target="_blank" rel="noopener">Facebook</a>' +
       '<a class="ep-share-btn" href="' + x  + '" target="_blank" rel="noopener">&#x1D54F;</a>' +
       '<a class="ep-share-btn" href="' + li + '" target="_blank" rel="noopener">LinkedIn</a>' +
       '<button class="ep-share-btn ep-copy-btn" data-url="' + ep.url + '"><span class="ep-copy-label">Copy Link</span></button>' +
-      '<button id="ep-modal-like-btn" class="ep-like-btn' + (isLiked ? ' liked' : '') + '" data-slug="' + ep.slug + '" data-title="' + ep.title.replace(/"/g, '&quot;') + '" title="' + (isLiked ? 'Liked!' : 'Like this episode') + '">' +
-        heartSvg + '<span class="ep-like-count">' + count + '</span>' +
-      '</button>';
+      '<button id="ep-modal-like-btn" class="ep-like-btn' + (isLiked ? ' liked' : '') + '" data-slug="' + ep.slug + '" data-title="' + ep.title.replace(/"/g,'&quot;') + '" title="' + (isLiked ? 'Liked!' : 'Like') + '">' +
+        hrt + '<span class="ep-like-count">' + count + '</span></button>';
+    // Show saved progress if any
+    var saved = getEpProgress(ep.slug);
+    if (saved > 15) {
+      var dur = ep.duration ? ' / ' + ep.duration : '';
+      var progNote = document.getElementById('ep-modal-progress-note');
+      if (!progNote) {
+        progNote = document.createElement('p');
+        progNote.id = 'ep-modal-progress-note';
+        progNote.style.cssText = 'font-family:"Nunito Sans",sans-serif;font-size:12px;color:var(--gold);margin-top:8px;';
+        modalPlayBtn.parentNode.insertBefore(progNote, modalPlayBtn.nextSibling);
+      }
+      progNote.textContent = 'Last played: ' + fmtTime(saved) + dur;
+    } else {
+      var pn = document.getElementById('ep-modal-progress-note');
+      if (pn) pn.textContent = '';
+    }
     modalOverlay.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
-  function closeModal() {
-    modalOverlay.classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  function closeModal() { modalOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+  // Timestamp click in modal — seek to that point
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('.ep-timestamp-link'); if (!a) return;
+    e.preventDefault();
+    var secs = parseFloat(a.getAttribute('data-secs')); if (isNaN(secs)) return;
+    if (modalCurrentEp) {
+      if (currentEp === modalCurrentEp) {
+        currentAudio.currentTime = secs;
+      } else {
+        stopCurrent(); playEpisode(modalCurrentEp);
+        modalCurrentEp._audio.addEventListener('loadedmetadata', function handler() {
+          modalCurrentEp._audio.currentTime = secs;
+          modalCurrentEp._audio.removeEventListener('loadedmetadata', handler);
+        });
+      }
+      closeModal();
+    }
+  });
 
   modalClose.addEventListener('click', closeModal);
-  modalOverlay.addEventListener('click', function (e) { if (e.target === modalOverlay) closeModal(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
-
-  modalPlayBtn.addEventListener('click', function () {
+  modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+  modalPlayBtn.addEventListener('click', function() {
     if (!modalCurrentEp) return;
     var ep = modalCurrentEp;
     if (currentEp === ep) {
       if (currentAudio.paused) { currentAudio.play(); modalPlayLbl.textContent = 'Pause'; }
       else { currentAudio.pause(); modalPlayLbl.textContent = 'Play Episode'; }
-    } else {
-      stopCurrent();
-      playEpisode(ep);
-      modalPlayLbl.textContent = 'Pause';
-    }
+    } else { stopCurrent(); playEpisode(ep); modalPlayLbl.textContent = 'Pause'; }
   });
 
-  /* ── stop current ── */
+  /* ── Core player: stop / play ── */
   function stopCurrent() {
-    if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
-    if (currentSetPlaying) { currentSetPlaying(false); }
+    if (currentAudio) { currentAudio.pause(); }
+    if (currentSetPlaying) currentSetPlaying(false);
     if (currentLi) currentLi.classList.remove('playing');
     currentAudio = null; currentLi = null; currentEp = null; currentSetPlaying = null;
     npPlayIcon.innerHTML = PLAY_PATH;
   }
 
-  /* ── play episode ── */
   function playEpisode(ep) {
-    currentAudio = ep._audio; currentLi = ep._li; currentEp = ep; currentSetPlaying = ep._setPlaying;
+    if (!ep || !ep._audio) return;
+    currentAudio      = ep._audio;
+    currentLi         = ep._li;
+    currentEp         = ep;
+    currentSetPlaying = ep._setPlaying;
+    currentAudio.playbackRate = playbackRate;
+    if (npVolSlider) currentAudio.volume = parseFloat(npVolSlider.value);
     ep._setPlaying(true);
-    ep._audio.play();
+    // Restore saved progress for this episode if > 10s
+    var saved = getEpProgress(ep.slug);
+    var doPlay = function() {
+      if (saved > 10 && Math.abs(currentAudio.currentTime - saved) > 2) {
+        currentAudio.currentTime = saved;
+      }
+      currentAudio.play().catch(function(err) {
+        // Autoplay blocked — show a visual cue without crashing
+        console.warn('Autoplay blocked:', err);
+        ep._setPlaying(false);
+      });
+    };
+    if (currentAudio.readyState >= 1) {
+      doPlay();
+    } else {
+      currentAudio.addEventListener('loadedmetadata', function h() {
+        currentAudio.removeEventListener('loadedmetadata', h);
+        doPlay();
+      });
+      // Trigger load since preload=metadata
+      if (!currentAudio._loadStarted) { currentAudio._loadStarted = true; currentAudio.load(); }
+    }
     updateNP(ep, true);
     updateMediaSession(ep);
+    // Preload the next episode's audio
+    var idx = allEps.indexOf(ep);
+    if (idx !== -1 && idx < allEps.length - 1) {
+      var next = allEps[idx + 1];
+      if (next._audio && next._audio.readyState === 0 && !next._audio._loadStarted) {
+        next._audio._loadStarted = true;
+        next._audio.load();
+      }
+    }
+  }
+
+  /* ── Media session ── */
+  function updateMediaSession(ep) {
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: ep.title, artist: 'Dr Luke Iggulden, ND', album: 'The Precision Health Podcast',
+      artwork: [{ src: ep.image, sizes: '512x512', type: 'image/png' }]
+    });
+    navigator.mediaSession.setActionHandler('play',  function() { if (currentAudio) currentAudio.play(); });
+    navigator.mediaSession.setActionHandler('pause', function() { if (currentAudio) currentAudio.pause(); });
+    navigator.mediaSession.setActionHandler('stop',  function() { stopCurrent(); });
+    navigator.mediaSession.setActionHandler('nexttrack', function() {
+      var idx = currentEp ? allEps.indexOf(currentEp) : -1;
+      if (idx !== -1 && idx < allEps.length - 1) { stopCurrent(); playEpisode(allEps[idx + 1]); }
+    });
+    navigator.mediaSession.setActionHandler('previoustrack', function() {
+      var idx = currentEp ? allEps.indexOf(currentEp) : -1;
+      if (idx > 0) { stopCurrent(); playEpisode(allEps[idx - 1]); }
+    });
+    navigator.mediaSession.setActionHandler('seekbackward', function() {
+      if (currentAudio) currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 15);
+    });
+    navigator.mediaSession.setActionHandler('seekforward', function() {
+      if (currentAudio) currentAudio.currentTime = Math.min(currentAudio.duration || 0, currentAudio.currentTime + 15);
+    });
   }
 
   /* ── XML parse ── */
   function parseItems(text) {
     var doc = new DOMParser().parseFromString(text, 'text/xml');
     var NS  = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
-    function itunes(el, tag) {
-      var n = el.getElementsByTagNameNS(NS, tag)[0];
-      return n ? (n.getAttribute('href') || n.textContent) : '';
-    }
+    function itunes(el, tag) { var n = el.getElementsByTagNameNS(NS, tag)[0]; return n ? (n.getAttribute('href') || n.textContent) : ''; }
     var items = Array.from(doc.querySelectorAll('item'));
-    return items.map(function (item, idx) {
+    return items.map(function(item, idx) {
       var enc    = item.querySelector('enclosure');
       var imgEl  = item.getElementsByTagNameNS(NS, 'image')[0];
       var imgUrl = (imgEl ? imgEl.getAttribute('href') : '') || itunes(item, 'image') || FALLBACK_ART;
       var dur    = itunes(item, 'duration') || (item.querySelector('duration') || {}).textContent || '';
       var title  = (item.querySelector('title') || {}).textContent || '';
       var slug   = slugify(title);
+      var rawDesc = (item.querySelector('description') || {}).textContent || '';
+      // Check if description has HTML — use innerHTML content if so
+      var hasHtml = /<[a-z][\s\S]*>/i.test(rawDesc);
       return {
         num:      items.length - idx,
         title:    title,
         pubDate:  (item.querySelector('pubDate') || {}).textContent || '',
-        desc:     stripHtml((item.querySelector('description') || {}).textContent || ''),
+        desc:     hasHtml ? stripHtml(rawDesc) : rawDesc.replace(/\s+/g,' ').trim(),
+        descHtml: hasHtml ? rawDesc : null,
         audioUrl: enc ? enc.getAttribute('url') : '',
         duration: secsToHMS(dur),
         image:    imgUrl,
         slug:     slug,
         url:      BASE_URL + '#ep-' + slug,
         season:   parseInt((item.getElementsByTagNameNS(NS, 'season')[0] || {}).textContent || '0') || 0,
-        _audio:   null, _li: null, _setPlaying: null,
+        _audio: null, _li: null, _setPlaying: null,
       };
     });
   }
 
-  /* ── download button helper ── */
-  function makeDownloadBtn(ep) {
-    if (!ep.audioUrl) return '';
-    return '<button class="ep-download-btn" data-audio="' + ep.audioUrl + '" data-title="' + ep.title.replace(/"/g, '&quot;') + '" title="Download episode">' +
-      '<svg viewBox="0 0 24 24"><path d="M12 2v13m0 0l-4-4m4 4l4-4M2 17v3a2 2 0 002 2h16a2 2 0 002-2v-3"/></svg>' +
-      '<span class="ep-dl-label">Download</span>' +
-    '</button>';
-  }
-
-  // Delegated download click handler
-  document.addEventListener('click', function (e) {
-    var btn = e.target.closest('.ep-download-btn');
-    if (!btn) return;
-    if (btn.classList.contains('downloading') || btn.classList.contains('done')) return;
-
-    var audioUrl = btn.getAttribute('data-audio');
-    var title    = btn.getAttribute('data-title') || 'episode';
-    var label    = btn.querySelector('.ep-dl-label');
-
-    btn.classList.add('downloading');
-    if (label) label.textContent = 'Downloading...';
-
-    // Direct anchor download — works cross-origin without fetch
-    var a = document.createElement('a');
-    a.href = audioUrl;
-    a.download = title.replace(/[^a-z0-9 ]/gi, '').trim() + '.mp3';
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    btn.classList.remove('downloading');
-    btn.classList.add('done');
-    if (label) label.textContent = 'Downloaded';
-
-    // Track download in Google Sheet
-    var slug = btn.getAttribute('data-audio') || '';
-    slug = slug.split('/').pop().replace(/\.mp3.*$/, '');
-    fetch('https://script.google.com/macros/s/AKfycbyGMMpAHiiPaw24Op8SnW_Jp74_im9TZgUM9zEZMEXfe59QIjhPGd_88nwe4Pvvh-NNwA/exec', {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        action:    'download',
-        title:     title,
-        slug:      slug,
-        userAgent: navigator.userAgent.substring(0, 150)
-      })
-    }).catch(function() {});
-
-    // GA event
-    if (typeof gtag !== 'undefined') {
-      gtag('event', 'episode_download', { event_category: 'Engagement', event_label: title });
-    }
-
-    // If not already following, open the follow modal after download
-    setTimeout(function () {
-      if (localStorage.getItem('pnm_podcast_following') !== 'true') {
-        var followOverlay = document.getElementById('follow-modal-overlay');
-        if (followOverlay) {
-          followOverlay.classList.add('open');
-          document.body.style.overflow = 'hidden';
-        }
-      }
-    }, 1500);
-  });
-
-  /* ── build episode element ── */
+  /* ── Build episode element ── */
   function buildEpisodeEl(ep, isFeatured) {
     var li = document.createElement(isFeatured ? 'div' : 'li');
     li.className = isFeatured ? 'episode-item ep-featured' : 'episode-item';
     li.id = 'ep-' + ep.slug;
     ep._li = li;
 
-    var desc      = ep.desc.substring(0, isFeatured ? 320 : 180) + (ep.desc.length > (isFeatured ? 320 : 180) ? '\u2026' : '');
+    var desc     = ep.desc.substring(0, isFeatured ? 320 : 180) + (ep.desc.length > (isFeatured ? 320 : 180) ? '\u2026' : '');
     var shareHtml = makeShareHtml(ep.url, ep.title, ep.slug);
+    var savedPct  = 0;
+    var savedSecs = getEpProgress(ep.slug);
+    if (savedSecs > 10 && ep._audio && ep._audio.duration) savedPct = (savedSecs / ep._audio.duration) * 100;
 
-    var PLAY_ICON  = isFeatured
-      ? '<svg width="16" height="18" viewBox="0 0 16 18"><path d="M1 1l14 8L1 17V1z"/></svg>'
-      : '<svg width="10" height="12" viewBox="0 0 10 12"><path d="M1 1l8 5-8 5V1z"/></svg>';
-    var PAUSE_ICON = isFeatured
-      ? '<svg width="16" height="18" viewBox="0 0 16 18"><rect x="1" y="1" width="5" height="16" rx="1"/><rect x="10" y="1" width="5" height="16" rx="1"/></svg>'
-      : '<svg width="10" height="12" viewBox="0 0 10 12"><rect x="1" y="1" width="3" height="10" rx="1"/><rect x="6" y="1" width="3" height="10" rx="1"/></svg>';
-    var ART_PLAY_ICON  = '<svg width="18" height="20" viewBox="0 0 18 20"><path d="M1 1l16 9L1 19V1z"/></svg>';
-    var ART_PAUSE_ICON = '<svg width="18" height="20" viewBox="0 0 18 20"><rect x="1" y="1" width="5" height="18" rx="1"/><rect x="12" y="1" width="5" height="18" rx="1"/></svg>';
+    var PLAY_ICON_FT  = '<svg width="16" height="18" viewBox="0 0 16 18"><path d="M1 1l14 8L1 17V1z"/></svg>';
+    var PAUSE_ICON_FT = '<svg width="16" height="18" viewBox="0 0 16 18"><rect x="1" y="1" width="5" height="16" rx="1"/><rect x="10" y="1" width="5" height="16" rx="1"/></svg>';
+    var PLAY_ICON     = '<svg width="10" height="12" viewBox="0 0 10 12"><path d="M1 1l8 5-8 5V1z"/></svg>';
+    var PAUSE_ICON    = '<svg width="10" height="12" viewBox="0 0 10 12"><rect x="1" y="1" width="3" height="10" rx="1"/><rect x="6" y="1" width="3" height="10" rx="1"/></svg>';
+    var ART_PLAY  = '<svg width="18" height="20" viewBox="0 0 18 20"><path d="M1 1l16 9L1 19V1z"/></svg>';
+    var ART_PAUSE = '<svg width="18" height="20" viewBox="0 0 18 20"><rect x="1" y="1" width="5" height="18" rx="1"/><rect x="12" y="1" width="5" height="18" rx="1"/></svg>';
+    var REPEAT_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>';
 
     if (isFeatured) {
       li.innerHTML =
         '<div class="ep-featured-inner">' +
           '<div class="ep-featured-art">' +
             '<img src="' + ep.image + '" alt="" onerror="this.src=\'' + FALLBACK_ART + '\'">' +
-            '<div class="ep-art-overlay"><div class="ep-art-play">' + ART_PLAY_ICON + '</div></div>' +
+            '<div class="ep-art-overlay"><div class="ep-art-play">' + ART_PLAY + '</div></div>' +
           '</div>' +
           '<div class="ep-featured-body">' +
             '<p class="ep-featured-label">Latest Episode</p>' +
@@ -1312,18 +1602,15 @@
             (desc ? '<p class="ep-featured-desc">' + desc + ' <span class="ep-modal-trigger" style="color:var(--gold-light);cursor:pointer;font-style:normal;font-size:13px;">Read more &rsaquo;</span></p>' : '') +
             '<div class="ep-featured-foot">' +
               (ep.duration ? '<span class="ep-duration">' + ep.duration + '</span>' : '') +
-              '<button class="ep-play-btn ep-play-btn--lg" aria-label="Play">' + PLAY_ICON + '<span class="ep-btn-label">Play Episode</span></button>' +
-              '<button class="ep-fav-btn" data-slug="' + ep.slug + '" title="Add to favourites"><svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></button>' +
+              '<button class="ep-play-btn ep-play-btn--lg">' + PLAY_ICON_FT + '<span class="ep-btn-label">Play Episode</span></button>' +
+              '<button class="ep-fav-btn" data-slug="' + ep.slug + '" title="Favourite"><svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></button>' +
             '</div>' +
             '<div class="ep-share"><span class="ep-share-label">Share</span>' + shareHtml + makeDownloadBtn(ep) + '</div>' +
             '<div class="ep-player ep-player--featured">' +
               '<div class="ep-progress-wrap">' +
-                '<button class="ep-repeat-btn" data-mode="0" aria-label="Repeat" title="Repeat: Off">' +
-                  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>' +
-                  '<span class="ep-repeat-badge"></span>' +
-                '</button>' +
+                '<button class="ep-repeat-btn" data-mode="0" title="Repeat: Off">' + REPEAT_SVG + '<span class="ep-repeat-badge"></span></button>' +
                 '<span class="ep-time ep-time-cur">0:00</span>' +
-                '<div class="ep-progress-bar"><div class="ep-progress-fill"></div><div class="ep-progress-thumb"></div></div>' +
+                '<div class="ep-progress-bar"><div class="ep-progress-fill" style="width:' + savedPct + '%"></div><div class="ep-progress-thumb"></div></div>' +
                 '<span class="ep-time ep-time-end">' + (ep.duration || '\u2013') + '</span>' +
               '</div>' +
             '</div>' +
@@ -1345,17 +1632,14 @@
           '</div>' +
           '<div class="ep-meta">' +
             (ep.duration ? '<p class="ep-duration">' + ep.duration + '</p>' : '') +
-            '<button class="ep-fav-btn" data-slug="' + ep.slug + '" title="Add to favourites"><svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></button>' +
-            '<button class="ep-play-btn" aria-label="Play">' + PLAY_ICON + '<span class="ep-btn-label">Play</span></button>' +
+            '<button class="ep-fav-btn" data-slug="' + ep.slug + '" title="Favourite"><svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></button>' +
+            '<button class="ep-play-btn">' + PLAY_ICON + '<span class="ep-btn-label">Play</span></button>' +
           '</div>' +
           '<div class="ep-player">' +
             '<div class="ep-progress-wrap">' +
-              '<button class="ep-repeat-btn" data-mode="0" aria-label="Repeat" title="Repeat: Off">' +
-                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>' +
-                '<span class="ep-repeat-badge"></span>' +
-              '</button>' +
+              '<button class="ep-repeat-btn" data-mode="0" title="Repeat: Off">' + REPEAT_SVG + '<span class="ep-repeat-badge"></span></button>' +
               '<span class="ep-time ep-time-cur">0:00</span>' +
-              '<div class="ep-progress-bar"><div class="ep-progress-fill"></div><div class="ep-progress-thumb"></div></div>' +
+              '<div class="ep-progress-bar"><div class="ep-progress-fill" style="width:' + savedPct + '%"></div><div class="ep-progress-thumb"></div></div>' +
               '<span class="ep-time ep-time-end">' + (ep.duration || '\u2013') + '</span>' +
             '</div>' +
           '</div>' +
@@ -1363,13 +1647,13 @@
     }
 
     /* modal triggers */
-    li.querySelectorAll('.ep-modal-trigger').forEach(function (t) {
-      t.addEventListener('click', function () { openModal(ep); });
+    li.querySelectorAll('.ep-modal-trigger').forEach(function(t) {
+      t.addEventListener('click', function() { openModal(ep); });
     });
 
-    /* audio */
+    /* audio setup */
     var audio = new Audio();
-    audio.preload = 'none';
+    audio.preload = 'metadata'; // loads duration without full download — fixes autoplay timing
     audio.src     = ep.audioUrl;
     ep._audio     = audio;
 
@@ -1385,16 +1669,16 @@
     function setPlaying(on) {
       li.classList.toggle('playing', on);
       var lbl = isFeatured ? (on ? 'Pause' : 'Play Episode') : (on ? 'Pause' : 'Play');
-      playBtn.innerHTML = (on ? PAUSE_ICON : PLAY_ICON) + '<span class="ep-btn-label">' + lbl + '</span>';
-      artPlay.innerHTML = on ? ART_PAUSE_ICON : ART_PLAY_ICON;
+      playBtn.innerHTML = (on ? (isFeatured ? PAUSE_ICON_FT : PAUSE_ICON) : (isFeatured ? PLAY_ICON_FT : PLAY_ICON)) + '<span class="ep-btn-label">' + lbl + '</span>';
+      artPlay.innerHTML = on ? ART_PAUSE : ART_PLAY;
       npPlayIcon.innerHTML = on ? PAUSE_PATH : PLAY_PATH;
-      if (modalCurrentEp === ep) { modalPlayLbl.textContent = on ? 'Pause' : 'Play Episode'; }
+      if (modalCurrentEp === ep) modalPlayLbl.textContent = on ? 'Pause' : 'Play Episode';
     }
     ep._setPlaying = setPlaying;
 
     function toggle() {
       if (!ep.audioUrl) return;
-      if (currentEp === ep) { if (audio.paused) { audio.play(); } else { audio.pause(); } return; }
+      if (currentEp === ep) { if (audio.paused) audio.play(); else audio.pause(); return; }
       stopCurrent();
       playEpisode(ep);
     }
@@ -1402,210 +1686,193 @@
     if (overlay) overlay.addEventListener('click', toggle);
     playBtn.addEventListener('click', toggle);
 
-    audio.addEventListener('timeupdate', function () {
+    audio.addEventListener('timeupdate', function() {
       if (!audio.duration) return;
       var pct = (audio.currentTime / audio.duration) * 100;
       fill.style.width = pct + '%';
       thumb.style.left = 'calc(' + pct + '% - 5px)';
       timeCur.textContent = fmtTime(audio.currentTime);
       if (currentEp === ep) {
-        npFill.style.width = pct + '%';
-        npThumb.style.left = pct + '%';
-        npCur.textContent  = fmtTime(audio.currentTime);
+        npFill.style.width  = pct + '%';
+        npThumb.style.left  = pct + '%';
+        npCur.textContent   = fmtTime(audio.currentTime);
       }
     });
-    audio.addEventListener('loadedmetadata', function () {
+    audio.addEventListener('loadedmetadata', function() {
       timeEnd.textContent = fmtTime(audio.duration);
       if (currentEp === ep) npEnd.textContent = fmtTime(audio.duration);
+      // Update saved progress bar now we have duration
+      var sv = getEpProgress(ep.slug);
+      if (sv > 10) fill.style.width = ((sv / audio.duration) * 100) + '%';
     });
-    var repeatPlays = 0; // counts extra plays for mode=1
-    audio.addEventListener('ended', function () {
-      clearResume();
-      // Mode 2: infinite loop — just restart
-      if (repeatMode === 2) {
-        audio.currentTime = 0;
-        audio.play();
-        return;
-      }
-      // Mode 1: play once more, then stop repeat
-      if (repeatMode === 1 && repeatPlays < 1) {
-        repeatPlays++;
-        audio.currentTime = 0;
-        audio.play();
-        return;
-      }
-      // Off (or mode 1 exhausted): reset and advance
-      repeatPlays = 0;
-      setPlaying(false); currentAudio = null; currentLi = null; currentEp = null;
-      fill.style.width = '0%'; timeCur.textContent = '0:00';
-      npPlayIcon.innerHTML = PLAY_PATH;
-      var idx = allEls.indexOf(li);
-      if (idx !== -1 && idx < allEls.length - 1) {
-        var next = allEls[idx + 1];
-        next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        setTimeout(function () { next.querySelector('.ep-play-btn').click(); }, 400);
-      }
-    });
-    audio.addEventListener('pause', function () { if (currentEp === ep) setPlaying(false); });
-    audio.addEventListener('play',  function () { if (currentEp === ep) setPlaying(true);  });
 
-    bar.addEventListener('click', function (e) {
-      if (!audio.duration) return;
-      var rect = bar.getBoundingClientRect();
-      audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+    var repeatPlays = 0;
+    audio.addEventListener('ended', function() {
+      saveEpProgress(ep.slug, 0); // clear progress on natural completion
+      clearEpProgress(ep.slug);
+      clearResume();
+      // Sleep timer end-of-episode mode
+      if (sleepEndTime === -1) {
+        setPlaying(false);
+        if (currentAudio === audio) { currentAudio = null; currentLi = null; currentEp = null; }
+        fill.style.width = '0%'; timeCur.textContent = '0:00';
+        npPlayIcon.innerHTML = PLAY_PATH;
+        setSleepTimer(0);
+        return;
+      }
+      // Repeat modes
+      if (repeatMode === 2) { audio.currentTime = 0; audio.play(); return; }
+      if (repeatMode === 1 && repeatPlays < 1) { repeatPlays++; audio.currentTime = 0; audio.play(); return; }
+      repeatPlays = 0;
+      // Advance to next episode — directly via allEps, NO setTimeout, NO .click()
+      setPlaying(false);
+      npPlayIcon.innerHTML = PLAY_PATH;
+      var idx = allEps.indexOf(ep);
+      if (idx !== -1 && idx < allEps.length - 1) {
+        var nextEp = allEps[idx + 1];
+        // Clear current refs BEFORE playEpisode so stopCurrent inside playEpisode doesn't interfere
+        currentAudio = null; currentLi = null; currentEp = null; currentSetPlaying = null;
+        fill.style.width = '0%'; timeCur.textContent = '0:00';
+        playEpisode(nextEp);
+        // Scroll the next episode card into view gently
+        if (nextEp._li) {
+          nextEp._li.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      } else {
+        currentAudio = null; currentLi = null; currentEp = null; currentSetPlaying = null;
+        fill.style.width = '0%'; timeCur.textContent = '0:00';
+      }
     });
+
+    audio.addEventListener('pause', function() { if (currentEp === ep) setPlaying(false); });
+    audio.addEventListener('play',  function() { if (currentEp === ep) setPlaying(true);  });
+
+    // Inline progress bar — full drag scrubber (mouse + touch)
+    (function(barEl, audioEl) {
+      function getPct(e) {
+        var r = barEl.getBoundingClientRect();
+        var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        return Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+      }
+      function seekToPct(pct) {
+        if (!audioEl.duration) return;
+        audioEl.currentTime = pct * audioEl.duration;
+      }
+      barEl.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        barEl.classList.add('dragging');
+        seekToPct(getPct(e));
+        function onMove(ev) { seekToPct(getPct(ev)); }
+        function onUp()   { barEl.classList.remove('dragging'); document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+      barEl.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        barEl.classList.add('dragging');
+        seekToPct(getPct(e));
+        function onMove(ev) { ev.preventDefault(); seekToPct(getPct(ev)); }
+        function onEnd()   { barEl.classList.remove('dragging'); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onEnd); }
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onEnd);
+      }, { passive: false });
+    }(bar, audio));
 
     return li;
-  }
-
-  /* ── media session ── */
-  function updateMediaSession(ep) {
-    if (!('mediaSession' in navigator)) return;
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: ep.title, artist: 'Dr Luke Iggulden, ND', album: 'The Precision Health Podcast',
-      artwork: [{ src: ep.image, sizes: '512x512', type: 'image/png' }]
-    });
-    navigator.mediaSession.setActionHandler('play',  function () { currentAudio && currentAudio.play(); });
-    navigator.mediaSession.setActionHandler('pause', function () { currentAudio && currentAudio.pause(); });
-    navigator.mediaSession.setActionHandler('stop',  function () { stopCurrent(); });
-    navigator.mediaSession.setActionHandler('nexttrack', function () {
-      var idx = allEls.indexOf(currentLi);
-      if (idx !== -1 && idx < allEls.length - 1) { stopCurrent(); allEls[idx + 1].querySelector('.ep-play-btn').click(); }
-    });
-    navigator.mediaSession.setActionHandler('previoustrack', function () {
-      var idx = allEls.indexOf(currentLi);
-      if (idx > 0) { stopCurrent(); allEls[idx - 1].querySelector('.ep-play-btn').click(); }
-    });
   }
 
   /* ── Resume prompt ── */
   function checkResume(items) {
     var saved = loadResume();
-    if (!saved || !saved.slug || !saved.time) return;
-    // Find the episode in the list
+    if (!saved || !saved.slug || !saved.time || saved.time < 10) return;
     var ep = null;
-    for (var i = 0; i < items.length; i++) {
-      if (items[i].slug === saved.slug) { ep = items[i]; break; }
-    }
+    for (var i = 0; i < items.length; i++) { if (items[i].slug === saved.slug) { ep = items[i]; break; } }
     if (!ep || !ep._audio) return;
-    if (saved.time < 10) return; // don't prompt for near-start positions
-    // Show a non-intrusive resume banner
     var banner = document.createElement('div');
     banner.id = 'resume-banner';
-    banner.style.cssText = 'position:fixed;bottom:' + (npBar.classList.contains("active") ? "92px" : "0") + ';left:0;right:0;background:var(--green-deep);color:var(--white);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:299;font-family:Nunito Sans,sans-serif;font-size:13px;box-shadow:0 -2px 12px rgba(0,0,0,0.15);transform:translateY(100%);transition:transform 0.3s ease;';
+    banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--green-deep);color:var(--white);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:299;font-family:"Nunito Sans",sans-serif;font-size:13px;box-shadow:0 -2px 12px rgba(0,0,0,0.15);transform:translateY(100%);transition:transform 0.3s ease;';
     banner.innerHTML =
       '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Resume <strong>' + ep.title + '</strong> from ' + fmtTime(saved.time) + '?</span>' +
       '<div style="display:flex;gap:8px;flex-shrink:0;">' +
-        '<button id="resume-yes" style="background:var(--gold);color:var(--green-deep);border:none;border-radius:2px;padding:7px 16px;font-family:Nunito Sans,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Resume</button>' +
-        '<button id="resume-no" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);border:none;border-radius:2px;padding:7px 12px;font-family:Nunito Sans,sans-serif;font-size:11px;cursor:pointer;">Dismiss</button>' +
+        '<button id="resume-yes" style="background:var(--gold);color:var(--green-deep);border:none;border-radius:2px;padding:7px 16px;font-family:\'Nunito Sans\',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Resume</button>' +
+        '<button id="resume-no" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);border:none;border-radius:2px;padding:7px 12px;font-family:\'Nunito Sans\',sans-serif;font-size:11px;cursor:pointer;">Dismiss</button>' +
       '</div>';
     document.body.appendChild(banner);
-    setTimeout(function () { banner.style.transform = 'translateY(0)'; }, 100);
-
-    document.getElementById('resume-yes').addEventListener('click', function () {
+    setTimeout(function() { banner.style.transform = 'translateY(0)'; }, 100);
+    document.getElementById('resume-yes').addEventListener('click', function() {
       banner.style.transform = 'translateY(100%)';
-      setTimeout(function () { banner.remove(); }, 350);
-      // Start the episode then seek
-      ep._li.querySelector('.ep-play-btn').click();
-      setTimeout(function () {
-        if (ep._audio && ep._audio.duration) {
-          ep._audio.currentTime = saved.time;
-        } else {
-          ep._audio.addEventListener('loadedmetadata', function () {
-            ep._audio.currentTime = saved.time;
-          }, { once: true });
-        }
-      }, 400);
+      setTimeout(function() { if (banner.parentNode) banner.remove(); }, 350);
+      stopCurrent();
+      playEpisode(ep);
+      ep._audio.addEventListener('loadedmetadata', function h() {
+        ep._audio.removeEventListener('loadedmetadata', h);
+        ep._audio.currentTime = saved.time;
+      });
     });
-    document.getElementById('resume-no').addEventListener('click', function () {
+    document.getElementById('resume-no').addEventListener('click', function() {
       banner.style.transform = 'translateY(100%)';
-      setTimeout(function () { banner.remove(); }, 350);
+      setTimeout(function() { if (banner.parentNode) banner.remove(); }, 350);
       clearResume();
     });
-    // Auto-dismiss after 12 seconds
-    setTimeout(function () {
+    setTimeout(function() {
       if (document.getElementById('resume-banner')) {
         banner.style.transform = 'translateY(100%)';
-        setTimeout(function () { if (banner.parentNode) banner.remove(); }, 350);
+        setTimeout(function() { if (banner.parentNode) banner.remove(); }, 350);
       }
     }, 12000);
   }
 
-  /* ── build list ── */
+  /* ── Build list ── */
   function buildList(items) {
     var container = document.getElementById('episode-container');
     container.innerHTML = '';
+    allEps = items.slice(); // flat ordered list for autoplay
     allEls = [];
+    window._allEpisodes = items;
 
-    window._allEpisodes = items; // expose for favourites view
-    // Featured — always the latest episode regardless of series
+    // Featured — always ep[0] (latest)
     var featured = buildEpisodeEl(items[0], true);
     allEls.push(featured);
     container.appendChild(featured);
 
-    if (items.length < 2) {
-      fetchLikeCounts(refreshLikeButtons);
-      scrollToAnchor();
-      return;
-    }
+    if (items.length < 2) { fetchLikeCounts(refreshLikeButtons); scrollToAnchor(); return; }
 
-    // Group remaining episodes by season
+    // Group by season
     var groups = {};
-    items.slice(1).forEach(function (ep) {
-      var s = ep.season;
-      if (!groups[s]) groups[s] = [];
-      groups[s].push(ep);
-    });
+    items.slice(1).forEach(function(ep) { var s = ep.season; if (!groups[s]) groups[s] = []; groups[s].push(ep); });
 
-    // Build series nav — sticky bar above episode groups
-    var availSeries = SERIES_ORDER.filter(function (s) { return groups[s] && groups[s].length > 0; });
+    // Series nav
+    var availSeries = SERIES_ORDER.filter(function(s) { return groups[s] && groups[s].length > 0; });
     if (availSeries.length > 0) {
       var navHeader = document.createElement('div');
       navHeader.className = 'ep-more-header';
-      var navHtml = '<div class="series-nav" id="series-nav"><span class="section-label" style="margin-bottom:0;white-space:nowrap;">More Episodes</span><div class="series-nav-pills">';
-      navHtml += '<button class="series-nav-pill active" data-season="all">All</button>';
-      availSeries.forEach(function (s) {
-        var label = SERIES_NAMES[s] || ('Series ' + s);
-        navHtml += '<button class="series-nav-pill" data-season="' + s + '">' + label + '</button>';
-      });
+      var navHtml = '<div class="series-nav" id="series-nav"><span class="section-label" style="margin-bottom:0;white-space:nowrap;">More Episodes</span><div class="series-nav-pills"><button class="series-nav-pill active" data-season="all">All</button>';
+      availSeries.forEach(function(s) { navHtml += '<button class="series-nav-pill" data-season="' + s + '">' + (SERIES_NAMES[s] || 'Series ' + s) + '</button>'; });
       navHtml += '</div></div>';
       navHeader.innerHTML = navHtml;
       container.appendChild(navHeader);
-      // Filter behaviour
-      navHeader.addEventListener('click', function (e) {
-        var pill = e.target.closest('.series-nav-pill');
-        if (!pill) return;
+      navHeader.addEventListener('click', function(e) {
+        var pill = e.target.closest('.series-nav-pill'); if (!pill) return;
         var season = pill.getAttribute('data-season');
-        navHeader.querySelectorAll('.series-nav-pill').forEach(function (p) { p.classList.remove('active'); });
+        navHeader.querySelectorAll('.series-nav-pill').forEach(function(p) { p.classList.remove('active'); });
         pill.classList.add('active');
-        // Show/hide groups
-        container.querySelectorAll('.ep-series-group[data-season]').forEach(function (g) {
-          if (season === 'all' || g.getAttribute('data-season') === season) {
-            g.style.display = '';
-            // Scroll to this group if filtering to specific series
-            if (season !== 'all') {
-              setTimeout(function () {
-                var navH = (document.querySelector('nav') || {}).offsetHeight || 64;
-                var stickyH = (document.getElementById('series-nav') || {}).offsetHeight || 0;
-                var top = g.getBoundingClientRect().top + window.pageYOffset - navH - stickyH - 16;
-                window.scrollTo({ top: top, behavior: 'smooth' });
-              }, 50);
-            }
-          } else {
-            g.style.display = 'none';
+        container.querySelectorAll('.ep-series-group[data-season]').forEach(function(g) {
+          var show = season === 'all' || g.getAttribute('data-season') === season;
+          g.style.display = show ? '' : 'none';
+          if (show && season !== 'all') {
+            setTimeout(function() {
+              var navH = (document.querySelector('nav') || {}).offsetHeight || 64;
+              var top = g.getBoundingClientRect().top + window.pageYOffset - navH - 16;
+              window.scrollTo({ top: top, behavior: 'smooth' });
+            }, 50);
           }
         });
       });
     }
 
-    // Render in SERIES_ORDER
-    var hasAny = availSeries.length > 0;
-    SERIES_ORDER.forEach(function (seasonNum) {
-      var eps = groups[seasonNum];
-      if (!eps || eps.length === 0) return;
-
-      // Series group header
-      var seriesName = SERIES_NAMES[seasonNum] || ('Series ' + seasonNum);
+    SERIES_ORDER.forEach(function(seasonNum) {
+      var eps = groups[seasonNum]; if (!eps || !eps.length) return;
+      var seriesName  = SERIES_NAMES[seasonNum] || ('Series ' + seasonNum);
       var seriesLabel = seasonNum === 0 ? 'Extras' : 'Series ' + seasonNum;
       var groupDiv = document.createElement('div');
       groupDiv.className = 'ep-series-group';
@@ -1619,74 +1886,60 @@
 
       var ul = document.createElement('ul');
       ul.className = 'episode-list';
-      eps.forEach(function (ep) {
-        var li = buildEpisodeEl(ep, false);
-        allEls.push(li);
-        ul.appendChild(li);
+      eps.forEach(function(ep) {
+        var liEl = buildEpisodeEl(ep, false);
+        allEls.push(liEl);
+        ul.appendChild(liEl);
       });
 
-      // Wrap in collapsible container — show 2 episodes by default
       var PREVIEW = 2;
       var needsCollapse = eps.length > PREVIEW;
       var listWrap = document.createElement('div');
       listWrap.className = 'ep-series-list' + (needsCollapse ? ' collapsed' : ' expanded');
       listWrap.appendChild(ul);
-
       groupDiv.appendChild(listWrap);
 
-      // Add "See more / See less" button
       if (needsCollapse) {
         var moreWrap = document.createElement('div');
         moreWrap.className = 'ep-series-more-wrap';
         var moreBtn = document.createElement('button');
         moreBtn.className = 'ep-series-more-btn';
-        moreBtn.innerHTML =
-          'See all ' + eps.length + ' episodes' +
-          '<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
-        moreBtn.addEventListener('click', function () {
+        moreBtn.innerHTML = 'See all ' + eps.length + ' episodes<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
+        moreBtn.addEventListener('click', function() {
           var isOpen = listWrap.classList.contains('expanded');
           if (isOpen) {
-            listWrap.classList.remove('expanded');
-            listWrap.classList.add('collapsed');
+            listWrap.classList.remove('expanded'); listWrap.classList.add('collapsed');
             moreBtn.classList.remove('open');
-            moreBtn.innerHTML =
-              'See all ' + eps.length + ' episodes' +
-              '<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
-            setTimeout(function () {
-              groupDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 420);
+            moreBtn.innerHTML = 'See all ' + eps.length + ' episodes<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
+            setTimeout(function() { groupDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 420);
           } else {
-            listWrap.classList.remove('collapsed');
-            listWrap.classList.add('expanded');
+            listWrap.classList.remove('collapsed'); listWrap.classList.add('expanded');
             moreBtn.classList.add('open');
-            moreBtn.innerHTML =
-              'See less' +
-              '<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
+            moreBtn.innerHTML = 'See less<svg width="12" height="12" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
           }
         });
         moreWrap.appendChild(moreBtn);
         groupDiv.appendChild(moreWrap);
       }
-
       container.appendChild(groupDiv);
     });
 
-    // Fetch live like counts from Google Sheets and update all buttons
     fetchLikeCounts(refreshLikeButtons);
-    // Refresh favourite stars
+    updateRepeatUI();
     if (window.refreshFavStars) window.refreshFavStars();
     scrollToAnchor();
-    // Check for saved resume position
     checkResume(items);
+    // Build speed + sleep menus now that NP bar is available
+    buildSpeedMenu();
+    buildSleepMenu();
   }
 
-  /* ── anchor scroll ── */
+  /* ── Anchor scroll ── */
   function scrollToAnchor() {
-    var hash = window.location.hash;
-    if (!hash) return;
+    var hash = window.location.hash; if (!hash) return;
     var target = document.getElementById(hash.replace('#', ''));
     if (target) {
-      setTimeout(function () {
+      setTimeout(function() {
         var navH = (document.querySelector('nav') || {}).offsetHeight || 64;
         var npH  = npBar.classList.contains('active') ? (npBar.offsetHeight || 0) : 0;
         var top  = target.getBoundingClientRect().top + window.pageYOffset - navH - npH - 20;
@@ -1695,31 +1948,102 @@
     }
   }
 
-  /* ── fetch ── */
+  /* ── Episode search ── */
+  document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('ep-search');
+    var searchClear = document.getElementById('ep-search-clear');
+    if (!searchInput) return;
+    searchInput.addEventListener('input', function() {
+      var q = searchInput.value.trim().toLowerCase();
+      if (searchClear) searchClear.classList.toggle('visible', q.length > 0);
+      filterEpisodes(q);
+    });
+    if (searchClear) {
+      searchClear.addEventListener('click', function() {
+        searchInput.value = '';
+        searchClear.classList.remove('visible');
+        filterEpisodes('');
+      });
+    }
+  });
+  function filterEpisodes(q) {
+    var container = document.getElementById('episode-container');
+    var noRes = document.getElementById('ep-search-no-results');
+    if (!q) {
+      // Restore all groups and featured
+      container.querySelectorAll('.ep-series-group, .ep-featured, .ep-more-header').forEach(function(el) { el.style.display = ''; });
+      container.querySelectorAll('.episode-item').forEach(function(el) { el.style.display = ''; });
+      if (noRes) noRes.remove();
+      return;
+    }
+    var anyMatch = false;
+    // Hide featured if no match
+    var feat = container.querySelector('.ep-featured');
+    if (feat) {
+      var featTitle = (feat.querySelector('.ep-title-link') || {}).textContent || '';
+      var featDesc  = (feat.querySelector('.ep-featured-desc') || {}).textContent || '';
+      var featMatch = (featTitle + ' ' + featDesc).toLowerCase().indexOf(q) !== -1;
+      feat.style.display = featMatch ? '' : 'none';
+      if (featMatch) anyMatch = true;
+    }
+    container.querySelectorAll('.ep-more-header').forEach(function(h) { h.style.display = 'none'; });
+    container.querySelectorAll('.ep-series-group').forEach(function(g) {
+      var groupMatch = false;
+      g.querySelectorAll('.episode-item').forEach(function(li) {
+        var title = (li.querySelector('.ep-title') || li.querySelector('.ep-title-link') || {}).textContent || '';
+        var desc  = (li.querySelector('.ep-desc') || {}).textContent || '';
+        var match = (title + ' ' + desc).toLowerCase().indexOf(q) !== -1;
+        li.style.display = match ? '' : 'none';
+        if (match) { groupMatch = true; anyMatch = true; }
+      });
+      g.style.display = groupMatch ? '' : 'none';
+      // Expand any collapsed group that has matches
+      if (groupMatch) {
+        var listWrap = g.querySelector('.ep-series-list');
+        if (listWrap && listWrap.classList.contains('collapsed')) {
+          listWrap.classList.remove('collapsed'); listWrap.classList.add('expanded');
+        }
+      }
+    });
+    // No results message
+    if (!anyMatch) {
+      if (!document.getElementById('ep-search-no-results')) {
+        var msg = document.createElement('p');
+        msg.id = 'ep-search-no-results';
+        msg.className = 'ep-search-no-results';
+        msg.textContent = 'No episodes found for \u201c' + q + '\u201d';
+        container.appendChild(msg);
+      }
+    } else {
+      if (noRes) noRes.remove();
+    }
+  }
+
+  /* ── Fetch feed ── */
   function fetchWithFallback(proxies, url, i) {
     if (i >= proxies.length) return Promise.reject(new Error('all proxies failed'));
     return fetch(proxies[i] + encodeURIComponent(url))
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
-      .catch(function () { return fetchWithFallback(proxies, url, i + 1); });
+      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .catch(function() { return fetchWithFallback(proxies, url, i + 1); });
   }
-
   function loadFeed() {
     fetch(RSS_FEED)
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
-      .catch(function () { return fetchWithFallback(PROXIES, RSS_FEED, 0); })
-      .then(function (text) {
+      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .catch(function() { return fetchWithFallback(PROXIES, RSS_FEED, 0); })
+      .then(function(text) {
         var items = parseItems(text);
-        if (items.length) { buildList(items); }
-        else { document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:\'Cormorant SC\',serif;letter-spacing:0.15em;font-size:12px;">No episodes found.</p>'; }
+        if (items.length) buildList(items);
+        else document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:\'Cormorant SC\',serif;letter-spacing:0.15em;font-size:12px;">No episodes found.</p>';
       })
-      .catch(function () {
+      .catch(function() {
         document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:\'Cormorant SC\',serif;letter-spacing:0.15em;font-size:12px;">Episodes temporarily unavailable.</p>';
       });
   }
-
-  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', loadFeed); }
-  else { loadFeed(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadFeed);
+  else loadFeed();
 })();
+
+
 
 /* ── PWA: Service Worker + Install Prompt ── */
 (function () {
