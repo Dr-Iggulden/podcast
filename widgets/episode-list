@@ -1,0 +1,83 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "THE PRECISION HEALTH PODCAST",
+      "size": "Small",
+      "color": "Warning",
+      "weight": "Bolder",
+      "spacing": "None"
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "type": "ColumnSet",
+          "$data": "${episodes}",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "Image",
+                  "url": "${image}",
+                  "size": "Small",
+                  "style": "RoundedCorners"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "stretch",
+              "selectAction": {
+                "type": "Action.Execute",
+                "verb": "play-episode",
+                "data": { "slug": "${slug}", "tag": "episode-list" }
+              },
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${title}",
+                  "wrap": true,
+                  "maxLines": 1,
+                  "weight": "Bolder",
+                  "size": "Small"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "${duration}",
+                  "size": "Small",
+                  "isSubtle": true,
+                  "spacing": "None"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "auto",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "▶",
+                  "size": "Medium",
+                  "color": "Warning"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "Open Podcast",
+      "url": "https://podcast.precisionnaturalmedicine.com.au/"
+    }
+  ]
+}
