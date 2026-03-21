@@ -499,19 +499,26 @@
     @media (max-width: 560px) { .signup-row { grid-template-columns: 1fr; } .signup-modal-body { padding: 24px 20px; } .signup-modal-header { padding: 24px 20px; } }
 
     /* SIGNUP POPUP */
-    .signup-popup-overlay { display: none; position: fixed; inset: 0; background: rgba(20,35,22,0.75); z-index: 700; overflow-y: auto; backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 20px; }
-    .signup-popup-overlay.open { display: flex; }
-    .signup-popup { background: var(--white); max-width: 560px; width: 100%; border-radius: 4px; overflow: hidden; position: relative; animation: modalIn 0.3s ease; box-shadow: 0 24px 80px rgba(0,0,0,0.35); }
-    .signup-popup-header { background: var(--green-deep); padding: 32px 64px 28px 36px; position: relative; }
-    .signup-popup-header .popup-eyebrow { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; display: block; }
-    .signup-popup-header h3 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 26px; color: var(--white); margin-bottom: 8px; line-height: 1.2; }
+    .signup-popup-overlay { display: none; position: fixed; inset: 0; background: rgba(20,35,22,0.85); z-index: 700; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 16px; }
+    .signup-popup-overlay.open { display: block; }
+    .signup-popup { background: var(--white); max-width: 560px; width: 100%; border-radius: 4px; position: relative; animation: modalIn 0.3s ease; box-shadow: 0 24px 80px rgba(0,0,0,0.35); margin: 0 auto; margin-top: max(20px, 5vh); margin-bottom: 20px; }
+    .signup-popup-header { background: var(--green-deep); padding: 28px 64px 24px 28px; position: relative; border-radius: 4px 4px 0 0; }
+    .signup-popup-header .popup-eyebrow { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; display: block; }
+    .signup-popup-header h3 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 24px; color: var(--white); margin-bottom: 8px; line-height: 1.2; }
     .signup-popup-header p { font-family: 'Nunito Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.55; }
-    .signup-popup-close { position: absolute; top: 14px; right: 16px; background: rgba(255,255,255,0.12); border: none; color: rgba(255,255,255,0.7); width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-    .signup-popup-close:hover { background: rgba(255,255,255,0.22); color: #fff; }
-    .signup-popup-body { padding: 28px 36px 32px; }
-    .signup-popup-dismiss { display: block; text-align: center; margin-top: 14px; font-family: 'Nunito Sans', sans-serif; font-size: 11px; color: var(--grey-light); cursor: pointer; background: none; border: none; width: 100%; padding: 4px; transition: color 0.2s; }
-    .signup-popup-dismiss:hover { color: var(--grey-nav); }
-    @media (max-width: 560px) { .signup-popup-header { padding: 24px 56px 20px 20px; } .signup-popup-body { padding: 20px 20px 24px; } }
+    .signup-popup-close { position: absolute; top: 12px; right: 14px; background: rgba(255,255,255,0.15); border: none; color: rgba(255,255,255,0.8); width: 34px; height: 34px; border-radius: 50%; font-size: 22px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+    .signup-popup-close:hover, .signup-popup-close:active { background: rgba(255,255,255,0.28); color: #fff; }
+    .signup-popup-body { padding: 24px 28px 28px; }
+    .signup-popup-dismiss { display: block; text-align: center; margin-top: 14px; font-family: 'Nunito Sans', sans-serif; font-size: 11px; color: var(--grey-light); cursor: pointer; background: none; border: none; width: 100%; padding: 8px 4px; transition: color 0.2s; -webkit-tap-highlight-color: transparent; }
+    .signup-popup-dismiss:hover, .signup-popup-dismiss:active { color: var(--grey-nav); }
+    @media (max-width: 480px) {
+      .signup-popup-overlay { padding: 12px; }
+      .signup-popup { margin-top: 12px; }
+      .signup-popup-header { padding: 22px 52px 20px 18px; }
+      .signup-popup-header h3 { font-size: 21px; }
+      .signup-popup-body { padding: 18px 18px 22px; }
+      .signup-popup .signup-row { grid-template-columns: 1fr; }
+    }
 
     /* ANIMATIONS */
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
