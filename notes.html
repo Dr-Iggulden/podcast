@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en-AU">
 <head>
+  <!-- SW registered immediately for offline support -->
+  <script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js",{scope:"/"}).catch(function(){});}</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Notes — The Precision Health Podcast</title>
@@ -184,6 +186,12 @@
     .mobile-sidebar-toggle { display: none; background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 20px; padding: 4px; align-items: center; }
     @media (max-width: 640px) { .mobile-sidebar-toggle { display: flex; } }
   </style>
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- html2canvas for PDF rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- docx.js for Word export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
 </head>
 <body>
 
@@ -278,6 +286,14 @@
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                 HTML <span class="export-desc">Formatted, with highlights</span>
               </div>
+              <div class="export-item" data-fmt="pdf">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+                PDF <span class="export-desc">Formatted document</span>
+              </div>
+              <div class="export-item" data-fmt="docx">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 12l2 4 2-4 2 4"/></svg>
+                Word (DOCX) <span class="export-desc">Microsoft Word document</span>
+              </div>
               <div class="export-item" data-fmt="txt">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
                 TXT <span class="export-desc">Plain text</span>
@@ -290,9 +306,29 @@
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h16"/></svg>
                 Markdown <span class="export-desc">.md file</span>
               </div>
+              <div class="export-item" data-fmt="pdf">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+                PDF <span class="export-desc">Print-ready document</span>
+              </div>
+              <div class="export-item" data-fmt="docx">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 12l1.5 4L12 12l1.5 4L15 12"/></svg>
+                Word (DOCX) <span class="export-desc">Microsoft Word document</span>
+              </div>
               <div class="export-item" data-fmt="json">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/></svg>
                 JSON Backup <span class="export-desc">All notes, re-importable</span>
+              </div>
+              <div class="export-sep"></div>
+              <div class="export-menu-title">Share</div>
+              <div class="export-item" id="share-native-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share Note
+                <span class="export-desc">Via email, messages, apps</span>
+              </div>
+              <div class="export-item" id="share-copy-link-item">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                Copy as Text
+                <span class="export-desc">Copy note to clipboard</span>
               </div>
               <div class="export-sep"></div>
               <div class="export-menu-title">Sync</div>
@@ -792,6 +828,51 @@ document.getElementById('export-menu').querySelectorAll('.export-item[data-fmt]'
     if (fmt) exportNote(fmt);
   });
 });
+/* ── Share handlers ── */
+document.getElementById('share-native-item').addEventListener('click', function(){
+  exportMenu.classList.remove('open');
+  var note = getNote(); if (!note) return;
+  var bodyText = (note.bodyHtml||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+  var shareTitle = note.title || 'Precision Health Podcast Note';
+  var shareText  = (note.title ? note.title + '\n' + '='.repeat(note.title.length) + '\n\n' : '')
+    + (note.episodeTitle ? 'Episode: ' + note.episodeTitle + '\n\n' : '')
+    + bodyText.substring(0, 1000) + (bodyText.length > 1000 ? '...' : '')
+    + '\n\n— The Precision Health Podcast\nprecisionnaturalmedicine.com.au';
+
+  if (navigator.share) {
+    navigator.share({
+      title: shareTitle,
+      text: shareText,
+      url: 'https://podcast.precisionnaturalmedicine.com.au/'
+    }).catch(function(e){
+      // User cancelled or share failed — silently ignore
+      if (e.name !== 'AbortError') showBanner('Share failed: ' + e.message, true);
+    });
+  } else {
+    // Fallback — copy to clipboard
+    navigator.clipboard.writeText(shareText).then(function(){
+      showBanner('\u2713 Note copied to clipboard — paste into any app to share');
+    }).catch(function(){
+      showBanner('Share not supported on this browser', true);
+    });
+  }
+});
+
+document.getElementById('share-copy-link-item').addEventListener('click', function(){
+  exportMenu.classList.remove('open');
+  var note = getNote(); if (!note) return;
+  var bodyText = (note.bodyHtml||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+  var fullText = (note.title ? note.title + '\n' + '='.repeat(Math.min(note.title.length,40)) + '\n\n' : '')
+    + (note.episodeTitle ? 'Episode: ' + note.episodeTitle + '\n\n' : '')
+    + bodyText
+    + '\n\n---\nThe Precision Health Podcast — precisionnaturalmedicine.com.au';
+  navigator.clipboard.writeText(fullText).then(function(){
+    showBanner('\u2713 Note copied to clipboard');
+  }).catch(function(){
+    showBanner('Clipboard access denied', true);
+  });
+});
+
 document.getElementById('import-item').addEventListener('click', function(){
   exportMenu.classList.remove('open');
   document.getElementById('import-file-input').click();
@@ -888,12 +969,152 @@ function exportNote(fmt) {
     downloadBlob(JSON.stringify(notes, null, 2), 'precision-health-notes-backup.json', 'application/json');
     showBanner('\u2713 All ' + notes.length + ' notes exported as backup');
     return;
+
+  } else if (fmt === 'pdf') {
+    exportPDF(note, slug);
+    return;
+
+  } else if (fmt === 'docx') {
+    exportDOCX(note, slug);
+    return;
   }
   showBanner('\u2713 Exported as ' + fmt.toUpperCase());
 }
 
+/* ── PDF export using jsPDF + html2canvas ── */
+function exportPDF(note, slug) {
+  var bodyHtml = note.bodyHtml || '<p>' + escHtml(note.body||'') + '</p>';
+
+  // Build a hidden render container with full styles
+  var container = document.createElement('div');
+  container.style.cssText = [
+    'position:fixed','left:-9999px','top:0',
+    'width:680px','padding:48px 56px',
+    'background:#ffffff','font-family:Georgia,serif',
+    'font-size:14px','line-height:1.8','color:#222'
+  ].join(';');
+
+  container.innerHTML =
+    '<h1 style="font-family:Georgia,serif;font-size:26px;color:#2C4A35;margin:0 0 6px;">'
+    + escHtml(note.title||'Untitled') + '</h1>'
+    + '<p style="font-size:12px;color:#888;margin:0 0 24px;padding-bottom:12px;border-bottom:1px solid #eee;">'
+    + (note.episodeTitle ? 'Episode: ' + escHtml(note.episodeTitle) + '  |  ' : '')
+    + new Date(note.updatedAt||Date.now()).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})
+    + '</p>'
+    + bodyHtml
+    + '<p style="margin-top:40px;padding-top:12px;border-top:1px solid #eee;color:#aaa;font-size:11px;">'
+    + 'The Precision Health Podcast — precisionnaturalmedicine.com.au</p>';
+
+  document.body.appendChild(container);
+  showBanner('Generating PDF...');
+
+  // Use html2canvas to render, then jsPDF to save
+  var h2c = window.html2canvas || window.Html2Canvas;
+  var jsPDFLib = window.jspdf ? window.jspdf.jsPDF : (window.jsPDF);
+  if (!h2c || !jsPDFLib) {
+    document.body.removeChild(container);
+    // Fallback: use print dialog
+    var win = window.open('', '_blank');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + escHtml(note.title||'Note') + '</title>'
+      + '<style>body{font-family:Georgia,serif;max-width:680px;margin:48px auto;line-height:1.8;color:#222;}'
+      + 'h1{color:#2C4A35;}mark{border-radius:2px;padding:0 2px;}'
+      + '@media print{body{margin:24px;}.noprint{display:none;}}</style></head><body>'
+      + container.innerHTML + '</body></html>');
+    win.document.close();
+    setTimeout(function(){ win.print(); }, 400);
+    showBanner('\u2713 Print dialog opened — save as PDF');
+    return;
+  }
+
+  h2c(container, { scale: 1.5, useCORS: true, allowTaint: true })
+    .then(function(canvas) {
+      document.body.removeChild(container);
+      var imgData = canvas.toDataURL('image/png');
+      var pdf = new jsPDFLib({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      var pdfW = pdf.internal.pageSize.getWidth();
+      var pdfH = (canvas.height * pdfW) / canvas.width;
+      var pageH = pdf.internal.pageSize.getHeight();
+      var y = 0;
+      // Multi-page support
+      while (y < pdfH) {
+        if (y > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, -y, pdfW, pdfH);
+        y += pageH;
+      }
+      pdf.save(slug + '.pdf');
+      showBanner('\u2713 PDF saved');
+    })
+    .catch(function() {
+      if (container.parentNode) document.body.removeChild(container);
+      showBanner('PDF generation failed — try HTML export instead', true);
+    });
+}
+
+/* ── DOCX export using docx.js ── */
+function exportDOCX(note, slug) {
+  var docxLib = window.docx;
+  if (!docxLib) {
+    showBanner('Word export library not loaded yet — try again in a moment', true);
+    return;
+  }
+  var bodyHtml = note.bodyHtml || note.body || '';
+  var bodyText = bodyHtml.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+
+  // Parse HTML into docx paragraphs
+  var paragraphs = [];
+
+  // Title
+  paragraphs.push(new docxLib.Paragraph({
+    text: note.title || 'Untitled',
+    heading: docxLib.HeadingLevel.HEADING_1,
+    spacing: { after: 200 }
+  }));
+
+  // Meta line
+  if (note.episodeTitle || note.updatedAt) {
+    var metaParts = [];
+    if (note.episodeTitle) metaParts.push('Episode: ' + note.episodeTitle);
+    if (note.updatedAt) metaParts.push(new Date(note.updatedAt).toLocaleDateString('en-AU'));
+    paragraphs.push(new docxLib.Paragraph({
+      children: [new docxLib.TextRun({ text: metaParts.join('  |  '), color: '888888', size: 20 })],
+      border: { bottom: { style: docxLib.BorderStyle.SINGLE, size: 6, color: 'EEEEEE' } },
+      spacing: { after: 300 }
+    }));
+  }
+
+  // Body — split into paragraphs on <p> and newlines
+  var lines = bodyText.split(/\n+/).filter(function(l){ return l.trim(); });
+  lines.forEach(function(line) {
+    paragraphs.push(new docxLib.Paragraph({
+      children: [new docxLib.TextRun({ text: line.trim(), size: 24 })],
+      spacing: { after: 160 }
+    }));
+  });
+
+  // Footer
+  paragraphs.push(new docxLib.Paragraph({
+    children: [new docxLib.TextRun({ text: 'The Precision Health Podcast — precisionnaturalmedicine.com.au', color: 'AAAAAA', size: 18 })],
+    border: { top: { style: docxLib.BorderStyle.SINGLE, size: 6, color: 'EEEEEE' } },
+    spacing: { before: 400 }
+  }));
+
+  var doc = new docxLib.Document({
+    creator: 'The Precision Health Podcast',
+    title: note.title || 'Note',
+    sections: [{ properties: {}, children: paragraphs }]
+  });
+
+  docxLib.Packer.toBlob(doc).then(function(blob) {
+    downloadBlob(blob, slug + '.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    showBanner('\u2713 Word document saved');
+  }).catch(function(e) {
+    showBanner('Word export failed: ' + e.message, true);
+  });
+}
+
 function downloadBlob(content, filename, mimeType) {
-  var blob = new Blob([content], { type: mimeType });
+  // Accept either a Blob (from docx.js) or string content
+  var blob = (content instanceof Blob) ? content : new Blob([content], { type: mimeType });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = filename;
