@@ -1,0 +1,62 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "Image",
+      "url": "${image}",
+      "size": "Large",
+      "horizontalAlignment": "Center",
+      "style": "RoundedCorners"
+    },
+    {
+      "type": "TextBlock",
+      "text": "LATEST EPISODE",
+      "size": "Small",
+      "color": "Warning",
+      "weight": "Bolder",
+      "horizontalAlignment": "Center",
+      "spacing": "Small"
+    },
+    {
+      "type": "TextBlock",
+      "text": "${title}",
+      "wrap": true,
+      "maxLines": 2,
+      "weight": "Bolder",
+      "horizontalAlignment": "Center",
+      "size": "Medium"
+    },
+    {
+      "type": "TextBlock",
+      "text": "${pubDate}",
+      "size": "Small",
+      "isSubtle": true,
+      "horizontalAlignment": "Center",
+      "spacing": "None"
+    },
+    {
+      "type": "TextBlock",
+      "text": "${description}",
+      "wrap": true,
+      "maxLines": 3,
+      "size": "Small",
+      "isSubtle": true,
+      "spacing": "Small"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Execute",
+      "title": "▶ Play Episode",
+      "verb": "play-episode",
+      "data": { "tag": "latest-episode", "slug": "${slug}" }
+    },
+    {
+      "type": "Action.OpenUrl",
+      "title": "All Episodes",
+      "url": "https://podcast.precisionnaturalmedicine.com.au/"
+    }
+  ]
+}
