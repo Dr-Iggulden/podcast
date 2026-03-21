@@ -12,34 +12,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,600;0,6..12,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cormorant+SC:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --green-deep:  #2C4A35;
-      --green-mid:   #2e674e;
-      --gold:        #B19443;
-      --gold-light:  #c9ab5a;
-      --cream:       #f7f4ee;
-      --cream-dark:  #ede9df;
-      --grey-nav:    #777777;
-      --grey-light:  #aaaaaa;
-      --white:       #ffffff;
-      --text-body:   #2e3d2f;
-      --danger:      #c0394a;
+      --green-deep: #2C4A35; --green-mid: #2e674e;
+      --gold: #B19443; --gold-light: #c9ab5a;
+      --cream: #f7f4ee; --cream-dark: #ede9df;
+      --grey-nav: #777777; --grey-light: #aaaaaa;
+      --white: #ffffff; --text-body: #2e3d2f;
+      --danger: #c0394a;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body { font-family: 'Nunito Sans', sans-serif; background: var(--cream); color: var(--text-body); display: flex; flex-direction: column; }
 
     /* ── Header ── */
-    .notes-header {
-      background: var(--green-deep);
-      padding: 16px 24px;
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      position: sticky; top: 0; z-index: 100;
-    }
+    .notes-header { background: var(--green-deep); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
     .notes-header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .notes-back { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 20px; padding: 4px; display: flex; align-items: center; flex-shrink: 0; }
+    .notes-back { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 20px; padding: 4px; display: flex; align-items: center; flex-shrink: 0; text-decoration: none; }
     .notes-back:hover { color: var(--white); }
-    .notes-header-title { font-family: 'Cormorant SC', serif; font-size: 13px; letter-spacing: 0.25em; color: var(--gold); white-space: nowrap; }
-    .notes-header-sub { font-family: 'Nunito Sans', sans-serif; font-size: 11px; color: rgba(255,255,255,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .notes-header-title { font-family: 'Cormorant SC', serif; font-size: 13px; letter-spacing: 0.25em; color: var(--gold); }
+    .notes-header-sub { font-family: 'Nunito Sans', sans-serif; font-size: 11px; color: rgba(255,255,255,0.5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .notes-new-btn { background: var(--gold); color: var(--green-deep); border: none; border-radius: 2px; padding: 8px 16px; font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; flex-shrink: 0; transition: background 0.2s; white-space: nowrap; }
     .notes-new-btn:hover { background: var(--gold-light); }
 
@@ -47,60 +37,119 @@
     .notes-layout { flex: 1; display: flex; overflow: hidden; }
     .notes-sidebar { width: 280px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--cream-dark); display: flex; flex-direction: column; overflow: hidden; }
     .notes-sidebar-search { padding: 12px 16px; border-bottom: 1px solid var(--cream-dark); position: relative; }
+    .notes-sidebar-search svg { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: var(--grey-light); pointer-events: none; width: 14px; height: 14px; }
     .notes-sidebar-search input { width: 100%; padding: 8px 12px 8px 32px; background: var(--cream); border: 1.5px solid var(--cream-dark); border-radius: 2px; font-family: 'Nunito Sans', sans-serif; font-size: 13px; outline: none; }
     .notes-sidebar-search input:focus { border-color: var(--green-mid); }
-    .notes-sidebar-search svg { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: var(--grey-light); pointer-events: none; }
     .notes-list { flex: 1; overflow-y: auto; }
     .note-item { padding: 14px 16px; border-bottom: 1px solid var(--cream-dark); cursor: pointer; transition: background 0.15s; }
     .note-item:hover { background: var(--cream); }
     .note-item.active { background: rgba(44,74,53,0.06); border-left: 3px solid var(--gold); padding-left: 13px; }
     .note-item-episode { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.2em; color: var(--gold); margin-bottom: 4px; }
-    .note-item-title { font-family: 'Nunito Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--green-deep); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .note-item-preview { font-family: 'Nunito Sans', sans-serif; font-size: 12px; color: var(--grey-nav); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .note-item-date { font-family: 'Nunito Sans', sans-serif; font-size: 10px; color: var(--grey-light); margin-top: 4px; }
+    .note-item-title { font-size: 13px; font-weight: 600; color: var(--green-deep); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-item-preview { font-size: 12px; color: var(--grey-nav); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-item-date { font-size: 10px; color: var(--grey-light); margin-top: 4px; }
     .notes-empty { padding: 40px 20px; text-align: center; color: var(--grey-light); font-family: 'Cormorant SC', serif; font-size: 11px; letter-spacing: 0.15em; line-height: 2; }
 
-    /* ── Editor ── */
-    .notes-editor { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .notes-editor-toolbar { padding: 12px 20px; border-bottom: 1px solid var(--cream-dark); background: var(--white); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .notes-editor-toolbar button { background: none; border: 1.5px solid var(--cream-dark); border-radius: 2px; padding: 4px 10px; font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 700; color: var(--grey-nav); cursor: pointer; transition: all 0.15s; }
-    .notes-editor-toolbar button:hover { border-color: var(--gold); color: var(--green-deep); }
-    .notes-editor-toolbar .toolbar-sep { width: 1px; height: 20px; background: var(--cream-dark); margin: 0 4px; }
-    .notes-editor-toolbar .toolbar-right { margin-left: auto; display: flex; gap: 8px; }
-    .notes-editor-toolbar .delete-btn { color: var(--danger); border-color: rgba(192,57,74,0.25); }
-    .notes-editor-toolbar .delete-btn:hover { background: rgba(192,57,74,0.06); border-color: var(--danger); }
-    .notes-editor-toolbar .save-indicator { font-size: 10px; color: var(--grey-light); font-weight: 400; letter-spacing: 0.05em; }
-    .notes-editor-toolbar .save-indicator.saved { color: #4caf7a; }
+    /* ── Toolbar ── */
+    .notes-editor { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .notes-editor-toolbar {
+      padding: 8px 16px; border-bottom: 1px solid var(--cream-dark);
+      background: var(--white); display: flex; align-items: center;
+      gap: 4px; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; flex-shrink: 0;
+    }
+    .tb-btn { background: none; border: 1.5px solid var(--cream-dark); border-radius: 2px; padding: 4px 10px; font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 700; color: var(--grey-nav); cursor: pointer; transition: all 0.15s; white-space: nowrap; user-select: none; }
+    .tb-btn:hover { border-color: var(--gold); color: var(--green-deep); }
+    .tb-btn.active { background: var(--green-deep); color: var(--white); border-color: var(--green-deep); }
+    .tb-sep { width: 1px; height: 20px; background: var(--cream-dark); margin: 0 4px; flex-shrink: 0; }
+    .tb-right { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+    .save-indicator { font-size: 10px; color: var(--grey-light); font-weight: 400; letter-spacing: 0.05em; }
+    .save-indicator.saved { color: #4caf7a; }
+    .delete-btn { color: var(--danger) !important; border-color: rgba(192,57,74,0.25) !important; }
+    .delete-btn:hover { background: rgba(192,57,74,0.06) !important; border-color: var(--danger) !important; }
 
-    .notes-editor-meta { padding: 16px 20px 0; background: var(--white); }
-    .notes-editor-meta input.note-title-input { width: 100%; font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; color: var(--green-deep); border: none; outline: none; background: transparent; margin-bottom: 4px; }
-    .notes-editor-meta input.note-title-input::placeholder { color: var(--grey-light); }
-    .notes-episode-tag { display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--cream-dark); }
+    /* ── Highlight button + palette ── */
+    .hl-wrap { position: relative; display: flex; align-items: center; gap: 0; }
+    .hl-active-swatch { width: 14px; height: 14px; border-radius: 2px; background: #FFE066; border: 1.5px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: pointer; }
+    .hl-btn { border-radius: 2px 0 0 2px !important; border-right: none !important; }
+    .hl-arrow { border-radius: 0 2px 2px 0 !important; border-left: 1px solid var(--cream-dark) !important; padding: 4px 6px !important; font-size: 9px; }
+    .hl-palette {
+      display: none; position: absolute; top: calc(100% + 6px); left: 0;
+      background: var(--white); border: 1px solid var(--cream-dark); border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12); padding: 12px; z-index: 500;
+      width: 280px;
+    }
+    .hl-palette.open { display: block; }
+    .hl-palette-title { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.25em; color: var(--gold); margin-bottom: 8px; }
+    .hl-swatches { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .hl-swatch {
+      width: 22px; height: 22px; border-radius: 3px; cursor: pointer;
+      border: 2px solid transparent; transition: transform 0.1s, border-color 0.1s;
+      flex-shrink: 0;
+    }
+    .hl-swatch:hover { transform: scale(1.18); border-color: rgba(0,0,0,0.2); }
+    .hl-swatch.selected { border-color: var(--green-deep); transform: scale(1.18); }
+    .hl-custom-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+    .hl-custom-row label { font-size: 11px; color: var(--grey-nav); white-space: nowrap; }
+    .hl-hex-input { font-family: 'Nunito Sans', sans-serif; font-size: 12px; border: 1.5px solid var(--cream-dark); border-radius: 2px; padding: 5px 8px; width: 90px; outline: none; background: var(--cream); }
+    .hl-hex-input:focus { border-color: var(--green-mid); }
+    .hl-color-picker { width: 30px; height: 30px; border: 1.5px solid var(--cream-dark); border-radius: 2px; padding: 0; cursor: pointer; background: none; }
+    .hl-add-btn { background: var(--green-deep); color: var(--white); border: none; border-radius: 2px; padding: 5px 10px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .hl-add-btn:hover { background: var(--green-mid); }
+    .hl-clear-btn { background: none; border: 1.5px solid var(--cream-dark); color: var(--grey-nav); border-radius: 2px; padding: 5px 10px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .hl-clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* ── Editor meta + body ── */
+    .notes-editor-meta { padding: 16px 20px 0; background: var(--white); flex-shrink: 0; }
+    .note-title-input { width: 100%; font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; color: var(--green-deep); border: none; outline: none; background: transparent; margin-bottom: 4px; }
+    .note-title-input::placeholder { color: var(--grey-light); }
+    .notes-episode-tag { display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--cream-dark); flex-wrap: wrap; }
     .notes-episode-tag select { font-family: 'Nunito Sans', sans-serif; font-size: 11px; color: var(--grey-nav); border: 1.5px solid var(--cream-dark); border-radius: 2px; padding: 4px 8px; background: var(--cream); outline: none; cursor: pointer; }
-    .notes-episode-tag select:focus { border-color: var(--green-mid); }
     .notes-episode-label { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.2em; color: var(--gold); }
+    .notes-content-area { flex: 1; overflow-y: auto; background: var(--white); padding: 16px 20px; }
 
-    .notes-content-area { flex: 1; overflow-y: auto; padding: 16px 20px; background: var(--white); }
-    textarea.note-body { width: 100%; height: 100%; min-height: 400px; font-family: 'Nunito Sans', sans-serif; font-size: 14px; line-height: 1.8; color: var(--text-body); border: none; outline: none; resize: none; background: transparent; }
-    textarea.note-body::placeholder { color: var(--grey-light); }
+    /* ── contenteditable body ── */
+    .note-body {
+      min-height: 400px; outline: none;
+      font-family: 'Nunito Sans', sans-serif; font-size: 14px;
+      line-height: 1.85; color: var(--text-body);
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .note-body:empty::before { content: attr(data-placeholder); color: var(--grey-light); pointer-events: none; }
+    .note-body h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--green-deep); margin: 16px 0 6px; }
+    .note-body ul { padding-left: 20px; }
+    .note-body ol { padding-left: 20px; }
+    .note-body .timestamp-link { color: var(--gold); font-weight: 700; cursor: pointer; text-decoration: none; }
+    .note-body .timestamp-link:hover { text-decoration: underline; }
 
-    /* ── Empty state ── */
+    /* ── Context menu ── */
+    .ctx-menu {
+      position: fixed; background: var(--white); border: 1px solid var(--cream-dark);
+      border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.14);
+      padding: 4px 0; z-index: 900; min-width: 180px; display: none;
+      font-family: 'Nunito Sans', sans-serif; font-size: 13px;
+    }
+    .ctx-menu.open { display: block; }
+    .ctx-item { padding: 8px 16px; cursor: pointer; color: var(--text-body); display: flex; align-items: center; gap: 8px; transition: background 0.1s; }
+    .ctx-item:hover { background: var(--cream); color: var(--green-deep); }
+    .ctx-item svg { flex-shrink: 0; color: var(--grey-nav); }
+    .ctx-sep { height: 1px; background: var(--cream-dark); margin: 4px 0; }
+    .ctx-hl-row { padding: 6px 12px; display: flex; gap: 5px; flex-wrap: wrap; }
+    .ctx-hl-swatch { width: 18px; height: 18px; border-radius: 2px; cursor: pointer; border: 1.5px solid transparent; transition: transform 0.1s; }
+    .ctx-hl-swatch:hover { transform: scale(1.2); border-color: rgba(0,0,0,0.2); }
+
+    /* ── Welcome screen ── */
     .notes-welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
     .notes-welcome h2 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: var(--green-deep); margin-bottom: 12px; }
     .notes-welcome p { font-family: 'Nunito Sans', sans-serif; font-size: 14px; color: var(--grey-nav); line-height: 1.7; max-width: 320px; margin-bottom: 24px; }
-    .notes-welcome-btn { background: var(--green-deep); color: var(--white); border: none; border-radius: 2px; padding: 12px 24px; font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+    .notes-welcome-btn { background: var(--green-deep); color: var(--white); border: none; border-radius: 2px; padding: 12px 24px; font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; gap: 8px; }
     .notes-welcome-btn:hover { background: var(--green-mid); }
 
-    /* ── Mobile ── */
     @media (max-width: 640px) {
       .notes-sidebar { width: 100%; position: fixed; top: 57px; left: 0; right: 0; bottom: 0; z-index: 50; transform: translateX(-100%); transition: transform 0.3s ease; }
       .notes-sidebar.open { transform: translateX(0); }
-      .notes-editor { width: 100%; }
-      .notes-layout { position: relative; }
-      .mobile-sidebar-toggle { display: flex; }
     }
     .mobile-sidebar-toggle { display: none; background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 20px; padding: 4px; align-items: center; }
-    .mobile-sidebar-toggle:hover { color: var(--white); }
+    @media (max-width: 640px) { .mobile-sidebar-toggle { display: flex; } }
   </style>
 </head>
 <body>
@@ -108,7 +157,7 @@
 <header class="notes-header">
   <div class="notes-header-left">
     <a href="/" class="notes-back" title="Back to podcast">&#8592;</a>
-    <button class="mobile-sidebar-toggle" id="sidebar-toggle" title="My notes">&#9776;</button>
+    <button class="mobile-sidebar-toggle" id="sidebar-toggle">&#9776;</button>
     <div>
       <div class="notes-header-title">My Notes</div>
       <div class="notes-header-sub" id="header-sub">The Precision Health Podcast</div>
@@ -120,37 +169,79 @@
 <div class="notes-layout">
   <aside class="notes-sidebar" id="notes-sidebar">
     <div class="notes-sidebar-search">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="search" id="notes-search" placeholder="Search notes..." autocomplete="off" />
     </div>
     <div class="notes-list" id="notes-list"></div>
   </aside>
 
   <div class="notes-editor" id="notes-editor">
+
+    <!-- Welcome screen -->
     <div class="notes-welcome" id="notes-welcome">
       <h2>Your Episode Notes</h2>
-      <p>Take notes as you listen. Tag each note to an episode, search your library, and never lose a clinical insight again.</p>
+      <p>Take notes as you listen. Highlight key insights, tag each note to an episode, and never lose a clinical finding again.</p>
       <button class="notes-welcome-btn" id="welcome-new-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;vertical-align:middle;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Create Your First Note
       </button>
     </div>
 
+    <!-- Active editor -->
     <div id="editor-active" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-      <div class="notes-editor-toolbar">
-        <button onclick="formatText('bold')"><strong>B</strong></button>
-        <button onclick="formatText('italic')"><em>I</em></button>
-        <button onclick="formatText('heading')">H</button>
-        <button onclick="formatText('bullet')">&#8226; List</button>
-        <button onclick="formatText('numbered')">1. List</button>
-        <div class="toolbar-sep"></div>
-        <button onclick="formatText('timestamp')" title="Insert current playback time">&#9201; Timestamp</button>
-        <div class="toolbar-right">
+
+      <!-- Toolbar -->
+      <div class="notes-editor-toolbar" id="toolbar">
+
+        <!-- Format buttons -->
+        <button class="tb-btn" id="tb-bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
+        <button class="tb-btn" id="tb-italic" title="Italic (Ctrl+I)"><em>I</em></button>
+        <button class="tb-btn" id="tb-underline" title="Underline (Ctrl+U)"><u>U</u></button>
+        <button class="tb-btn" id="tb-heading" title="Heading">H</button>
+        <button class="tb-btn" id="tb-bullet" title="Bullet list">&#8226; List</button>
+        <button class="tb-btn" id="tb-numbered" title="Numbered list">1. List</button>
+
+        <div class="tb-sep"></div>
+
+        <!-- Highlight -->
+        <div class="hl-wrap" id="hl-wrap">
+          <button class="tb-btn hl-btn" id="tb-highlight" title="Highlight selected text">
+            <span style="display:inline-flex;align-items:center;gap:5px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Highlight
+            </span>
+          </button>
+          <button class="tb-btn hl-arrow" id="hl-arrow" title="Choose highlight colour">&#9660;</button>
+          <!-- colour swatch next to button -->
+          <div class="hl-active-swatch" id="hl-active-swatch" style="margin-left:3px;" title="Current highlight colour"></div>
+
+          <!-- Palette popover -->
+          <div class="hl-palette" id="hl-palette">
+            <div class="hl-palette-title">Highlight Colour</div>
+            <div class="hl-swatches" id="hl-swatches"></div>
+            <div class="tb-sep" style="margin:8px 0;"></div>
+            <div class="hl-palette-title">Custom Colour</div>
+            <div class="hl-custom-row">
+              <label>Hex</label>
+              <input type="text" class="hl-hex-input" id="hl-hex-input" placeholder="#FFE066" maxlength="7" />
+              <input type="color" class="hl-color-picker" id="hl-color-picker" value="#FFE066" title="Colour wheel" />
+              <button class="hl-add-btn" id="hl-add-btn">Add</button>
+              <button class="hl-clear-btn" id="hl-clear-btn">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tb-sep"></div>
+        <button class="tb-btn" id="tb-timestamp" title="Insert current playback time">&#9201; Timestamp</button>
+
+        <div class="tb-right">
           <span class="save-indicator" id="save-indicator">All changes saved</span>
-          <button onclick="exportNote()">Export</button>
-          <button class="delete-btn" onclick="deleteCurrentNote()">Delete</button>
+          <button class="tb-btn" id="tb-export">Export</button>
+          <button class="tb-btn delete-btn" id="tb-delete">Delete</button>
         </div>
       </div>
+
+      <!-- Meta -->
       <div class="notes-editor-meta">
         <input type="text" class="note-title-input" id="note-title" placeholder="Note title..." autocomplete="off" />
         <div class="notes-episode-tag">
@@ -160,21 +251,80 @@
           </select>
         </div>
       </div>
+
+      <!-- Body -->
       <div class="notes-content-area">
-        <textarea class="note-body" id="note-body" placeholder="Start typing your notes here...&#10;&#10;Use the toolbar above to format, or just write freely.&#10;&#10;Tip: click the &#9201; Timestamp button to insert the current playback time from the podcast player."></textarea>
+        <div
+          class="note-body"
+          id="note-body"
+          contenteditable="true"
+          data-placeholder="Start typing your notes here...&#10;&#10;Select any text and right-click to highlight, copy, or add to a new note."
+          spellcheck="true"
+        ></div>
       </div>
+
     </div>
   </div>
 </div>
 
+<!-- Context menu -->
+<div class="ctx-menu" id="ctx-menu">
+  <div class="ctx-item" id="ctx-copy">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+    Copy
+  </div>
+  <div class="ctx-item" id="ctx-new-note">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    Add to New Note
+  </div>
+  <div class="ctx-sep"></div>
+  <div style="padding:4px 12px 2px; font-family:'Cormorant SC',serif; font-size:9px; letter-spacing:0.2em; color:var(--gold);">Highlight</div>
+  <div class="ctx-hl-row" id="ctx-hl-row"></div>
+  <div class="ctx-item" id="ctx-clear-hl" style="color:var(--grey-nav);font-size:12px;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+    Remove Highlight
+  </div>
+</div>
+
+<!-- FAB -->
+<button id="fab-new-note" aria-label="New note" title="New note" style="position:fixed;bottom:24px;right:24px;z-index:200;width:52px;height:52px;border-radius:50%;background:var(--green-deep);color:var(--white);border:none;cursor:pointer;box-shadow:0 4px 16px rgba(44,74,53,0.4);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:300;transition:background 0.2s,transform 0.15s;-webkit-tap-highlight-color:transparent;">+</button>
+
 <script>
-/* ── Notes App ── */
-var NOTES_KEY    = 'pnm_notes';
-var EPISODES_KEY = 'pnm_notes_episodes';
-var notes        = [];
-var currentId    = null;
-var saveTimer    = null;
-var episodes     = [];
+/* ═══════════════════════════════════════════════════════
+   NOTES APP — contenteditable with full highlight support
+   ═══════════════════════════════════════════════════════ */
+
+var NOTES_KEY = 'pnm_notes';
+var notes     = [];
+var currentId = null;
+var saveTimer = null;
+var episodes  = [];
+
+/* ── Default highlight palette (45 colours) ── */
+var DEFAULT_COLOURS = [
+  // Yellows / ambers
+  '#FFE066','#FFD700','#FFC200','#FFB347','#FFA500',
+  // Greens
+  '#CCFF90','#B9F6CA','#69F0AE','#A5D6A7','#C8E6C9',
+  // Blues
+  '#B3E5FC','#81D4FA','#B0BEC5','#90CAF9','#BBDEFB',
+  // Purples / pinks
+  '#E1BEE7','#CE93D8','#F8BBD9','#F48FB1','#FCE4EC',
+  // Reds / oranges
+  '#FFCCBC','#FFAB91','#FF8A65','#FFCDD2','#EF9A9A',
+  // Teals / cyans
+  '#E0F7FA','#B2EBF2','#80DEEA','#A7FFEB','#CCFF90',
+  // Neutrals / warm
+  '#FFF9C4','#FFF8E1','#FFF3E0','#F3E5F5','#EDE7F6',
+  // Cool neutrals
+  '#ECEFF1','#CFD8DC','#F5F5F5','#FAFAFA','#FFFFFF',
+  // Botanical greens (branded)
+  '#D4EDDA','#C8F7C5','#A8E6CF','#DCEDC8','#F0F4C3',
+  // Gold tones (branded)
+  '#FFF9C4','#FFF59D','#FFF176','#FFEE58','#FFE082'
+];
+var customColours = [];
+var activeColour  = DEFAULT_COLOURS[0]; // #FFE066 yellow
 
 /* ── Storage ── */
 function loadNotes() {
@@ -183,128 +333,143 @@ function loadNotes() {
 function saveNotes() {
   try { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch(e) {}
 }
-function genId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 8); }
+function genId() { return Date.now() + '-' + Math.random().toString(36).slice(2,8); }
 
-/* ── Episode list (loaded from localStorage set by main app) ── */
+function loadCustomColours() {
+  try { customColours = JSON.parse(localStorage.getItem('pnm_hl_colours') || '[]'); } catch(e) { customColours = []; }
+}
+function saveCustomColours() {
+  try { localStorage.setItem('pnm_hl_colours', JSON.stringify(customColours)); } catch(e) {}
+}
+function loadActiveColour() {
+  activeColour = localStorage.getItem('pnm_hl_active') || DEFAULT_COLOURS[0];
+}
+function saveActiveColour(c) {
+  activeColour = c;
+  localStorage.setItem('pnm_hl_active', c);
+}
+
+/* ── Episodes ── */
 function loadEpisodes() {
   try {
     var raw = localStorage.getItem('pnm_notes_episodes');
-    if (raw) { episodes = JSON.parse(raw); return; }
+    if (raw) { episodes = JSON.parse(raw); populateEpisodeSelect(); return; }
   } catch(e) {}
-  // Fallback: fetch RSS feed and parse titles
   fetch('https://media.rss.com/sacredherbology/feed.xml')
-    .then(function(r) { return r.text(); })
-    .then(function(text) {
-      var matches = text.match(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>|<title>([^<]+)<\/title>/g) || [];
-      episodes = matches.slice(1).map(function(m, i) {
-        var title = m.replace(/<\/?title>|<!\[CDATA\[|\]\]>/g, '').trim();
-        return { num: matches.length - 1 - i, title: title };
-      });
+    .then(function(r){ return r.text(); })
+    .then(function(text){
+      var matches = Array.from(text.matchAll(/<title>(?:<!\[CDATA\[)?([^\]<]+)(?:\]\]>)?<\/title>/g));
+      episodes = matches.slice(1).map(function(m,i){ return { num: matches.length-1-i, title: m[1].trim() }; });
       populateEpisodeSelect();
-    }).catch(function() {});
+    }).catch(function(){});
 }
-
 function populateEpisodeSelect() {
   var sel = document.getElementById('note-episode-select');
   sel.innerHTML = '<option value="">— Not linked to an episode —</option>';
-  episodes.forEach(function(ep) {
-    var opt = document.createElement('option');
-    opt.value = ep.num;
-    opt.textContent = 'Ep ' + ep.num + ' — ' + ep.title.substring(0, 50);
-    sel.appendChild(opt);
+  episodes.forEach(function(ep){
+    var o = document.createElement('option');
+    o.value = ep.num; o.textContent = 'Ep ' + ep.num + ' — ' + ep.title.substring(0,50);
+    sel.appendChild(o);
   });
-  // Set current value
   if (currentId) {
-    var note = notes.find(function(n) { return n.id === currentId; });
+    var note = notes.find(function(n){ return n.id === currentId; });
     if (note) sel.value = note.episodeNum || '';
   }
 }
 
-/* ── Render notes list ── */
+/* ── Render note list ── */
 function renderNotesList(filter) {
   var list = document.getElementById('notes-list');
-  var filtered = filter
-    ? notes.filter(function(n) {
-        var q = filter.toLowerCase();
-        return (n.title + ' ' + n.body + ' ' + (n.episodeTitle || '')).toLowerCase().includes(q);
-      })
-    : notes.slice();
-  // Sort by updatedAt descending
-  filtered.sort(function(a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+  var filtered = notes.slice().filter(function(n){
+    if (!filter) return true;
+    var q = filter.toLowerCase();
+    var bodyText = n.bodyHtml ? n.bodyHtml.replace(/<[^>]+>/g,'') : (n.body||'');
+    return (n.title + ' ' + bodyText + ' ' + (n.episodeTitle||'')).toLowerCase().includes(q);
+  }).sort(function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); });
   if (!filtered.length) {
     list.innerHTML = '<div class="notes-empty">No notes yet.<br>Create your first one!</div>';
     return;
   }
-  list.innerHTML = filtered.map(function(n) {
-    var preview = (n.body || '').replace(/\n/g, ' ').substring(0, 60);
-    var date    = n.updatedAt ? new Date(n.updatedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-    var epLabel = n.episodeTitle ? 'Ep ' + n.episodeNum + ' — ' + n.episodeTitle.substring(0, 30) : 'Unlinked';
-    return '<div class="note-item' + (n.id === currentId ? ' active' : '') + '" data-id="' + n.id + '">' +
-      '<div class="note-item-episode">' + epLabel + '</div>' +
-      '<div class="note-item-title">' + (n.title || 'Untitled note') + '</div>' +
-      '<div class="note-item-preview">' + (preview || 'No content yet') + '</div>' +
-      '<div class="note-item-date">' + date + '</div>' +
-    '</div>';
+  list.innerHTML = filtered.map(function(n){
+    var bodyText = n.bodyHtml ? n.bodyHtml.replace(/<[^>]+>/g,'').substring(0,60) : (n.body||'').substring(0,60);
+    var date = n.updatedAt ? new Date(n.updatedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '';
+    var epLabel = n.episodeTitle ? 'Ep '+n.episodeNum+' — '+n.episodeTitle.substring(0,28) : 'Unlinked';
+    return '<div class="note-item'+(n.id===currentId?' active':'')+'" data-id="'+n.id+'">'
+      +'<div class="note-item-episode">'+epLabel+'</div>'
+      +'<div class="note-item-title">'+(n.title||'Untitled note')+'</div>'
+      +'<div class="note-item-preview">'+(bodyText||'No content yet')+'</div>'
+      +'<div class="note-item-date">'+date+'</div>'
+      +'</div>';
   }).join('');
-  list.querySelectorAll('.note-item').forEach(function(el) {
-    el.addEventListener('click', function() { openNote(el.getAttribute('data-id')); });
+  list.querySelectorAll('.note-item').forEach(function(el){
+    el.addEventListener('click', function(){ openNote(el.getAttribute('data-id')); });
   });
 }
 
-/* ── Open a note ── */
+/* ── Open note ── */
 function openNote(id) {
-  var note = notes.find(function(n) { return n.id === id; });
+  var note = notes.find(function(n){ return n.id===id; });
   if (!note) return;
   currentId = id;
   document.getElementById('notes-welcome').style.display = 'none';
   var editorActive = document.getElementById('editor-active');
   editorActive.style.display = 'flex';
   document.getElementById('note-title').value = note.title || '';
-  document.getElementById('note-body').value  = note.body  || '';
+  // Restore rich HTML content
+  var body = document.getElementById('note-body');
+  body.innerHTML = note.bodyHtml || note.body || '';
   document.getElementById('note-episode-select').value = note.episodeNum || '';
   document.getElementById('header-sub').textContent = note.episodeTitle || 'The Precision Health Podcast';
   renderNotesList(document.getElementById('notes-search').value);
-  // Close mobile sidebar
   document.getElementById('notes-sidebar').classList.remove('open');
+  updateToolbarState();
 }
 
-/* ── Create new note ── */
-function createNote(episodeNum, episodeTitle) {
+/* ── Create note ── */
+function createNote(episodeNum, episodeTitle, prefillHtml) {
   var note = {
-    id:           genId(),
-    title:        episodeTitle ? 'Notes — ' + episodeTitle.substring(0, 40) : '',
-    body:         '',
-    episodeNum:   episodeNum   || '',
-    episodeTitle: episodeTitle || '',
-    createdAt:    Date.now(),
-    updatedAt:    Date.now()
+    id: genId(),
+    title: episodeTitle ? 'Notes — '+episodeTitle.substring(0,40) : '',
+    body: '', bodyHtml: prefillHtml || '',
+    episodeNum: episodeNum||'', episodeTitle: episodeTitle||'',
+    createdAt: Date.now(), updatedAt: Date.now()
   };
   notes.unshift(note);
   saveNotes();
   renderNotesList();
   openNote(note.id);
-  setTimeout(function() {
-    var titleInput = document.getElementById('note-title');
-    titleInput.focus(); titleInput.select();
-  }, 50);
+  if (prefillHtml) {
+    // Already has content — place cursor at end
+    var body = document.getElementById('note-body');
+    var range = document.createRange(); var sel = window.getSelection();
+    range.selectNodeContents(body); range.collapse(false);
+    sel.removeAllRanges(); sel.addRange(range);
+  } else {
+    setTimeout(function(){
+      var ti = document.getElementById('note-title');
+      ti.focus(); ti.select();
+    }, 50);
+  }
 }
 
 /* ── Auto-save ── */
 function scheduleSave() {
   clearTimeout(saveTimer);
-  document.getElementById('save-indicator').textContent = 'Saving...';
-  document.getElementById('save-indicator').className = 'save-indicator';
-  saveTimer = setTimeout(function() { saveCurrentNote(); }, 600);
+  var ind = document.getElementById('save-indicator');
+  ind.textContent = 'Saving...'; ind.className = 'save-indicator';
+  saveTimer = setTimeout(saveCurrentNote, 700);
 }
 function saveCurrentNote() {
   if (!currentId) return;
-  var note = notes.find(function(n) { return n.id === currentId; });
+  var note = notes.find(function(n){ return n.id===currentId; });
   if (!note) return;
-  note.title        = document.getElementById('note-title').value.trim();
-  note.body         = document.getElementById('note-body').value;
-  var sel           = document.getElementById('note-episode-select');
+  note.title     = document.getElementById('note-title').value.trim();
+  var body       = document.getElementById('note-body');
+  note.bodyHtml  = body.innerHTML;
+  note.body      = body.innerText || body.textContent || '';
+  var sel        = document.getElementById('note-episode-select');
   note.episodeNum   = sel.value;
-  note.episodeTitle = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent.replace(/^Ep \d+ — /, '') : '';
+  note.episodeTitle = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent.replace(/^Ep \d+ — /,'') : '';
   note.updatedAt    = Date.now();
   saveNotes();
   renderNotesList(document.getElementById('notes-search').value);
@@ -313,129 +478,281 @@ function saveCurrentNote() {
   ind.textContent = 'All changes saved'; ind.className = 'save-indicator saved';
 }
 
-/* ── Delete ── */
-function deleteCurrentNote() {
+/* ── Format commands ── */
+function execFmt(cmd, val) {
+  document.getElementById('note-body').focus();
+  document.execCommand(cmd, false, val || null);
+  scheduleSave(); updateToolbarState();
+}
+function updateToolbarState() {
+  document.getElementById('tb-bold').classList.toggle('active', document.queryCommandState('bold'));
+  document.getElementById('tb-italic').classList.toggle('active', document.queryCommandState('italic'));
+  document.getElementById('tb-underline').classList.toggle('active', document.queryCommandState('underline'));
+}
+
+/* ── Highlight logic ── */
+function applyHighlight(colour) {
+  document.getElementById('note-body').focus();
+  document.execCommand('hiliteColor', false, colour);
+  scheduleSave();
+}
+function clearHighlight() {
+  document.getElementById('note-body').focus();
+  document.execCommand('hiliteColor', false, 'transparent');
+  document.execCommand('removeFormat', false, null);
+  scheduleSave();
+}
+
+/* ── Build swatch grid ── */
+function buildSwatches() {
+  buildPaletteSwatches();
+  buildCtxSwatches();
+}
+function buildPaletteSwatches() {
+  var container = document.getElementById('hl-swatches');
+  var allColours = DEFAULT_COLOURS.concat(customColours);
+  container.innerHTML = allColours.map(function(c){
+    return '<div class="hl-swatch'+(c===activeColour?' selected':'')+'" data-colour="'+c+'" style="background:'+c+';" title="'+c+'"></div>';
+  }).join('');
+  container.querySelectorAll('.hl-swatch').forEach(function(sw){
+    sw.addEventListener('click', function(){
+      selectColour(sw.getAttribute('data-colour'));
+      document.getElementById('hl-palette').classList.remove('open');
+    });
+  });
+  // Update active swatch display
+  document.getElementById('hl-active-swatch').style.background = activeColour;
+}
+function buildCtxSwatches() {
+  var container = document.getElementById('ctx-hl-row');
+  var quickColours = [DEFAULT_COLOURS[0],DEFAULT_COLOURS[5],DEFAULT_COLOURS[10],DEFAULT_COLOURS[15],DEFAULT_COLOURS[20]].concat(customColours.slice(0,3));
+  container.innerHTML = quickColours.map(function(c){
+    return '<div class="ctx-hl-swatch" data-colour="'+c+'" style="background:'+c+';" title="'+c+'"></div>';
+  }).join('');
+  container.querySelectorAll('.ctx-hl-swatch').forEach(function(sw){
+    sw.addEventListener('click', function(){
+      var colour = sw.getAttribute('data-colour');
+      selectColour(colour);
+      applyHighlight(colour);
+      hideCtxMenu();
+    });
+  });
+}
+function selectColour(c) {
+  saveActiveColour(c);
+  buildSwatches();
+}
+
+/* ── Palette UI ── */
+document.getElementById('hl-arrow').addEventListener('click', function(e){
+  e.stopPropagation();
+  var palette = document.getElementById('hl-palette');
+  palette.classList.toggle('open');
+});
+document.getElementById('tb-highlight').addEventListener('mousedown', function(e){
+  e.preventDefault(); // prevent focus loss
+  applyHighlight(activeColour);
+});
+
+// Hex input sync with colour picker
+var hlHex = document.getElementById('hl-hex-input');
+var hlPicker = document.getElementById('hl-color-picker');
+hlPicker.addEventListener('input', function(){ hlHex.value = hlPicker.value; });
+hlHex.addEventListener('input', function(){
+  var v = hlHex.value.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) hlPicker.value = v;
+});
+document.getElementById('hl-add-btn').addEventListener('click', function(){
+  var v = hlHex.value.trim() || hlPicker.value;
+  if (!/^#[0-9a-fA-F]{6}$/.test(v)) { v = hlPicker.value; }
+  if (!customColours.includes(v) && !DEFAULT_COLOURS.includes(v)) {
+    customColours.push(v); saveCustomColours();
+  }
+  selectColour(v);
+  document.getElementById('hl-palette').classList.remove('open');
+});
+document.getElementById('hl-clear-btn').addEventListener('click', function(){
+  clearHighlight();
+  document.getElementById('hl-palette').classList.remove('open');
+});
+
+// Close palette on outside click
+document.addEventListener('click', function(e){
+  if (!document.getElementById('hl-wrap').contains(e.target)) {
+    document.getElementById('hl-palette').classList.remove('open');
+  }
+});
+
+/* ── Context menu ── */
+var ctxMenu = document.getElementById('ctx-menu');
+var ctxSelection = '';
+var ctxSelectionHtml = '';
+
+function hideCtxMenu() { ctxMenu.classList.remove('open'); }
+
+document.getElementById('note-body').addEventListener('contextmenu', function(e){
+  var sel = window.getSelection();
+  var selectedText = sel ? sel.toString().trim() : '';
+  if (!selectedText) return; // use native menu if nothing selected
+
+  e.preventDefault();
+  ctxSelection    = selectedText;
+
+  // Capture HTML of selection
+  if (sel.rangeCount) {
+    var frag = sel.getRangeAt(0).cloneContents();
+    var div  = document.createElement('div');
+    div.appendChild(frag);
+    ctxSelectionHtml = div.innerHTML;
+  }
+
+  // Position menu
+  var x = e.clientX, y = e.clientY;
+  var menuW = 190, menuH = 180;
+  if (x + menuW > window.innerWidth)  x = window.innerWidth  - menuW - 8;
+  if (y + menuH > window.innerHeight) y = window.innerHeight - menuH - 8;
+  ctxMenu.style.left = x + 'px';
+  ctxMenu.style.top  = y + 'px';
+  ctxMenu.classList.add('open');
+});
+
+document.getElementById('ctx-copy').addEventListener('click', function(){
+  navigator.clipboard.writeText(ctxSelection).catch(function(){
+    document.execCommand('copy');
+  });
+  hideCtxMenu();
+});
+
+document.getElementById('ctx-new-note').addEventListener('click', function(){
+  if (!ctxSelection) { hideCtxMenu(); return; }
+  // Build prefill with a blockquote of the highlighted text + source note link
+  var sourceNote = notes.find(function(n){ return n.id===currentId; });
+  var sourceRef  = sourceNote ? '\n\n— From note: ' + (sourceNote.title || 'Untitled') + (sourceNote.episodeTitle ? ' ('+sourceNote.episodeTitle+')' : '') : '';
+  var prefillHtml = '<blockquote style="border-left:3px solid #B19443;margin:0;padding:4px 12px;background:#fffef0;">' + ctxSelectionHtml + '</blockquote><p>' + sourceRef + '</p><p><br></p>';
+  var epNum   = sourceNote ? sourceNote.episodeNum   : '';
+  var epTitle = sourceNote ? sourceNote.episodeTitle : '';
+  hideCtxMenu();
+  createNote(epNum, epTitle, prefillHtml);
+});
+
+document.getElementById('ctx-clear-hl').addEventListener('click', function(){
+  clearHighlight();
+  hideCtxMenu();
+});
+
+document.addEventListener('click', function(e){
+  if (!ctxMenu.contains(e.target)) hideCtxMenu();
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') hideCtxMenu();
+});
+
+/* ── Toolbar event wiring ── */
+document.getElementById('tb-bold').addEventListener('mousedown',      function(e){ e.preventDefault(); execFmt('bold'); });
+document.getElementById('tb-italic').addEventListener('mousedown',    function(e){ e.preventDefault(); execFmt('italic'); });
+document.getElementById('tb-underline').addEventListener('mousedown', function(e){ e.preventDefault(); execFmt('underline'); });
+document.getElementById('tb-heading').addEventListener('mousedown',   function(e){
+  e.preventDefault();
+  var body = document.getElementById('note-body'); body.focus();
+  document.execCommand('formatBlock', false, 'h2');
+  scheduleSave();
+});
+document.getElementById('tb-bullet').addEventListener('mousedown',   function(e){ e.preventDefault(); execFmt('insertUnorderedList'); });
+document.getElementById('tb-numbered').addEventListener('mousedown', function(e){ e.preventDefault(); execFmt('insertOrderedList'); });
+
+document.getElementById('tb-timestamp').addEventListener('click', function(){
+  var ts = '';
+  try {
+    var resume = JSON.parse(localStorage.getItem('pnm_podcast_resume') || 'null');
+    if (resume && resume.time) {
+      var s = Math.floor(resume.time); var m = Math.floor(s/60); s = s%60;
+      ts = '[' + (m<10?'0':'')+m + ':' + (s<10?'0':'')+s + '] ';
+    } else { ts = '['+new Date().toLocaleTimeString()+'] '; }
+  } catch(ex) { ts = '['+new Date().toLocaleTimeString()+'] '; }
+  document.getElementById('note-body').focus();
+  document.execCommand('insertText', false, ts);
+  scheduleSave();
+});
+
+document.getElementById('note-title').addEventListener('input', scheduleSave);
+document.getElementById('note-body').addEventListener('input', function(){ scheduleSave(); updateToolbarState(); });
+document.getElementById('note-body').addEventListener('keyup', updateToolbarState);
+document.getElementById('note-body').addEventListener('mouseup', updateToolbarState);
+document.getElementById('note-episode-select').addEventListener('change', scheduleSave);
+
+// Keyboard shortcuts
+document.getElementById('note-body').addEventListener('keydown', function(e){
+  if ((e.ctrlKey||e.metaKey) && e.key === 'b') { e.preventDefault(); execFmt('bold'); }
+  if ((e.ctrlKey||e.metaKey) && e.key === 'i') { e.preventDefault(); execFmt('italic'); }
+  if ((e.ctrlKey||e.metaKey) && e.key === 'u') { e.preventDefault(); execFmt('underline'); }
+  if ((e.ctrlKey||e.metaKey) && e.key === 'h') { e.preventDefault(); applyHighlight(activeColour); }
+});
+
+/* ── Delete / Export ── */
+document.getElementById('tb-delete').addEventListener('click', function(){
   if (!currentId) return;
   if (!confirm('Delete this note? This cannot be undone.')) return;
-  notes = notes.filter(function(n) { return n.id !== currentId; });
-  saveNotes();
-  currentId = null;
+  notes = notes.filter(function(n){ return n.id!==currentId; });
+  saveNotes(); currentId = null;
   document.getElementById('editor-active').style.display = 'none';
   document.getElementById('notes-welcome').style.display = 'flex';
   renderNotesList();
-}
-
-/* ── Format helpers ── */
-function formatText(type) {
-  var ta  = document.getElementById('note-body');
-  var s   = ta.selectionStart;
-  var e   = ta.selectionEnd;
-  var val = ta.value;
-  var sel = val.slice(s, e);
-  var insert = '';
-  if (type === 'bold')     insert = '**' + (sel || 'bold text') + '**';
-  if (type === 'italic')   insert = '_' + (sel || 'italic text') + '_';
-  if (type === 'heading')  insert = '\n## ' + (sel || 'Heading') + '\n';
-  if (type === 'bullet')   insert = '\n• ' + (sel || 'Item');
-  if (type === 'numbered') insert = '\n1. ' + (sel || 'Item');
-  if (type === 'timestamp') {
-    // Try to get current playback time from main app localStorage
-    var resume = null;
-    try { resume = JSON.parse(localStorage.getItem('pnm_podcast_resume') || 'null'); } catch(ex) {}
-    var ts = resume ? '[' + formatTime(resume.time) + ']' : '[' + new Date().toLocaleTimeString() + ']';
-    insert = ts + ' ';
-  }
-  ta.value = val.slice(0, s) + insert + val.slice(e);
-  ta.selectionStart = ta.selectionEnd = s + insert.length;
-  ta.focus();
-  scheduleSave();
-}
-function formatTime(s) {
-  s = Math.floor(s || 0);
-  var m = Math.floor(s / 60); s = s % 60;
-  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-}
-
-/* ── Export ── */
-function exportNote() {
+});
+document.getElementById('tb-export').addEventListener('click', function(){
   if (!currentId) return;
-  var note = notes.find(function(n) { return n.id === currentId; });
+  var note = notes.find(function(n){ return n.id===currentId; });
   if (!note) return;
-  var content = (note.title ? '# ' + note.title + '\n\n' : '') +
-    (note.episodeTitle ? 'Episode: ' + note.episodeTitle + '\n\n' : '') +
-    (note.body || '') + '\n\n---\nThe Precision Health Podcast — precisionnaturalemedicine.com.au';
-  var blob = new Blob([content], { type: 'text/plain' });
+  // Export as HTML with styles for highlights
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+escHtml(note.title||'Note')+'</title>'
+    +'<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;line-height:1.7;color:#333;}h1{color:#2C4A35;}blockquote{border-left:3px solid #B19443;padding:4px 12px;background:#fffef0;}</style>'
+    +'</head><body><h1>'+escHtml(note.title||'Untitled')+'</h1>'
+    +(note.episodeTitle ? '<p><strong>Episode:</strong> '+escHtml(note.episodeTitle)+'</p>' : '')
+    +(note.bodyHtml || escHtml(note.body||''))
+    +'<hr><p><small>The Precision Health Podcast — precisionnaturalmedicine.com.au</small></p>'
+    +'</body></html>';
+  var blob = new Blob([html], { type: 'text/html' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = (note.title || 'note').replace(/[^a-z0-9 ]/gi, '').trim() + '.txt';
+  a.download = (note.title||'note').replace(/[^a-z0-9 ]/gi,'').trim() + '.html';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
+});
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+/* ── New note buttons ── */
+document.getElementById('new-note-btn').addEventListener('click', function(){ createNote(); });
+document.getElementById('welcome-new-btn').addEventListener('click', function(){ createNote(); });
+document.getElementById('fab-new-note').addEventListener('click', function(){ createNote(); });
+document.getElementById('sidebar-toggle').addEventListener('click', function(){
+  document.getElementById('notes-sidebar').classList.toggle('open');
+});
+document.getElementById('notes-search').addEventListener('input', function(){
+  renderNotesList(this.value);
+});
+
 /* ── Init ── */
-document.addEventListener('DOMContentLoaded', function() {
-  loadNotes();
-  loadEpisodes();
+document.addEventListener('DOMContentLoaded', function(){
+  loadNotes(); loadCustomColours(); loadActiveColour(); loadEpisodes();
+  buildSwatches();
   renderNotesList();
 
-  document.getElementById('new-note-btn').addEventListener('click', function() { createNote(); });
-  document.getElementById('welcome-new-btn').addEventListener('click', function() { createNote(); });
-  document.getElementById('sidebar-toggle').addEventListener('click', function() {
-    document.getElementById('notes-sidebar').classList.toggle('open');
-  });
-  document.getElementById('notes-search').addEventListener('input', function() {
-    renderNotesList(this.value);
-  });
-  document.getElementById('note-title').addEventListener('input', scheduleSave);
-  document.getElementById('note-body').addEventListener('input', scheduleSave);
-  document.getElementById('note-episode-select').addEventListener('change', scheduleSave);
-
-  // Check if opened from note_taking new_note_url or with a ?episode= param
-  var params = new URLSearchParams(window.location.search);
-  var epNum  = params.get('episode');
+  var params  = new URLSearchParams(window.location.search);
+  var epNum   = params.get('episode');
   var epTitle = params.get('title');
-  var newNote = params.get('new');
-  if (newNote || epNum) {
-    createNote(epNum || '', epTitle || '');
+  var isNew   = params.get('new');
+
+  if (isNew || epNum) {
+    createNote(epNum||'', epTitle||'');
   } else if (notes.length > 0) {
-    // Auto-open most recent note
-    var sorted = notes.slice().sort(function(a,b) { return (b.updatedAt||0) - (a.updatedAt||0); });
+    var sorted = notes.slice().sort(function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); });
     openNote(sorted[0].id);
   }
 });
 
-// Register SW
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(function(){});
 }
-
-// Expose episode list for the main app to call
-window.setEpisodesForNotes = function(epList) {
-  episodes = epList;
-  try { localStorage.setItem('pnm_notes_episodes', JSON.stringify(epList)); } catch(e) {}
-  populateEpisodeSelect();
-};
-</script>
-<!-- Floating action button — always visible on mobile -->
-<button id="fab-new-note" aria-label="New note" title="New note" style="
-  position: fixed; bottom: 24px; right: 24px; z-index: 200;
-  width: 52px; height: 52px; border-radius: 50%;
-  background: var(--green-deep); color: var(--white);
-  border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(44,74,53,0.4);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px; font-weight: 300; line-height: 1;
-  transition: background 0.2s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;">+</button>
-
-<script>
-document.getElementById('fab-new-note').addEventListener('click', function() {
-  createNote();
-});
-document.getElementById('fab-new-note').addEventListener('mouseenter', function() {
-  this.style.transform = 'scale(1.1)';
-});
-document.getElementById('fab-new-note').addEventListener('mouseleave', function() {
-  this.style.transform = 'scale(1)';
-});
 </script>
 </body>
 </html>
