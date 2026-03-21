@@ -8,6 +8,7 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/notes.html',
+  '/widget.html',
   '/manifest.json',
   '/icon-96x96.png',
   '/icon-192x192.png',
@@ -83,6 +84,8 @@ self.addEventListener('fetch', function(e) {
   if (
     url.endsWith('/') ||
     url.endsWith('/index.html') ||
+    url.endsWith('/widget.html') ||
+    url.endsWith('/notes.html') ||
     url.match(/podcast\.precisionnaturalmedicine\.com\.au\/?$/)
   ) {
     e.respondWith(
