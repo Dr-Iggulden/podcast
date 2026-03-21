@@ -513,9 +513,10 @@
     .signup-popup-dismiss:hover, .signup-popup-dismiss:active { color: var(--grey-nav); }
     /* Popup platform subscribe buttons */
     .popup-section-label { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.25em; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; display: block; }
-    .popup-platform-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
-    .popup-platform-btn { display: inline-flex; align-items: center; gap: 7px; font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-deep); border: 1.5px solid var(--cream-dark); background: var(--cream); padding: 8px 14px; border-radius: 2px; text-decoration: none; transition: all 0.2s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
-    .popup-platform-btn:hover, .popup-platform-btn:active { border-color: var(--gold); background: var(--white); }
+    .popup-follow-btn { display: inline-flex; align-items: center; gap: 9px; background: var(--green-deep); color: var(--white); border: 2px solid var(--green-deep); border-radius: 2px; padding: 12px 24px; font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; width: 100%; justify-content: center; -webkit-tap-highlight-color: transparent; }
+    .popup-follow-btn:hover, .popup-follow-btn:active { background: var(--green-mid); border-color: var(--green-mid); }
+    .popup-follow-btn.following { background: none; color: var(--green-deep); border-color: var(--gold); }
+    .popup-follow-btn.following:hover { background: rgba(177,148,67,0.08); }
     /* Divider */
     .popup-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0 18px; }
     .popup-divider::before, .popup-divider::after { content: ''; flex: 1; height: 1px; background: var(--cream-dark); }
@@ -2063,12 +2064,14 @@ document.addEventListener('DOMContentLoaded', function () {
   var SUBSCRIBED_KEY = 'pnm_subscribed';
   var DISMISSED_KEY  = 'pnm_popup_dismissed_until';
 
-  var popupOverlay = document.getElementById('signup-popup-overlay');
-  var popupClose   = document.getElementById('signup-popup-close');
-  var popupDismiss = document.getElementById('signup-popup-dismiss');
-  var popupForm    = document.getElementById('signup-popup-form');
-  var popupSubmit  = document.getElementById('signup-popup-submit-btn');
-  var popupMsg     = document.getElementById('signup-popup-msg');
+  var popupOverlay    = document.getElementById('signup-popup-overlay');
+  var popupClose      = document.getElementById('signup-popup-close');
+  var popupDismiss    = document.getElementById('signup-popup-dismiss');
+  var popupForm       = document.getElementById('signup-popup-form');
+  var popupSubmit     = document.getElementById('signup-popup-submit-btn');
+  var popupMsg        = document.getElementById('signup-popup-msg');
+  var popupFollowBtn  = document.getElementById('popup-follow-btn');
+  var popupFollowLbl  = document.getElementById('popup-follow-label');
 
   function isSubscribed() {
     return localStorage.getItem(SUBSCRIBED_KEY) === 'true';
@@ -2101,6 +2104,37 @@ document.addEventListener('DOMContentLoaded', function () {
   function closePopup() {
     popupOverlay.classList.remove('open');
     document.body.style.overflow = '';
+  }
+
+  // Sync popup follow button state with actual following state
+  function syncPopupFollowBtn() {
+    if (!popupFollowBtn || !popupFollowLbl) return;
+    var following = localStorage.getItem('pnm_podcast_following') === 'true';
+    popupFollowBtn.classList.toggle('following', following);
+    popupFollowLbl.textContent = following ? 'Following \u2714' : 'Follow Podcast';
+  }
+  syncPopupFollowBtn();
+
+  // Follow button — opens the main follow modal (which handles permission + FCM)
+  if (popupFollowBtn) {
+    popupFollowBtn.addEventListener('click', function () {
+      if (localStorage.getItem('pnm_podcast_following') === 'true') return; // already following
+      var followOverlay = document.getElementById('follow-modal-overlay');
+      if (followOverlay) {
+        closePopup();
+        followOverlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+    });
+  }
+
+  // When the follow modal closes with success, sync the button
+  var followOverlayEl = document.getElementById('follow-modal-overlay');
+  if (followOverlayEl) {
+    var followObserver = new MutationObserver(function () {
+      syncPopupFollowBtn();
+    });
+    followObserver.observe(followOverlayEl, { attributes: true, attributeFilter: ['class'] });
   }
 
   // Only schedule if user hasn't subscribed or dismissed recently
@@ -2494,26 +2528,13 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
     <div class="signup-popup-body">
 
-      <!-- Subscribe platform buttons -->
-      <p class="popup-section-label">Subscribe to the Podcast</p>
-      <div class="popup-platform-btns">
-        <a class="popup-platform-btn" href="https://open.spotify.com/show/05661buTvrIKkSBao3b29S" target="_blank" rel="noopener">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 17.322a.75.75 0 01-1.032.25c-2.822-1.726-6.376-2.117-10.563-1.16a.75.75 0 01-.332-1.463c4.583-1.044 8.516-.594 11.677 1.34a.75.75 0 01.25 1.033zm1.484-3.308a.937.937 0 01-1.29.308c-3.23-1.985-8.155-2.561-11.976-1.402a.937.937 0 01-.543-1.793c4.368-1.324 9.8-.683 13.501 1.596a.937.937 0 01.308 1.291zm.127-3.443C15.53 8.37 9.466 8.17 6.07 9.205a1.124 1.124 0 01-.651-2.151c3.91-1.185 10.41-.956 14.517 1.628a1.124 1.124 0 01-1.163 1.929z"/></svg>
-          Spotify
-        </a>
-        <a class="popup-platform-btn" href="https://podcasts.apple.com/podcast/the-precision-health-podcast" target="_blank" rel="noopener">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="#872EC4"><path d="M12.003 0C5.374 0 0 5.374 0 12.003 0 18.63 5.374 24 12.003 24 18.63 24 24 18.63 24 12.003 24 5.374 18.63 0 12.003 0zm-.001 4.155a4.155 4.155 0 110 8.31 4.155 4.155 0 010-8.31zm6.337 14.208a9.093 9.093 0 01-12.674 0 .59.59 0 01.012-.838c.97-.926 2.178-1.59 3.512-1.906a5.22 5.22 0 005.626 0c1.334.316 2.542.98 3.512 1.906a.59.59 0 01.012.838z"/></svg>
-          Apple Podcasts
-        </a>
-        <a class="popup-platform-btn" href="https://music.amazon.com/podcasts/ce477d27-f094-473f-a979-14bb0caff6cc/the-precision-health-podcast" target="_blank" rel="noopener">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="#FF9900"><path d="M13.958 10.09c0 1.232.029 2.256-.591 3.351-.502.891-1.301 1.439-2.186 1.439-1.214 0-1.922-.924-1.922-2.292 0-2.692 2.415-3.182 4.699-3.182v.684zm3.186 7.705c-.209.189-.512.201-.745.076-1.047-.872-1.233-1.275-1.808-2.106-1.728 1.763-2.952 2.29-5.19 2.29-2.652 0-4.714-1.636-4.714-4.909 0-2.557 1.385-4.297 3.359-5.148 1.713-.755 4.107-.891 5.941-1.099v-.41c0-.753.06-1.642-.383-2.294-.385-.585-1.124-.827-1.775-.827-1.205 0-2.277.618-2.54 1.897-.054.283-.263.562-.553.577l-3.094-.334c-.261-.058-.549-.268-.474-.666C6.239 1.961 9.188 1 11.85 1c1.41 0 3.254.375 4.368 1.443C17.63 3.585 17.472 5.128 17.472 6.8v4.711c0 1.417.588 2.04 1.141 2.804.194.271.238.597-.01.8l-1.459 1.68zm3.013 2.734c-.432-.337-4.272-2.017-3.586-6.22.013-.085.084-.1.145-.067 1.016.557 2.458 1.083 3.396 2.157.791.908.869 2.247.432 3.337a.213.213 0 01-.387-.207zm-16.67.268c-1.04-.463-1.855-1.36-2.123-2.486-.26-1.097.065-2.336.844-3.043.14-.127.3-.03.29.156-.138 2.537.994 4.058 1.998 5.209a.202.202 0 01-.01.284c-.29.083-.666-.01-.999-.12z"/></svg>
-          Amazon Music
-        </a>
-        <a class="popup-platform-btn" href="https://www.youtube.com/playlist?list=PLr0rsCCMU07YB-PtoQynncC94Ruzox0VF" target="_blank" rel="noopener">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-          YouTube
-        </a>
-      </div>
+      <!-- Follow / push notification button -->
+      <p class="popup-section-label">Get New Episode Alerts</p>
+      <p style="font-family:'Nunito Sans',sans-serif;font-size:13px;color:var(--grey-nav);line-height:1.6;margin-bottom:14px;">Get a browser notification the moment a new episode drops. No app required.</p>
+      <button class="popup-follow-btn" id="popup-follow-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span id="popup-follow-label">Follow Podcast</span>
+      </button>
 
       <!-- Divider -->
       <div class="popup-divider"><span>or join the mailing list</span></div>
