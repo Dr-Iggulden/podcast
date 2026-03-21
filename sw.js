@@ -2,8 +2,8 @@
 // VERSION: 5
 const CACHE_VERSION = 5;
 const CACHE_NAME    = 'php-v' + CACHE_VERSION;
-const OFFLINE_URL   = '/index.html';
 
+// Pages to pre-cache at install — ensures offline works from first visit
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -15,39 +15,40 @@ const STATIC_ASSETS = [
   '/icon-512x512.png'
 ];
 
-// ── Install — pre-cache everything needed for offline ──────────────────────
+// ── Install ────────────────────────────────────────────────────────────────
 self.addEventListener('install', function(e) {
   e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        return cache.addAll(STATIC_ASSETS).then(function() {
-          // Explicitly cache root as /index.html too so offline fallback
-          // hits regardless of how the browser requests the page
-          return fetch('/index.html').then(function(res) {
-            if (!res || !res.ok) return;
-            var clone = res.clone();
-            return Promise.all([
-              cache.put('/', clone),
-              cache.put('/index.html', res)
-            ]);
-          }).catch(function(){});
-        });
-      })
-      .then(function() { return self.skipWaiting(); })
+    caches.open(CACHE_NAME).then(function(cache) {
+      // Cache all static assets
+      return cache.addAll(STATIC_ASSETS).then(function() {
+        // Also explicitly double-cache root as /index.html
+        // so the offline fallback hits regardless of request form
+        return fetch('/index.html').then(function(res) {
+          if (!res || !res.ok) return;
+          var clone = res.clone();
+          return Promise.all([
+            cache.put('/', clone),
+            cache.put('/index.html', res)
+          ]);
+        }).catch(function() {});
+      });
+    }).then(function() {
+      return self.skipWaiting();
+    })
   );
 });
 
-// ── Activate — purge old caches, claim clients ─────────────────────────────
+// ── Activate — purge old caches ────────────────────────────────────────────
 self.addEventListener('activate', function(e) {
   e.waitUntil(
-    caches.keys()
-      .then(function(keys) {
-        return Promise.all(
-          keys.filter(function(k) { return k !== CACHE_NAME; })
-              .map(function(k)   { return caches.delete(k); })
-        );
-      })
-      .then(function() { return self.clients.claim(); })
+    caches.keys().then(function(keys) {
+      return Promise.all(
+        keys.filter(function(k) { return k !== CACHE_NAME; })
+            .map(function(k)   { return caches.delete(k); })
+      );
+    }).then(function() {
+      return self.clients.claim();
+    })
   );
 });
 
@@ -56,59 +57,63 @@ self.addEventListener('fetch', function(e) {
   var req = e.request;
   var url = req.url;
 
-  // Never intercept non-GET requests (POST to Apps Script, etc.)
+  // Only handle GET
   if (req.method !== 'GET') return;
 
-  // Never intercept audio — always stream
+  // Never cache audio — always stream
   if (url.includes('.mp3') || url.includes('.m4a') || url.includes('.ogg')) return;
 
-  // Never intercept analytics, Firebase, or FCM
+  // Never cache analytics or Firebase
   if (url.includes('google-analytics') || url.includes('googletagmanager')) return;
   if (url.includes('firebasejs') || url.includes('fcm.googleapis') || url.includes('firebase')) return;
 
   // RSS feed + CORS proxies — network first, cache fallback
   if (url.includes('rss.com') || url.includes('corsproxy') || url.includes('allorigins')) {
     e.respondWith(
-      fetch(req)
-        .then(function(res) {
-          var clone = res.clone();
-          caches.open(CACHE_NAME).then(function(c) { c.put(req, clone); });
-          return res;
-        })
-        .catch(function() { return caches.match(req); })
+      fetch(req).then(function(res) {
+        var clone = res.clone();
+        caches.open(CACHE_NAME).then(function(c) { c.put(req, clone); });
+        return res;
+      }).catch(function() { return caches.match(req); })
     );
     return;
   }
 
-  // App shell (root + index.html) — network first, guaranteed offline fallback
-  if (
+  // App shell pages — network first, multi-key offline fallback
+  var isAppShell = (
     url.endsWith('/') ||
     url.endsWith('/index.html') ||
-    url.endsWith('/widget.html') ||
     url.endsWith('/notes.html') ||
+    url.endsWith('/notes') ||
+    url.endsWith('/widget.html') ||
+    url.endsWith('/widget') ||
     url.match(/podcast\.precisionnaturalmedicine\.com\.au\/?$/)
-  ) {
+  );
+
+  if (isAppShell) {
     e.respondWith(
-      fetch(req)
-        .then(function(res) {
-          var clone = res.clone();
-          caches.open(CACHE_NAME).then(function(c) { c.put(req, clone); });
-          return res;
-        })
-        .catch(function() {
-          // Offline — try the exact request, then /index.html, then /
-          return caches.match(req)
-            .then(function(cached) {
-              if (cached) return cached;
-              return caches.match('/index.html')
-                .then(function(c) { return c || caches.match('/'); });
-            });
-        })
+      fetch(req).then(function(res) {
+        // Cache fresh copy
+        var clone = res.clone();
+        caches.open(CACHE_NAME).then(function(c) { c.put(req, clone); });
+        return res;
+      }).catch(function() {
+        // Offline — try exact URL, then /index.html, then /
+        return caches.match(req).then(function(cached) {
+          if (cached) return cached;
+          // Map extensionless paths to .html versions
+          if (url.endsWith('/notes'))  return caches.match('/notes.html');
+          if (url.endsWith('/widget')) return caches.match('/widget.html');
+          return caches.match('/index.html').then(function(c) {
+            return c || caches.match('/');
+          });
+        });
+      })
     );
     return;
   }
 
-  // Everything else — cache first, network fallback + update cache
+  // Everything else — cache first, background update
   e.respondWith(
     caches.match(req).then(function(cached) {
       var networkFetch = fetch(req).then(function(res) {
@@ -123,11 +128,26 @@ self.addEventListener('fetch', function(e) {
   );
 });
 
-// ── Background Sync ────────────────────────────────────────────────────────
-// Queues failed API requests (likes, downloads, signups) and retries
-// automatically when the device comes back online.
-var SYNC_QUEUE_KEY = 'php-sync-queue';
+// ── Messages ───────────────────────────────────────────────────────────────
+self.addEventListener('message', function(e) {
+  if (!e.data) return;
+  if (e.data.type === 'SKIP_WAITING') { self.skipWaiting(); return; }
 
+  // Queue failed API request for Background Sync retry
+  if (e.data.type === 'QUEUE_REQUEST') {
+    openSyncDB().then(function(db) {
+      var tx = db.transaction('queue', 'readwrite');
+      tx.objectStore('queue').add({
+        url: e.data.url, method: e.data.method || 'POST',
+        headers: e.data.headers || { 'Content-Type': 'text/plain' },
+        body: e.data.body, queued: Date.now()
+      });
+    });
+    return;
+  }
+});
+
+// ── Background Sync — retry failed API calls ───────────────────────────────
 self.addEventListener('sync', function(e) {
   if (e.tag === 'retry-api-requests') {
     e.waitUntil(flushSyncQueue());
@@ -135,34 +155,24 @@ self.addEventListener('sync', function(e) {
 });
 
 function flushSyncQueue() {
-  return self.registration.sync && getQueuedRequests().then(function(queue) {
-    if (!queue || !queue.length) return;
-    return Promise.all(queue.map(function(item) {
-      return fetch(item.url, {
-        method:  item.method  || 'POST',
-        headers: item.headers || { 'Content-Type': 'text/plain' },
-        body:    item.body
-      }).then(function(res) {
-        if (res.ok) return removeFromQueue(item.id);
-      }).catch(function() {
-        // Still offline — leave in queue for next sync
-      });
-    }));
-  });
-}
-
-function getQueuedRequests() {
-  return self.clients.matchAll().then(function() {
-    // Read queue from IndexedDB
-    return openSyncDB().then(function(db) {
-      return new Promise(function(resolve, reject) {
-        var tx  = db.transaction('queue', 'readonly');
-        var req = tx.objectStore('queue').getAll();
-        req.onsuccess = function() { resolve(req.result || []); };
-        req.onerror   = function() { resolve([]); };
-      });
+  return openSyncDB().then(function(db) {
+    return new Promise(function(resolve) {
+      var tx  = db.transaction('queue', 'readonly');
+      var req = tx.objectStore('queue').getAll();
+      req.onsuccess = function() {
+        var queue = req.result || [];
+        if (!queue.length) { resolve(); return; }
+        Promise.all(queue.map(function(item) {
+          return fetch(item.url, {
+            method: item.method, headers: item.headers, body: item.body
+          }).then(function(res) {
+            if (res.ok) return removeFromQueue(item.id);
+          }).catch(function() {});
+        })).then(resolve);
+      };
+      req.onerror = function() { resolve(); };
     });
-  });
+  }).catch(function() {});
 }
 
 function removeFromQueue(id) {
@@ -187,62 +197,39 @@ function openSyncDB() {
 }
 
 // ── Periodic Background Sync ───────────────────────────────────────────────
-// Pre-fetches the RSS feed in the background (max once per hour) so that
-// when the user opens the app, the episode list loads instantly even on
-// a slow connection. Also checks for new episodes to badge the app icon.
-self.addEventListener('periodicsync', function(e) {
-  if (e.tag === 'refresh-feed') {
-    e.waitUntil(refreshFeedCache());
-  }
-  if (e.tag === 'check-new-episodes') {
-    e.waitUntil(checkAndBadgeNewEpisode());
-  }
-});
-
-var RSS_FEED = 'https://media.rss.com/sacredherbology/feed.xml';
+var RSS_FEED     = 'https://media.rss.com/sacredherbology/feed.xml';
 var LAST_GUID_KEY = 'php-last-guid';
 
+self.addEventListener('periodicsync', function(e) {
+  if (e.tag === 'refresh-feed')       e.waitUntil(refreshFeedCache());
+  if (e.tag === 'check-new-episodes') e.waitUntil(checkAndBadgeNewEpisode());
+});
+
 function refreshFeedCache() {
-  return fetch(RSS_FEED)
-    .then(function(res) {
-      if (!res.ok) return;
-      var clone = res.clone();
-      return caches.open(CACHE_NAME).then(function(cache) {
-        return cache.put(RSS_FEED, clone);
-      });
-    })
-    .catch(function() { /* offline — skip */ });
+  return fetch(RSS_FEED).then(function(res) {
+    if (!res.ok) return;
+    var clone = res.clone();
+    return caches.open(CACHE_NAME).then(function(c) { return c.put(RSS_FEED, clone); });
+  }).catch(function() {});
 }
 
 function checkAndBadgeNewEpisode() {
-  return fetch(RSS_FEED)
-    .then(function(res) { return res.text(); })
-    .then(function(text) {
-      // Extract first <guid> from RSS
-      var match = text.match(/<guid[^>]*>([^<]+)<\/guid>/);
-      if (!match) return;
-      var latestGuid = match[1].trim();
-      // Compare with stored last-seen guid
-      return getStoredValue(LAST_GUID_KEY).then(function(stored) {
-        if (stored && stored !== latestGuid) {
-          // New episode — badge the app icon
-          if ('setAppBadge' in navigator) {
-            return navigator.setAppBadge(1);
-          }
-        }
-        // Update stored guid
-        return setStoredValue(LAST_GUID_KEY, latestGuid);
-      });
-    })
-    .catch(function() {});
+  return fetch(RSS_FEED).then(function(r) { return r.text(); }).then(function(text) {
+    var match = text.match(/<guid[^>]*>([^<]+)<\/guid>/);
+    if (!match) return;
+    var latestGuid = match[1].trim();
+    return getStoredValue(LAST_GUID_KEY).then(function(stored) {
+      if (stored && stored !== latestGuid && 'setAppBadge' in navigator) {
+        navigator.setAppBadge(1).catch(function() {});
+      }
+      return setStoredValue(LAST_GUID_KEY, latestGuid);
+    });
+  }).catch(function() {});
 }
 
-// Simple key-value store using Cache API (avoids needing another IDB store)
 function getStoredValue(key) {
   return caches.open('php-kv').then(function(c) {
-    return c.match('/__kv__/' + key).then(function(r) {
-      return r ? r.text() : null;
-    });
+    return c.match('/__kv__/' + key).then(function(r) { return r ? r.text() : null; });
   });
 }
 function setStoredValue(key, val) {
@@ -250,42 +237,6 @@ function setStoredValue(key, val) {
     return c.put('/__kv__/' + key, new Response(val));
   });
 }
-
-// ── Messages from page ─────────────────────────────────────────────────────
-self.addEventListener('message', function(e) {
-  if (!e.data) return;
-
-  // Force update
-  if (e.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-    return;
-  }
-
-  // Page asks SW to queue a failed API request for Background Sync retry
-  if (e.data.type === 'QUEUE_REQUEST') {
-    openSyncDB().then(function(db) {
-      var tx    = db.transaction('queue', 'readwrite');
-      var store = tx.objectStore('queue');
-      store.add({
-        url:     e.data.url,
-        method:  e.data.method  || 'POST',
-        headers: e.data.headers || { 'Content-Type': 'text/plain' },
-        body:    e.data.body,
-        queued:  Date.now()
-      });
-    });
-    return;
-  }
-
-  // Page registers periodic sync tags
-  if (e.data.type === 'REGISTER_PERIODIC_SYNC') {
-    if ('periodicSync' in self.registration) {
-      self.registration.periodicSync.register('refresh-feed',          { minInterval: 60 * 60 * 1000 }).catch(function(){});
-      self.registration.periodicSync.register('check-new-episodes',    { minInterval: 60 * 60 * 1000 }).catch(function(){});
-    }
-    return;
-  }
-});
 
 // ── Push notifications ─────────────────────────────────────────────────────
 self.addEventListener('push', function(e) {
@@ -297,12 +248,10 @@ self.addEventListener('push', function(e) {
   var badge = data.badge || '/icon-96x96.png';
   var url   = (data.data && data.data.url) ? data.data.url : 'https://podcast.precisionnaturalmedicine.com.au/';
   e.waitUntil(
-    // Clear badge when notification arrives
-    ('clearAppBadge' in navigator ? navigator.clearAppBadge() : Promise.resolve())
+    (('clearAppBadge' in navigator) ? navigator.clearAppBadge() : Promise.resolve())
       .then(function() {
         return self.registration.showNotification(title, {
-          body, icon, badge,
-          data:     { url },
+          body, icon, badge, data: { url },
           actions:  [{ action: 'listen', title: 'Listen Now' }],
           tag:      'new-episode',
           renotify: true
@@ -327,122 +276,58 @@ self.addEventListener('notificationclick', function(e) {
   );
 });
 
-// ── Widget handlers (Windows 11 Widget Board) ─────────────────────────────
-// Handles widget install/uninstall, button actions, and periodic data updates
-
-var RSS_FEED_WIDGET = 'https://media.rss.com/sacredherbology/feed.xml';
-var widgetState = {}; // tracks installed widget instances
-
-self.addEventListener('widgetinstall', function(e) {
-  e.waitUntil(handleWidgetInstall(e.widget));
-});
-
-self.addEventListener('widgetuninstall', function(e) {
-  e.waitUntil(handleWidgetUninstall(e.widget));
-});
-
-self.addEventListener('widgetresume', function(e) {
-  e.waitUntil(updateAllWidgets());
-});
-
-self.addEventListener('widgetclick', function(e) {
-  e.waitUntil(handleWidgetClick(e.action, e.instanceId, e.data));
-});
-
-function handleWidgetInstall(widget) {
-  if (!widget) return Promise.resolve();
-  return updateWidget(widget);
-}
-
-function handleWidgetUninstall(widget) {
-  if (!widget || !widget.tag) return Promise.resolve();
-  delete widgetState[widget.instanceId];
-  return Promise.resolve();
-}
+// ── Widget handlers ────────────────────────────────────────────────────────
+self.addEventListener('widgetinstall',  function(e) { e.waitUntil(updateWidget(e.widget)); });
+self.addEventListener('widgetuninstall',function(e) { /* nothing to clean up */ });
+self.addEventListener('widgetresume',   function(e) { e.waitUntil(updateAllWidgets()); });
+self.addEventListener('widgetclick',    function(e) { e.waitUntil(handleWidgetClick(e.action, e.instanceId, e.data)); });
 
 function handleWidgetClick(action, instanceId, data) {
-  if (!action) return Promise.resolve();
-  // Open the app for any play/navigate action
-  if (action === 'play-episode' || action === 'toggle-play' || action === 'next-episode') {
-    var url = 'https://podcast.precisionnaturalmedicine.com.au/';
-    if (data && data.slug) url += '#ep-' + data.slug;
-    return clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list) {
-      for (var i = 0; i < list.length; i++) {
-        if ('focus' in list[i]) return list[i].focus();
-      }
-      if (clients.openWindow) return clients.openWindow(url);
-    });
-  }
-  return Promise.resolve();
+  var url = 'https://podcast.precisionnaturalmedicine.com.au/';
+  if (data && data.slug) url += '#ep-' + data.slug;
+  return clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list) {
+    for (var i = 0; i < list.length; i++) {
+      if ('focus' in list[i]) return list[i].focus();
+    }
+    if (clients.openWindow) return clients.openWindow(url);
+  });
 }
 
 function updateAllWidgets() {
   if (!('widgets' in self)) return Promise.resolve();
-  return self.widgets.getAll().then(function(widgets) {
-    return Promise.all(widgets.map(updateWidget));
+  return self.widgets.getAll().then(function(ws) {
+    return Promise.all(ws.map(updateWidget));
   }).catch(function() {});
 }
 
 function updateWidget(widget) {
   if (!widget || !widget.definition) return Promise.resolve();
   var tag = widget.definition.tag;
-  if (tag === 'latest-episode' || tag === 'episode-list') {
-    return fetchLatestEpisodeData().then(function(data) {
-      return self.widgets.updateByTag(tag, { data: JSON.stringify(data) });
-    }).catch(function() {});
-  }
   if (tag === 'now-playing') {
-    var npData = {
-      title: 'No episode playing',
-      image: 'https://podcast.precisionnaturalmedicine.com.au/icon-512x512.png',
-      currentTime: '0:00', duration: '--:--', isPlaying: false, slug: ''
-    };
-    return self.widgets ? self.widgets.updateByTag('now-playing', { data: JSON.stringify(npData) }) : Promise.resolve();
+    var data = JSON.stringify({ title: 'No episode playing', image: '/icon-512x512.png', currentTime: '0:00', duration: '--:--', isPlaying: false, slug: '' });
+    return self.widgets ? self.widgets.updateByTag(tag, { data }) : Promise.resolve();
   }
-  return Promise.resolve();
+  return fetchLatestEpisodeData().then(function(data) {
+    return self.widgets ? self.widgets.updateByTag(tag, { data: JSON.stringify(data) }) : Promise.resolve();
+  }).catch(function() {});
 }
 
 function fetchLatestEpisodeData() {
-  return fetch(RSS_FEED_WIDGET)
-    .then(function(r) { return r.text(); })
-    .then(function(text) {
-      var parser = new DOMParser ? new DOMParser() : null;
-      if (!parser) return {};
-      var doc = parser.parseFromString(text, 'text/xml');
-      var NS  = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
-      var items = Array.from(doc.querySelectorAll('item')).slice(0, 5);
-      var episodes = items.map(function(item) {
-        var title   = (item.querySelector('title') || {}).textContent || '';
-        var enc     = item.querySelector('enclosure');
-        var imgEl   = item.getElementsByTagNameNS(NS, 'image')[0];
-        var imgUrl  = imgEl ? imgEl.getAttribute('href') : 'https://podcast.precisionnaturalmedicine.com.au/icon-512x512.png';
-        var dur     = (item.getElementsByTagNameNS(NS, 'duration')[0] || {}).textContent || '';
-        var slug    = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 60);
-        var rawDesc = (item.querySelector('description') || {}).textContent || '';
-        var desc    = rawDesc.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').substring(0, 120) + '...';
-        var pubDate = (item.querySelector('pubDate') || {}).textContent || '';
-        return { title: title, image: imgUrl, duration: dur, slug: slug, description: desc, pubDate: pubDate };
-      });
-      return {
-        // Latest episode data
-        title:       episodes[0] ? episodes[0].title : 'No episodes',
-        image:       episodes[0] ? episodes[0].image : 'https://podcast.precisionnaturalmedicine.com.au/icon-512x512.png',
-        description: episodes[0] ? episodes[0].description : '',
-        pubDate:     episodes[0] ? episodes[0].pubDate : '',
-        duration:    episodes[0] ? episodes[0].duration : '',
-        slug:        episodes[0] ? episodes[0].slug : '',
-        // Episode list data
-        episodes:    episodes
-      };
+  return fetch(RSS_FEED).then(function(r) { return r.text(); }).then(function(text) {
+    var NS   = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
+    var doc  = new DOMParser().parseFromString(text, 'text/xml');
+    var items = Array.from(doc.querySelectorAll('item')).slice(0, 5);
+    var eps = items.map(function(item, i) {
+      var title  = (item.querySelector('title') || {}).textContent || '';
+      var imgEl  = item.getElementsByTagNameNS(NS, 'image')[0];
+      var imgUrl = imgEl ? imgEl.getAttribute('href') : '/icon-512x512.png';
+      var dur    = (item.getElementsByTagNameNS(NS, 'duration')[0] || {}).textContent || '';
+      var rawDesc= (item.querySelector('description') || {}).textContent || '';
+      var desc   = rawDesc.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').substring(0, 120);
+      var pub    = (item.querySelector('pubDate') || {}).textContent || '';
+      var slug   = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 60);
+      return { num: items.length - i, title, image: imgUrl, duration: dur, description: desc, pubDate: pub, slug };
     });
+    return { title: eps[0] ? eps[0].title : '', image: eps[0] ? eps[0].image : '/icon-512x512.png', description: eps[0] ? eps[0].description : '', pubDate: eps[0] ? eps[0].pubDate : '', duration: eps[0] ? eps[0].duration : '', slug: eps[0] ? eps[0].slug : '', episodes: eps };
+  });
 }
-
-// Update widgets on periodic sync too
-var _origPeriodicSync = self.onperiodicsync;
-self.addEventListener('periodicsync', function(e) {
-  if (e.tag === 'refresh-feed') {
-    e.waitUntil(
-      Promise.all([refreshFeedCache(), updateAllWidgets()])
-    );
-  }
-});
