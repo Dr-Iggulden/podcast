@@ -6,16 +6,96 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
+  "display_override": ["window-controls-overlay", "tabbed", "standalone"],
   "background_color": "#f7f4ee",
   "theme_color": "#2C4A35",
   "orientation": "any",
   "lang": "en-AU",
   "dir": "ltr",
+  "iarc_rating_id": "",
+  "prefer_related_applications": false,
   "categories": ["health", "education", "lifestyle", "music"],
+
   "launch_handler": {
-    "client_mode": "focus-existing"
+    "client_mode": ["focus-existing", "auto"]
   },
+
+  "note_taking": {
+    "new_note_url": "/notes"
+  },
+
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+
+  "protocol_handlers": [
+    {
+      "protocol": "web+podcast",
+      "url": "/?episode=%s"
+    }
+  ],
+
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": {
+        "audio/mpeg":  [".mp3"],
+        "audio/mp4":   [".m4a"],
+        "audio/ogg":   [".ogg"],
+        "audio/x-wav": [".wav"]
+      },
+      "icons": [
+        { "src": "icon-96x96.png", "sizes": "96x96", "type": "image/png" }
+      ],
+      "launch_type": "single-client"
+    }
+  ],
+
+  "widgets": [
+    {
+      "name": "Now Playing",
+      "tag": "now-playing",
+      "description": "Shows the currently playing episode with play/pause and skip controls",
+      "ms_ac_template": "/widgets/now-playing.json",
+      "data": "/widgets/now-playing-data.json",
+      "type": "application/json",
+      "screenshots": [
+        { "src": "screenshot-mobile-5.png", "sizes": "3375x6000", "label": "Now Playing widget" }
+      ],
+      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }],
+      "auth": false,
+      "update": 300
+    },
+    {
+      "name": "Latest Episode",
+      "tag": "latest-episode",
+      "description": "Shows the latest episode with artwork and a play button",
+      "ms_ac_template": "/widgets/latest-episode.json",
+      "data": "/widgets/latest-episode-data.json",
+      "type": "application/json",
+      "screenshots": [
+        { "src": "screenshot-mobile-5.png", "sizes": "3375x6000", "label": "Latest Episode widget" }
+      ],
+      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }],
+      "auth": false,
+      "update": 3600
+    },
+    {
+      "name": "Episode List",
+      "tag": "episode-list",
+      "description": "Browse and play recent episodes from the Windows widget board",
+      "ms_ac_template": "/widgets/episode-list.json",
+      "data": "/widgets/episode-list-data.json",
+      "type": "application/json",
+      "screenshots": [
+        { "src": "screenshot-mobile-1.png", "sizes": "3375x6000", "label": "Episode List widget" }
+      ],
+      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }],
+      "auth": false,
+      "update": 3600
+    }
+  ],
+
   "icons": [
     { "src": "icon-72x72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any" },
     { "src": "icon-96x96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any" },
@@ -26,6 +106,7 @@
     { "src": "icon-384x384.png", "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
     { "src": "icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
+
   "screenshots": [
     {
       "src": "screenshot-mobile-1.png",
@@ -54,21 +135,21 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "About The Podcast"
-      },
+    },
     {
       "src": "screenshot-mobile-5.png",
       "sizes": "3375x6000",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Latest Episode"
-      },
+    },
     {
       "src": "screenshot-mobile-6.png",
       "sizes": "3375x6000",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Stay In The Loop"
-      },
+    },
     {
       "src": "screenshot-mobile-7.png",
       "sizes": "897x1690",
@@ -84,12 +165,20 @@
       "label": "Desktop player view"
     }
   ],
+
   "shortcuts": [
     {
       "name": "Latest Episode",
       "short_name": "Latest",
       "url": "/",
       "description": "Play the latest episode",
+      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Notes",
+      "short_name": "Notes",
+      "url": "/notes",
+      "description": "Open your episode notes",
       "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
     },
     {
@@ -107,6 +196,7 @@
       "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
     }
   ],
+
   "share_target": {
     "action": "/",
     "method": "GET",
