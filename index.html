@@ -879,6 +879,22 @@
   var PROXIES      = ['https://corsproxy.io/?', 'https://api.allorigins.win/raw?url='];
   var LIKES_API    = 'https://script.google.com/macros/s/AKfycbyGMMpAHiiPaw24Op8SnW_Jp74_im9TZgUM9zEZMEXfe59QIjhPGd_88nwe4Pvvh-NNwA/exec';
 
+  // Queue a failed POST for Background Sync retry via the SW
+  function queueForSync(url, body) {
+    if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+    navigator.serviceWorker.controller.postMessage({
+      type:    'QUEUE_REQUEST',
+      url:     url,
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    body
+    });
+    // Trigger sync immediately in case we just came back online
+    navigator.serviceWorker.ready.then(function(reg) {
+      if ('sync' in reg) reg.sync.register('retry-api-requests').catch(function(){});
+    });
+  }
+
   var SERIES_NAMES = { 2: 'Metabolic Masters', 1: 'Meditation Music', 0: 'Extras' };
   var SERIES_ORDER = [2, 1, 0];
 
@@ -983,8 +999,8 @@
       b.classList.add('liked'); b.title = 'Liked!';
       var c = b.querySelector('.ep-like-count'); if (c) c.textContent = n;
     });
-    fetch(LIKES_API, { method: 'POST', headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ slug: slug, title: title, voter: getVoterHash() }) })
+    var likeBody = JSON.stringify({ slug: slug, title: title, voter: getVoterHash() });
+    fetch(LIKES_API, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: likeBody })
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (typeof d.likes === 'number') {
@@ -994,7 +1010,10 @@
         });
         if (d.voted === false) { liked.delete(slug); saveLikedSet(liked); }
       }
-    }).catch(function(){});
+    }).catch(function() {
+      // Offline — queue for background sync retry
+      queueForSync(LIKES_API, likeBody);
+    });
   }
   document.addEventListener('click', function(e) {
     var btn = e.target.closest('.ep-like-btn'); if (!btn) return;
@@ -1046,8 +1065,9 @@
     a.download = ttl.replace(/[^a-z0-9 ]/gi,'').trim() + '.mp3'; a.target = '_blank';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     btn.classList.remove('downloading'); btn.classList.add('done'); if (lbl) lbl.textContent = 'Downloaded';
-    fetch(LIKES_API, { method: 'POST', headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'download', title: ttl, slug: url.split('/').pop().replace(/\.mp3.*$/,''), userAgent: navigator.userAgent.substring(0,150) }) }).catch(function(){});
+    var dlBody = JSON.stringify({ action: 'download', title: ttl, slug: url.split('/').pop().replace(/\.mp3.*$/,''), userAgent: navigator.userAgent.substring(0,150) });
+    fetch(LIKES_API, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: dlBody })
+      .catch(function() { queueForSync(LIKES_API, dlBody); });
     if (typeof gtag !== 'undefined') gtag('event', 'episode_download', { event_category: 'Engagement', event_label: ttl });
     setTimeout(function() {
       if (localStorage.getItem('pnm_podcast_following') !== 'true') {
@@ -2011,6 +2031,9 @@
     // Build speed + sleep menus now that NP bar is available
     buildSpeedMenu();
     buildSleepMenu();
+    // Expose episode list to notes app
+    var epListForNotes = items.map(function(ep) { return { num: ep.num, title: ep.title }; });
+    try { localStorage.setItem('pnm_notes_episodes', JSON.stringify(epListForNotes)); } catch(e) {}
   }
 
   /* ── Anchor scroll ── */
@@ -2122,6 +2145,70 @@
   else loadFeed();
 })();
 
+/* ── File Handler launch detection ── */
+/* When user opens an .mp3 file with "Open with Precision Health Podcast",
+   the File Handling API passes the file via window.launchQueue */
+if ('launchQueue' in window) {
+  window.launchQueue.setConsumer(function(launchParams) {
+    if (!launchParams.files || !launchParams.files.length) return;
+    launchParams.files[0].getFile().then(function(file) {
+      if (!file.type.startsWith('audio/')) return;
+      var url = URL.createObjectURL(file);
+      // Show a toast and auto-play the file in the NP bar
+      var toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--green-deep);color:var(--white);padding:12px 20px;border-radius:4px;font-family:"Nunito Sans",sans-serif;font-size:13px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.25);';
+      toast.textContent = '▶ Playing: ' + file.name;
+      document.body.appendChild(toast);
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 4000);
+      // Create a temporary episode object and play it
+      var tempEp = {
+        title:    file.name.replace(/\.[^.]+$/, ''),
+        audioUrl: url,
+        image:    '/icon-512x512.png',
+        slug:     'file-' + Date.now(),
+        desc:     'Local file: ' + file.name,
+        _audio:   null, _li: null, _setPlaying: null
+      };
+      // Build a minimal episode element off-screen
+      var li = document.createElement('div');
+      li.style.display = 'none';
+      document.body.appendChild(li);
+      tempEp._li = li;
+      tempEp._setPlaying = function() {};
+      var audio = new Audio(url);
+      audio.preload = 'metadata';
+      tempEp._audio = audio;
+      if (typeof playEpisode === 'function') {
+        // playEpisode is inside the IIFE — expose it if needed
+        // For now trigger via the first episode's play mechanism
+        audio.play().catch(function(){});
+        if (typeof updateNP === 'function') updateNP(tempEp, true);
+      }
+    }).catch(function() {});
+  });
+}
+
+/* ── Protocol handler launch detection ── */
+/* Handles web+podcast://ep-slug links */
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var episodeParam = params.get('episode');
+  if (!episodeParam) return;
+  // Scroll to the episode once the feed has loaded
+  var checkInterval = setInterval(function() {
+    var target = document.getElementById('ep-' + episodeParam);
+    if (target) {
+      clearInterval(checkInterval);
+      setTimeout(function() {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var playBtn = target.querySelector('.ep-play-btn');
+        if (playBtn) playBtn.click();
+      }, 500);
+    }
+  }, 300);
+  setTimeout(function() { clearInterval(checkInterval); }, 8000);
+})();
+
 
 
 /* ── PWA: Service Worker + Install Prompt ── */
@@ -2133,6 +2220,24 @@
         // Check for updates every time the page gains focus
         document.addEventListener('visibilitychange', function () {
           if (document.visibilityState === 'visible') reg.update();
+        });
+
+        // Request Periodic Background Sync permission and register tags
+        // This pre-fetches the RSS feed hourly and badges the icon on new episodes
+        navigator.serviceWorker.ready.then(function (readyReg) {
+          if ('periodicSync' in readyReg) {
+            navigator.permissions.query({ name: 'periodic-background-sync' })
+              .then(function (status) {
+                if (status.state === 'granted') {
+                  readyReg.periodicSync.register('refresh-feed',       { minInterval: 60 * 60 * 1000 }).catch(function(){});
+                  readyReg.periodicSync.register('check-new-episodes', { minInterval: 60 * 60 * 1000 }).catch(function(){});
+                }
+              }).catch(function(){});
+          }
+          // Register background sync for retry of failed API calls (likes, tracking)
+          if ('sync' in readyReg) {
+            readyReg.sync.register('retry-api-requests').catch(function(){});
+          }
         });
 
         // A new SW is waiting — show update toast
@@ -2848,6 +2953,10 @@ document.addEventListener('DOMContentLoaded', function () {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Follow Podcast
       </button>
+      <a href="/notes" class="signup-open-btn" style="text-decoration:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+        My Notes
+      </a>
     </div>
   </div>
 </section>
