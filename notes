@@ -130,7 +130,10 @@
     <div class="notes-welcome" id="notes-welcome">
       <h2>Your Episode Notes</h2>
       <p>Take notes as you listen. Tag each note to an episode, search your library, and never lose a clinical insight again.</p>
-      <button class="notes-welcome-btn" id="welcome-new-btn">Create your first note</button>
+      <button class="notes-welcome-btn" id="welcome-new-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;vertical-align:middle;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Your First Note
+      </button>
     </div>
 
     <div id="editor-active" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
@@ -411,6 +414,28 @@ window.setEpisodesForNotes = function(epList) {
   try { localStorage.setItem('pnm_notes_episodes', JSON.stringify(epList)); } catch(e) {}
   populateEpisodeSelect();
 };
+</script>
+<!-- Floating action button — always visible on mobile -->
+<button id="fab-new-note" aria-label="New note" title="New note" style="
+  position: fixed; bottom: 24px; right: 24px; z-index: 200;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--green-deep); color: var(--white);
+  border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(44,74,53,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 300; line-height: 1;
+  transition: background 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;">+</button>
+
+<script>
+document.getElementById('fab-new-note').addEventListener('click', function() {
+  createNote();
+});
+document.getElementById('fab-new-note').addEventListener('mouseenter', function() {
+  this.style.transform = 'scale(1.1)';
+});
+document.getElementById('fab-new-note').addEventListener('mouseleave', function() {
+  this.style.transform = 'scale(1)';
+});
 </script>
 </body>
 </html>
