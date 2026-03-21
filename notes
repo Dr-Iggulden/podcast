@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Notes — The Precision Health Podcast</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icon-96x96.png" />
+  <meta name="theme-color" content="#2C4A35" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,600;0,6..12,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cormorant+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-deep:  #2C4A35;
+      --green-mid:   #2e674e;
+      --gold:        #B19443;
+      --gold-light:  #c9ab5a;
+      --cream:       #f7f4ee;
+      --cream-dark:  #ede9df;
+      --grey-nav:    #777777;
+      --grey-light:  #aaaaaa;
+      --white:       #ffffff;
+      --text-body:   #2e3d2f;
+      --danger:      #c0394a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { font-family: 'Nunito Sans', sans-serif; background: var(--cream); color: var(--text-body); display: flex; flex-direction: column; }
+
+    /* ── Header ── */
+    .notes-header {
+      background: var(--green-deep);
+      padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .notes-header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .notes-back { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 20px; padding: 4px; display: flex; align-items: center; flex-shrink: 0; }
+    .notes-back:hover { color: var(--white); }
+    .notes-header-title { font-family: 'Cormorant SC', serif; font-size: 13px; letter-spacing: 0.25em; color: var(--gold); white-space: nowrap; }
+    .notes-header-sub { font-family: 'Nunito Sans', sans-serif; font-size: 11px; color: rgba(255,255,255,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .notes-new-btn { background: var(--gold); color: var(--green-deep); border: none; border-radius: 2px; padding: 8px 16px; font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; flex-shrink: 0; transition: background 0.2s; white-space: nowrap; }
+    .notes-new-btn:hover { background: var(--gold-light); }
+
+    /* ── Layout ── */
+    .notes-layout { flex: 1; display: flex; overflow: hidden; }
+    .notes-sidebar { width: 280px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--cream-dark); display: flex; flex-direction: column; overflow: hidden; }
+    .notes-sidebar-search { padding: 12px 16px; border-bottom: 1px solid var(--cream-dark); position: relative; }
+    .notes-sidebar-search input { width: 100%; padding: 8px 12px 8px 32px; background: var(--cream); border: 1.5px solid var(--cream-dark); border-radius: 2px; font-family: 'Nunito Sans', sans-serif; font-size: 13px; outline: none; }
+    .notes-sidebar-search input:focus { border-color: var(--green-mid); }
+    .notes-sidebar-search svg { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: var(--grey-light); pointer-events: none; }
+    .notes-list { flex: 1; overflow-y: auto; }
+    .note-item { padding: 14px 16px; border-bottom: 1px solid var(--cream-dark); cursor: pointer; transition: background 0.15s; }
+    .note-item:hover { background: var(--cream); }
+    .note-item.active { background: rgba(44,74,53,0.06); border-left: 3px solid var(--gold); padding-left: 13px; }
+    .note-item-episode { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.2em; color: var(--gold); margin-bottom: 4px; }
+    .note-item-title { font-family: 'Nunito Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--green-deep); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-item-preview { font-family: 'Nunito Sans', sans-serif; font-size: 12px; color: var(--grey-nav); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-item-date { font-family: 'Nunito Sans', sans-serif; font-size: 10px; color: var(--grey-light); margin-top: 4px; }
+    .notes-empty { padding: 40px 20px; text-align: center; color: var(--grey-light); font-family: 'Cormorant SC', serif; font-size: 11px; letter-spacing: 0.15em; line-height: 2; }
+
+    /* ── Editor ── */
+    .notes-editor { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .notes-editor-toolbar { padding: 12px 20px; border-bottom: 1px solid var(--cream-dark); background: var(--white); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .notes-editor-toolbar button { background: none; border: 1.5px solid var(--cream-dark); border-radius: 2px; padding: 4px 10px; font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 700; color: var(--grey-nav); cursor: pointer; transition: all 0.15s; }
+    .notes-editor-toolbar button:hover { border-color: var(--gold); color: var(--green-deep); }
+    .notes-editor-toolbar .toolbar-sep { width: 1px; height: 20px; background: var(--cream-dark); margin: 0 4px; }
+    .notes-editor-toolbar .toolbar-right { margin-left: auto; display: flex; gap: 8px; }
+    .notes-editor-toolbar .delete-btn { color: var(--danger); border-color: rgba(192,57,74,0.25); }
+    .notes-editor-toolbar .delete-btn:hover { background: rgba(192,57,74,0.06); border-color: var(--danger); }
+    .notes-editor-toolbar .save-indicator { font-size: 10px; color: var(--grey-light); font-weight: 400; letter-spacing: 0.05em; }
+    .notes-editor-toolbar .save-indicator.saved { color: #4caf7a; }
+
+    .notes-editor-meta { padding: 16px 20px 0; background: var(--white); }
+    .notes-editor-meta input.note-title-input { width: 100%; font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; color: var(--green-deep); border: none; outline: none; background: transparent; margin-bottom: 4px; }
+    .notes-editor-meta input.note-title-input::placeholder { color: var(--grey-light); }
+    .notes-episode-tag { display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--cream-dark); }
+    .notes-episode-tag select { font-family: 'Nunito Sans', sans-serif; font-size: 11px; color: var(--grey-nav); border: 1.5px solid var(--cream-dark); border-radius: 2px; padding: 4px 8px; background: var(--cream); outline: none; cursor: pointer; }
+    .notes-episode-tag select:focus { border-color: var(--green-mid); }
+    .notes-episode-label { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.2em; color: var(--gold); }
+
+    .notes-content-area { flex: 1; overflow-y: auto; padding: 16px 20px; background: var(--white); }
+    textarea.note-body { width: 100%; height: 100%; min-height: 400px; font-family: 'Nunito Sans', sans-serif; font-size: 14px; line-height: 1.8; color: var(--text-body); border: none; outline: none; resize: none; background: transparent; }
+    textarea.note-body::placeholder { color: var(--grey-light); }
+
+    /* ── Empty state ── */
+    .notes-welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+    .notes-welcome h2 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: var(--green-deep); margin-bottom: 12px; }
+    .notes-welcome p { font-family: 'Nunito Sans', sans-serif; font-size: 14px; color: var(--grey-nav); line-height: 1.7; max-width: 320px; margin-bottom: 24px; }
+    .notes-welcome-btn { background: var(--green-deep); color: var(--white); border: none; border-radius: 2px; padding: 12px 24px; font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+    .notes-welcome-btn:hover { background: var(--green-mid); }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      .notes-sidebar { width: 100%; position: fixed; top: 57px; left: 0; right: 0; bottom: 0; z-index: 50; transform: translateX(-100%); transition: transform 0.3s ease; }
+      .notes-sidebar.open { transform: translateX(0); }
+      .notes-editor { width: 100%; }
+      .notes-layout { position: relative; }
+      .mobile-sidebar-toggle { display: flex; }
+    }
+    .mobile-sidebar-toggle { display: none; background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 20px; padding: 4px; align-items: center; }
+    .mobile-sidebar-toggle:hover { color: var(--white); }
+  </style>
+</head>
+<body>
+
+<header class="notes-header">
+  <div class="notes-header-left">
+    <a href="/" class="notes-back" title="Back to podcast">&#8592;</a>
+    <button class="mobile-sidebar-toggle" id="sidebar-toggle" title="My notes">&#9776;</button>
+    <div>
+      <div class="notes-header-title">My Notes</div>
+      <div class="notes-header-sub" id="header-sub">The Precision Health Podcast</div>
+    </div>
+  </div>
+  <button class="notes-new-btn" id="new-note-btn">+ New Note</button>
+</header>
+
+<div class="notes-layout">
+  <aside class="notes-sidebar" id="notes-sidebar">
+    <div class="notes-sidebar-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="notes-search" placeholder="Search notes..." autocomplete="off" />
+    </div>
+    <div class="notes-list" id="notes-list"></div>
+  </aside>
+
+  <div class="notes-editor" id="notes-editor">
+    <div class="notes-welcome" id="notes-welcome">
+      <h2>Your Episode Notes</h2>
+      <p>Take notes as you listen. Tag each note to an episode, search your library, and never lose a clinical insight again.</p>
+      <button class="notes-welcome-btn" id="welcome-new-btn">Create your first note</button>
+    </div>
+
+    <div id="editor-active" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+      <div class="notes-editor-toolbar">
+        <button onclick="formatText('bold')"><strong>B</strong></button>
+        <button onclick="formatText('italic')"><em>I</em></button>
+        <button onclick="formatText('heading')">H</button>
+        <button onclick="formatText('bullet')">&#8226; List</button>
+        <button onclick="formatText('numbered')">1. List</button>
+        <div class="toolbar-sep"></div>
+        <button onclick="formatText('timestamp')" title="Insert current playback time">&#9201; Timestamp</button>
+        <div class="toolbar-right">
+          <span class="save-indicator" id="save-indicator">All changes saved</span>
+          <button onclick="exportNote()">Export</button>
+          <button class="delete-btn" onclick="deleteCurrentNote()">Delete</button>
+        </div>
+      </div>
+      <div class="notes-editor-meta">
+        <input type="text" class="note-title-input" id="note-title" placeholder="Note title..." autocomplete="off" />
+        <div class="notes-episode-tag">
+          <span class="notes-episode-label">Episode</span>
+          <select id="note-episode-select">
+            <option value="">— Not linked to an episode —</option>
+          </select>
+        </div>
+      </div>
+      <div class="notes-content-area">
+        <textarea class="note-body" id="note-body" placeholder="Start typing your notes here...&#10;&#10;Use the toolbar above to format, or just write freely.&#10;&#10;Tip: click the &#9201; Timestamp button to insert the current playback time from the podcast player."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Notes App ── */
+var NOTES_KEY    = 'pnm_notes';
+var EPISODES_KEY = 'pnm_notes_episodes';
+var notes        = [];
+var currentId    = null;
+var saveTimer    = null;
+var episodes     = [];
+
+/* ── Storage ── */
+function loadNotes() {
+  try { notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]'); } catch(e) { notes = []; }
+}
+function saveNotes() {
+  try { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch(e) {}
+}
+function genId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 8); }
+
+/* ── Episode list (loaded from localStorage set by main app) ── */
+function loadEpisodes() {
+  try {
+    var raw = localStorage.getItem('pnm_notes_episodes');
+    if (raw) { episodes = JSON.parse(raw); return; }
+  } catch(e) {}
+  // Fallback: fetch RSS feed and parse titles
+  fetch('https://media.rss.com/sacredherbology/feed.xml')
+    .then(function(r) { return r.text(); })
+    .then(function(text) {
+      var matches = text.match(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>|<title>([^<]+)<\/title>/g) || [];
+      episodes = matches.slice(1).map(function(m, i) {
+        var title = m.replace(/<\/?title>|<!\[CDATA\[|\]\]>/g, '').trim();
+        return { num: matches.length - 1 - i, title: title };
+      });
+      populateEpisodeSelect();
+    }).catch(function() {});
+}
+
+function populateEpisodeSelect() {
+  var sel = document.getElementById('note-episode-select');
+  sel.innerHTML = '<option value="">— Not linked to an episode —</option>';
+  episodes.forEach(function(ep) {
+    var opt = document.createElement('option');
+    opt.value = ep.num;
+    opt.textContent = 'Ep ' + ep.num + ' — ' + ep.title.substring(0, 50);
+    sel.appendChild(opt);
+  });
+  // Set current value
+  if (currentId) {
+    var note = notes.find(function(n) { return n.id === currentId; });
+    if (note) sel.value = note.episodeNum || '';
+  }
+}
+
+/* ── Render notes list ── */
+function renderNotesList(filter) {
+  var list = document.getElementById('notes-list');
+  var filtered = filter
+    ? notes.filter(function(n) {
+        var q = filter.toLowerCase();
+        return (n.title + ' ' + n.body + ' ' + (n.episodeTitle || '')).toLowerCase().includes(q);
+      })
+    : notes.slice();
+  // Sort by updatedAt descending
+  filtered.sort(function(a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+  if (!filtered.length) {
+    list.innerHTML = '<div class="notes-empty">No notes yet.<br>Create your first one!</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(n) {
+    var preview = (n.body || '').replace(/\n/g, ' ').substring(0, 60);
+    var date    = n.updatedAt ? new Date(n.updatedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    var epLabel = n.episodeTitle ? 'Ep ' + n.episodeNum + ' — ' + n.episodeTitle.substring(0, 30) : 'Unlinked';
+    return '<div class="note-item' + (n.id === currentId ? ' active' : '') + '" data-id="' + n.id + '">' +
+      '<div class="note-item-episode">' + epLabel + '</div>' +
+      '<div class="note-item-title">' + (n.title || 'Untitled note') + '</div>' +
+      '<div class="note-item-preview">' + (preview || 'No content yet') + '</div>' +
+      '<div class="note-item-date">' + date + '</div>' +
+    '</div>';
+  }).join('');
+  list.querySelectorAll('.note-item').forEach(function(el) {
+    el.addEventListener('click', function() { openNote(el.getAttribute('data-id')); });
+  });
+}
+
+/* ── Open a note ── */
+function openNote(id) {
+  var note = notes.find(function(n) { return n.id === id; });
+  if (!note) return;
+  currentId = id;
+  document.getElementById('notes-welcome').style.display = 'none';
+  var editorActive = document.getElementById('editor-active');
+  editorActive.style.display = 'flex';
+  document.getElementById('note-title').value = note.title || '';
+  document.getElementById('note-body').value  = note.body  || '';
+  document.getElementById('note-episode-select').value = note.episodeNum || '';
+  document.getElementById('header-sub').textContent = note.episodeTitle || 'The Precision Health Podcast';
+  renderNotesList(document.getElementById('notes-search').value);
+  // Close mobile sidebar
+  document.getElementById('notes-sidebar').classList.remove('open');
+}
+
+/* ── Create new note ── */
+function createNote(episodeNum, episodeTitle) {
+  var note = {
+    id:           genId(),
+    title:        episodeTitle ? 'Notes — ' + episodeTitle.substring(0, 40) : '',
+    body:         '',
+    episodeNum:   episodeNum   || '',
+    episodeTitle: episodeTitle || '',
+    createdAt:    Date.now(),
+    updatedAt:    Date.now()
+  };
+  notes.unshift(note);
+  saveNotes();
+  renderNotesList();
+  openNote(note.id);
+  setTimeout(function() {
+    var titleInput = document.getElementById('note-title');
+    titleInput.focus(); titleInput.select();
+  }, 50);
+}
+
+/* ── Auto-save ── */
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  document.getElementById('save-indicator').textContent = 'Saving...';
+  document.getElementById('save-indicator').className = 'save-indicator';
+  saveTimer = setTimeout(function() { saveCurrentNote(); }, 600);
+}
+function saveCurrentNote() {
+  if (!currentId) return;
+  var note = notes.find(function(n) { return n.id === currentId; });
+  if (!note) return;
+  note.title        = document.getElementById('note-title').value.trim();
+  note.body         = document.getElementById('note-body').value;
+  var sel           = document.getElementById('note-episode-select');
+  note.episodeNum   = sel.value;
+  note.episodeTitle = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent.replace(/^Ep \d+ — /, '') : '';
+  note.updatedAt    = Date.now();
+  saveNotes();
+  renderNotesList(document.getElementById('notes-search').value);
+  document.getElementById('header-sub').textContent = note.episodeTitle || 'The Precision Health Podcast';
+  var ind = document.getElementById('save-indicator');
+  ind.textContent = 'All changes saved'; ind.className = 'save-indicator saved';
+}
+
+/* ── Delete ── */
+function deleteCurrentNote() {
+  if (!currentId) return;
+  if (!confirm('Delete this note? This cannot be undone.')) return;
+  notes = notes.filter(function(n) { return n.id !== currentId; });
+  saveNotes();
+  currentId = null;
+  document.getElementById('editor-active').style.display = 'none';
+  document.getElementById('notes-welcome').style.display = 'flex';
+  renderNotesList();
+}
+
+/* ── Format helpers ── */
+function formatText(type) {
+  var ta  = document.getElementById('note-body');
+  var s   = ta.selectionStart;
+  var e   = ta.selectionEnd;
+  var val = ta.value;
+  var sel = val.slice(s, e);
+  var insert = '';
+  if (type === 'bold')     insert = '**' + (sel || 'bold text') + '**';
+  if (type === 'italic')   insert = '_' + (sel || 'italic text') + '_';
+  if (type === 'heading')  insert = '\n## ' + (sel || 'Heading') + '\n';
+  if (type === 'bullet')   insert = '\n• ' + (sel || 'Item');
+  if (type === 'numbered') insert = '\n1. ' + (sel || 'Item');
+  if (type === 'timestamp') {
+    // Try to get current playback time from main app localStorage
+    var resume = null;
+    try { resume = JSON.parse(localStorage.getItem('pnm_podcast_resume') || 'null'); } catch(ex) {}
+    var ts = resume ? '[' + formatTime(resume.time) + ']' : '[' + new Date().toLocaleTimeString() + ']';
+    insert = ts + ' ';
+  }
+  ta.value = val.slice(0, s) + insert + val.slice(e);
+  ta.selectionStart = ta.selectionEnd = s + insert.length;
+  ta.focus();
+  scheduleSave();
+}
+function formatTime(s) {
+  s = Math.floor(s || 0);
+  var m = Math.floor(s / 60); s = s % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+/* ── Export ── */
+function exportNote() {
+  if (!currentId) return;
+  var note = notes.find(function(n) { return n.id === currentId; });
+  if (!note) return;
+  var content = (note.title ? '# ' + note.title + '\n\n' : '') +
+    (note.episodeTitle ? 'Episode: ' + note.episodeTitle + '\n\n' : '') +
+    (note.body || '') + '\n\n---\nThe Precision Health Podcast — precisionnaturalemedicine.com.au';
+  var blob = new Blob([content], { type: 'text/plain' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (note.title || 'note').replace(/[^a-z0-9 ]/gi, '').trim() + '.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', function() {
+  loadNotes();
+  loadEpisodes();
+  renderNotesList();
+
+  document.getElementById('new-note-btn').addEventListener('click', function() { createNote(); });
+  document.getElementById('welcome-new-btn').addEventListener('click', function() { createNote(); });
+  document.getElementById('sidebar-toggle').addEventListener('click', function() {
+    document.getElementById('notes-sidebar').classList.toggle('open');
+  });
+  document.getElementById('notes-search').addEventListener('input', function() {
+    renderNotesList(this.value);
+  });
+  document.getElementById('note-title').addEventListener('input', scheduleSave);
+  document.getElementById('note-body').addEventListener('input', scheduleSave);
+  document.getElementById('note-episode-select').addEventListener('change', scheduleSave);
+
+  // Check if opened from note_taking new_note_url or with a ?episode= param
+  var params = new URLSearchParams(window.location.search);
+  var epNum  = params.get('episode');
+  var epTitle = params.get('title');
+  var newNote = params.get('new');
+  if (newNote || epNum) {
+    createNote(epNum || '', epTitle || '');
+  } else if (notes.length > 0) {
+    // Auto-open most recent note
+    var sorted = notes.slice().sort(function(a,b) { return (b.updatedAt||0) - (a.updatedAt||0); });
+    openNote(sorted[0].id);
+  }
+});
+
+// Register SW
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// Expose episode list for the main app to call
+window.setEpisodesForNotes = function(epList) {
+  episodes = epList;
+  try { localStorage.setItem('pnm_notes_episodes', JSON.stringify(epList)); } catch(e) {}
+  populateEpisodeSelect();
+};
+</script>
+</body>
+</html>
