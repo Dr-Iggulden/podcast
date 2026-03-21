@@ -2,11 +2,15 @@
   "id": "com.precisionnaturalmedicine.podcast",
   "name": "The Precision Health Podcast",
   "short_name": "Precision Health",
-  "description": "Australia's evidence-based natural medicine podcast. Clinical-grade insight into herbal medicine, integrative health, longevity, and the science of living well. Hosted by Dr Luke Iggulden — Medical Herbalist, Clinical Naturopath & Pharmacognosist.",
+  "description": "Australia's evidence-based natural medicine podcast. Clinical-grade insight into herbal medicine, integrative health, longevity, and the science of living well. Hosted by Dr Luke Iggulden \u2014 Medical Herbalist, Clinical Naturopath & Pharmacognosist.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "tabbed", "standalone"],
+  "display_override": [
+    "window-controls-overlay",
+    "tabbed",
+    "standalone"
+  ],
   "background_color": "#f7f4ee",
   "theme_color": "#2C4A35",
   "orientation": "any",
@@ -14,43 +18,57 @@
   "dir": "ltr",
   "iarc_rating_id": "",
   "prefer_related_applications": false,
-  "categories": ["health", "education", "lifestyle", "music"],
-
+  "categories": [
+    "health",
+    "education",
+    "lifestyle",
+    "music"
+  ],
   "launch_handler": {
-    "client_mode": ["focus-existing", "auto"]
+    "client_mode": [
+      "focus-existing",
+      "auto"
+    ]
   },
-
   "note_taking": {
     "new_note_url": "/notes"
   },
-
   "edge_side_panel": {
     "preferred_width": 400
   },
-
   "protocol_handlers": [
     {
       "protocol": "web+podcast",
       "url": "/?episode=%s"
     }
   ],
-
   "file_handlers": [
     {
       "action": "/",
       "accept": {
-        "audio/mpeg":  [".mp3"],
-        "audio/mp4":   [".m4a"],
-        "audio/ogg":   [".ogg"],
-        "audio/x-wav": [".wav"]
+        "audio/mpeg": [
+          ".mp3"
+        ],
+        "audio/mp4": [
+          ".m4a"
+        ],
+        "audio/ogg": [
+          ".ogg"
+        ],
+        "audio/x-wav": [
+          ".wav"
+        ]
       },
       "icons": [
-        { "src": "icon-96x96.png", "sizes": "96x96", "type": "image/png" }
+        {
+          "src": "icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
       ],
       "launch_type": "single-client"
     }
   ],
-
   "widgets": [
     {
       "name": "Now Playing",
@@ -60,9 +78,18 @@
       "data": "/widgets/now-playing-data.json",
       "type": "application/json",
       "screenshots": [
-        { "src": "screenshot-mobile-5.png", "sizes": "3375x6000", "label": "Now Playing widget" }
+        {
+          "src": "screenshot-mobile-5.png",
+          "sizes": "3375x6000",
+          "label": "Now Playing widget"
+        }
       ],
-      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }],
+      "icons": [
+        {
+          "src": "icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ],
       "auth": false,
       "update": 300
     },
@@ -74,9 +101,18 @@
       "data": "/widgets/latest-episode-data.json",
       "type": "application/json",
       "screenshots": [
-        { "src": "screenshot-mobile-5.png", "sizes": "3375x6000", "label": "Latest Episode widget" }
+        {
+          "src": "screenshot-mobile-5.png",
+          "sizes": "3375x6000",
+          "label": "Latest Episode widget"
+        }
       ],
-      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }],
+      "icons": [
+        {
+          "src": "icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ],
       "auth": false,
       "update": 3600
     },
@@ -88,25 +124,72 @@
       "data": "/widgets/episode-list-data.json",
       "type": "application/json",
       "screenshots": [
-        { "src": "screenshot-mobile-1.png", "sizes": "3375x6000", "label": "Episode List widget" }
+        {
+          "src": "screenshot-mobile-1.png",
+          "sizes": "3375x6000",
+          "label": "Episode List widget"
+        }
       ],
-      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }],
+      "icons": [
+        {
+          "src": "icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ],
       "auth": false,
       "update": 3600
     }
   ],
-
   "icons": [
-    { "src": "icon-72x72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any" },
-    { "src": "icon-96x96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any" },
-    { "src": "icon-128x128.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
-    { "src": "icon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
-    { "src": "icon-152x152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
-    { "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-384x384.png", "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ],
-
   "screenshots": [
     {
       "src": "screenshot-mobile-1.png",
@@ -165,38 +248,68 @@
       "label": "Desktop player view"
     }
   ],
-
   "shortcuts": [
     {
       "name": "Latest Episode",
       "short_name": "Latest",
       "url": "/",
       "description": "Play the latest episode",
-      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Player Widget",
+      "short_name": "Widget",
+      "url": "/widget",
+      "description": "Compact player widget \u2014 now playing, latest episode, episode list",
+      "icons": [
+        {
+          "src": "icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "My Notes",
       "short_name": "Notes",
       "url": "/notes",
       "description": "Open your episode notes",
-      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Metabolic Masters",
       "short_name": "Metabolic",
       "url": "/#series-2",
       "description": "Browse the Metabolic Masters series",
-      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Meditation Music",
       "short_name": "Meditation",
       "url": "/#series-1",
       "description": "Browse the Meditation Music series",
-      "icons": [{ "src": "icon-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
-
   "share_target": {
     "action": "/",
     "method": "GET",
