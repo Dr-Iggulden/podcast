@@ -1227,15 +1227,7 @@ function exportPDF(note, slug) {
     + '</p>'
     + bodyHtml
     + '<p style="margin-top:40px;padding-top:12px;border-top:1px solid #eee;color:#aaa;font-size:11px;">'
-    + 'The Precision Health Podcast \u2014 podcast.precisionnaturalmedicine.com.au</p>';font-size:26px;color:#2C4A35;margin:0 0 6px;">'
-    + escHtml(note.title||'Untitled') + '</h1>'
-    + '<p style="font-size:12px;color:#888;margin:0 0 24px;padding-bottom:12px;border-bottom:1px solid #eee;">'
-    + (note.episodeTitle ? 'Episode: ' + escHtml(note.episodeTitle) + '  |  ' : '')
-    + new Date(note.updatedAt||Date.now()).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})
-    + '</p>'
-    + bodyHtml
-    + '<p style="margin-top:40px;padding-top:12px;border-top:1px solid #eee;color:#aaa;font-size:11px;">'
-    + 'The Precision Health Podcast — precisionnaturalmedicine.com.au</p>';
+    + 'The Precision Health Podcast \u2014 podcast.precisionnaturalmedicine.com.au</p>';
 
   document.body.appendChild(container);
   showBanner('Generating PDF...');
