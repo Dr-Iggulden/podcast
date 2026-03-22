@@ -162,12 +162,18 @@
     }
     /* Page settings panel */
     .page-settings-panel {
-      display: none; position: absolute; top: calc(100% + 4px); right: 0;
-      background: var(--white); border: 1px solid var(--cream-dark); border-radius: 4px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12); padding: 12px 14px; z-index: 500;
-      width: 260px; font-family: 'Nunito Sans', sans-serif;
+      display: none; position: fixed;
+      background: var(--white); border: 1px solid var(--cream-dark); border-radius: 6px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 0; z-index: 600;
+      width: 300px; font-family: 'Nunito Sans', sans-serif;
+      max-height: 80vh; overflow-y: auto;
     }
     .page-settings-panel.open { display: block; }
+    .ps-panel-header { display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px 8px; border-bottom: 1px solid var(--cream-dark); }
+    .ps-panel-title { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.25em; color: var(--gold); }
+    .ps-panel-close { background: none; border: none; cursor: pointer; color: var(--grey-nav); font-size: 16px; padding: 0 2px; line-height: 1; }
+    .ps-panel-body { padding: 12px 14px; }
     .ps-title { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.25em; color: var(--gold); margin-bottom: 8px; }
     .ps-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
     .ps-btn { font-size: 11px; font-family: 'Nunito Sans', sans-serif; padding: 4px 9px; border: 1.5px solid var(--cream-dark); border-radius: 2px; background: none; cursor: pointer; color: var(--grey-nav); transition: all 0.15s; white-space: nowrap; }
@@ -433,6 +439,7 @@
               <button class="hl-add-btn" id="hl-add-btn">Add</button>
               <button class="hl-clear-btn" id="hl-clear-btn">Clear</button>
             </div>
+            </div><!-- end ps-panel-body -->
           </div>
         </div>
 
@@ -445,7 +452,11 @@
             Page &#9660;
           </button>
           <div class="page-settings-panel" id="page-settings-panel">
-            <div class="ps-title">Page Style</div>
+            <div class="ps-panel-header">
+              <span class="ps-panel-title">Page Style</span>
+              <button class="ps-panel-close" id="ps-panel-close" title="Close">&times;</button>
+            </div>
+            <div class="ps-panel-body">
             <div class="ps-label">Lines</div>
             <div class="ps-row">
               <button class="ps-btn active" data-lines="none">None</button>
@@ -458,12 +469,20 @@
             <div class="ps-colour-row" id="ps-colour-row">
               <div class="ps-colour active" data-colour="#ffffff" style="background:#ffffff;border:1.5px solid #ddd;" title="White"></div>
               <div class="ps-colour" data-colour="#fefce8" style="background:#fefce8;" title="Legal Pad Yellow"></div>
+              <div class="ps-colour" data-colour="#fdf6e3" style="background:#fdf6e3;" title="Solarised"></div>
               <div class="ps-colour" data-colour="#fffbf0" style="background:#fffbf0;" title="Warm Cream"></div>
+              <div class="ps-colour" data-colour="#f5f0e8" style="background:#f5f0e8;" title="Parchment"></div>
               <div class="ps-colour" data-colour="#f0f4ff" style="background:#f0f4ff;" title="Cool Blue"></div>
+              <div class="ps-colour" data-colour="#e8f4fd" style="background:#e8f4fd;" title="Sky"></div>
               <div class="ps-colour" data-colour="#f0fff4" style="background:#f0fff4;" title="Mint"></div>
+              <div class="ps-colour" data-colour="#e8f5e9" style="background:#e8f5e9;" title="Sage"></div>
               <div class="ps-colour" data-colour="#fff0f6" style="background:#fff0f6;" title="Rose"></div>
+              <div class="ps-colour" data-colour="#fce4ec" style="background:#fce4ec;" title="Blush"></div>
+              <div class="ps-colour" data-colour="#f3e5f5" style="background:#f3e5f5;" title="Lavender"></div>
+              <div class="ps-colour" data-colour="#f5f5f5" style="background:#f5f5f5;" title="Light Grey"></div>
               <div class="ps-colour" data-colour="#1a1a2e" style="background:#1a1a2e;" title="Dark Mode"></div>
               <div class="ps-colour" data-colour="#1e3a2f" style="background:#1e3a2f;" title="Forest Dark"></div>
+              <div class="ps-colour" data-colour="#1a2a3a" style="background:#1a2a3a;" title="Navy Dark"></div>
             </div>
             <div class="ps-label" style="margin-top:6px;">Line Colour</div>
             <div class="ps-colour-row" id="ps-linecolour-row">
@@ -2320,58 +2339,100 @@ function savePageSettings() {
   applyPageSettings();
 }
 
-// Wire page settings panel
+// Wire page settings panel — fixed position under button
+function openPageSettings() {
+  var panel = document.getElementById('page-settings-panel');
+  var btn   = document.getElementById('tb-page-settings');
+  if (!panel || !btn) return;
+  var r = btn.getBoundingClientRect();
+  // Position below button, aligned right if near right edge
+  var left = r.left;
+  var top  = r.bottom + 6;
+  // Clamp to viewport
+  var panelW = 300;
+  if (left + panelW > window.innerWidth - 8) left = window.innerWidth - panelW - 8;
+  if (left < 8) left = 8;
+  // Clamp bottom
+  var maxH = window.innerHeight - top - 16;
+  panel.style.left      = left + 'px';
+  panel.style.top       = top  + 'px';
+  panel.style.maxHeight = Math.min(maxH, 480) + 'px';
+  panel.classList.toggle('open');
+}
+
 document.getElementById('tb-page-settings').addEventListener('click', function(e) {
   e.stopPropagation();
-  document.getElementById('page-settings-panel').classList.toggle('open');
+  openPageSettings();
 });
-document.addEventListener('click', function(e) {
-  if (!document.getElementById('page-settings-wrap').contains(e.target))
+
+// Close panel button
+document.addEventListener('DOMContentLoaded', function() {
+  var closeBtn = document.getElementById('ps-panel-close');
+  if (closeBtn) closeBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
     document.getElementById('page-settings-panel').classList.remove('open');
+  });
+});
+
+// Close on outside click — use mousedown so it fires before focus changes
+document.addEventListener('mousedown', function(e) {
+  var panel = document.getElementById('page-settings-panel');
+  var btn   = document.getElementById('tb-page-settings');
+  if (!panel || !panel.classList.contains('open')) return;
+  if (!panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+});
+
+// Reposition on scroll/resize
+window.addEventListener('resize', function() {
+  var panel = document.getElementById('page-settings-panel');
+  if (panel && panel.classList.contains('open')) openPageSettings();
 });
 
 // Lines buttons
 document.querySelectorAll('.ps-btn[data-lines]').forEach(function(btn) {
+  // Set initial active state
+  btn.classList.toggle('active', btn.getAttribute('data-lines') === pageSettings.lines);
   btn.addEventListener('click', function() {
     pageSettings.lines = btn.getAttribute('data-lines');
     document.querySelectorAll('.ps-btn[data-lines]').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
     savePageSettings();
   });
-  if (btn.getAttribute('data-lines') === pageSettings.lines) btn.classList.add('active');
 });
 
 // Colour swatches
 document.querySelectorAll('.ps-colour[data-colour]').forEach(function(sw) {
+  sw.classList.toggle('active', sw.getAttribute('data-colour') === pageSettings.colour);
   sw.addEventListener('click', function() {
     pageSettings.colour = sw.getAttribute('data-colour');
     document.querySelectorAll('.ps-colour[data-colour]').forEach(function(s){ s.classList.remove('active'); });
     sw.classList.add('active');
     savePageSettings();
   });
-  if (sw.getAttribute('data-colour') === pageSettings.colour) sw.classList.add('active');
 });
 
 // Line colour swatches
 document.querySelectorAll('.ps-colour[data-linecolour]').forEach(function(sw) {
+  sw.classList.toggle('active', sw.getAttribute('data-linecolour') === pageSettings.lineColour);
   sw.addEventListener('click', function() {
     pageSettings.lineColour = sw.getAttribute('data-linecolour');
     document.querySelectorAll('.ps-colour[data-linecolour]').forEach(function(s){ s.classList.remove('active'); });
     sw.classList.add('active');
     savePageSettings();
   });
-  if (sw.getAttribute('data-linecolour') === pageSettings.lineColour) sw.classList.add('active');
 });
 
 // Margin buttons
 document.querySelectorAll('.ps-btn[data-margin]').forEach(function(btn) {
+  btn.classList.toggle('active', btn.getAttribute('data-margin') === pageSettings.margin);
   btn.addEventListener('click', function() {
     pageSettings.margin = btn.getAttribute('data-margin');
     document.querySelectorAll('.ps-btn[data-margin]').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
     savePageSettings();
   });
-  if (btn.getAttribute('data-margin') === pageSettings.margin) btn.classList.add('active');
 });
 
 // Apply saved settings on load
