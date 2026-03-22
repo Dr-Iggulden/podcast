@@ -73,13 +73,10 @@
     .nav-logo { display: flex; flex-direction: column; text-decoration: none; line-height: 1.1; }
     .nav-logo-top { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 300; font-size: 18px; color: var(--green-deep); letter-spacing: 0.02em; }
     .nav-logo-sub { font-family: 'Cormorant SC', serif; font-weight: 400; font-size: 9px; color: var(--green-deep); letter-spacing: 0.22em; text-transform: uppercase; }
-    .nav-links { display: flex; align-items: center; gap: 18px; list-style: none; }
+    .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
     .nav-links a { font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey-nav); text-decoration: none; transition: color 0.2s; }
     .nav-links a:hover { color: var(--green-deep); }
     .nav-links a.active { color: var(--gold); }
-    .nav-notes-icon { display: inline-flex; align-items: center; gap: 4px; color: var(--grey-nav) !important; }
-    .nav-notes-icon:hover { color: var(--green-deep) !important; }
-    .nav-notes-icon svg { flex-shrink: 0; }
     .nav-book { background: var(--green-deep) !important; color: var(--white) !important; padding: 9px 18px !important; border-radius: 2px; transition: background 0.2s !important; }
     .nav-book:hover { background: var(--green-mid) !important; }
     .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
@@ -307,7 +304,7 @@
     /* NOW PLAYING BAR — fixed pop-out player */
     #now-playing { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300; background: var(--white); border-top: 2px solid var(--gold); box-shadow: 0 -4px 24px rgba(44,74,53,0.13); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
     #now-playing.active { display: block; transform: translateY(0); }
-    .np-inner { max-width: 1200px; margin: 0 auto; padding: 14px 20px; display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
+    .np-inner { max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; }
     .np-art { width: 56px; height: 56px; border-radius: 4px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 10px rgba(44,74,53,0.14); }
     .np-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .np-body { min-width: 0; }
@@ -354,35 +351,6 @@
     .np-pip-btn:hover { background: var(--cream); color: var(--green-deep); }
     .np-pip-btn.active { background: var(--green-deep); color: var(--white); }
     .np-pip-btn:not(.pip-supported) { display: none; }
-    /* ── Floating mini-player fallback (all browsers) ── */
-    #float-player {
-      display: none; position: fixed; bottom: 80px; right: 20px; z-index: 9999;
-      width: 300px; background: var(--green-deep); border-radius: 8px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.35); overflow: hidden;
-      user-select: none; touch-action: none;
-    }
-    #float-player.open { display: block; }
-    #float-player.minimised { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; bottom: 90px; }
-    #float-player.minimised .float-body { display: none; }
-    #float-player.minimised #float-art { width: 56px; height: 56px; }
-    #float-player.minimised #float-minimise { display: none; }
-    #float-drag-handle { height: 6px; background: rgba(255,255,255,0.1); cursor: grab; display: flex; align-items: center; justify-content: center; }
-    #float-drag-handle::after { content: ''; width: 24px; height: 2px; background: rgba(255,255,255,0.3); border-radius: 1px; }
-    #float-art { width: 100%; height: 80px; object-fit: cover; display: block; filter: brightness(0.7); }
-    .float-body { padding: 10px 12px 12px; }
-    #float-title { font-family: 'Nunito Sans', sans-serif; font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
-    .float-progress { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-    .float-time { font-size: 9px; color: rgba(255,255,255,0.5); font-family: monospace; }
-    .float-bar { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 3px; cursor: pointer; position: relative; }
-    .float-bar-fill { height: 100%; background: #B19443; border-radius: 3px; width: 0%; pointer-events: none; }
-    .float-controls { display: flex; align-items: center; justify-content: space-between; }
-    .float-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.8); padding: 4px; display: flex; align-items: center; }
-    .float-btn:hover { color: #fff; }
-    .float-play-btn { width: 36px; height: 36px; border-radius: 50%; background: #B19443; color: var(--green-deep); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .float-play-btn:hover { background: #c9ab5a; }
-    #float-speed { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.1); border: none; border-radius: 3px; padding: 3px 6px; cursor: pointer; }
-    #float-minimise, #float-close { font-size: 14px; line-height: 1; }
-    .float-top-bar { display: flex; justify-content: flex-end; gap: 2px; padding: 4px 8px 0; }
     .np-share-row { display: flex; align-items: center; gap: 5px; }
     .np-share-btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Nunito Sans', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid rgba(177,148,67,0.35); background: rgba(177,148,67,0.05); color: var(--green-deep); padding: 4px 8px; border-radius: 2px; cursor: pointer; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
     .np-share-btn:hover { border-color: var(--gold); background: rgba(177,148,67,0.12); }
@@ -403,11 +371,11 @@
     .np-sleep-menu button.active { color: var(--gold); font-weight: 700; }
     .np-sleep-wrap { position: relative; flex-shrink: 0; }
     @media (max-width: 900px) {
-      .np-vol-wrap { display: flex; }
+      .np-vol-wrap { display: none; }
       .np-share-row { display: none; }
     }
     @media (max-width: 640px) {
-      .np-inner { grid-template-columns: 46px 1fr auto; gap: 10px; padding: 12px; }
+      .np-inner { grid-template-columns: 46px 1fr auto; gap: 10px; padding: 8px 12px; }
       .np-art { width: 46px; height: 46px; }
       .np-title { font-size: 12px; }
       .np-controls { gap: 4px; }
@@ -662,13 +630,8 @@
       <li><a href="https://precisionnaturalmedicine.com.au/dispensary">Dispensary</a></li>
       <li><a href="https://precisionnaturalmedicine.com.au/blog">Blog</a></li>
       <li><a href="#" class="active">Podcast</a></li>
+      <li><a href="/notes">My Notes</a></li>
       <li><a href="https://precisionnaturalmedicine.com.au/contact">Contact</a></li>
-      <li>
-        <a href="/notes.html" class="nav-notes-icon" title="My Notes" aria-label="My Notes" target="_blank" rel="noopener">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          Notes
-        </a>
-      </li>
       <li><a href="https://precisionnaturalmedicine.com.au/bookings" class="nav-book">Bookings</a></li>
     </ul>
     <button class="nav-hamburger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.toggle('open')">
@@ -684,7 +647,7 @@
     <a href="https://precisionnaturalmedicine.com.au/dispensary">Dispensary</a>
     <a href="https://precisionnaturalmedicine.com.au/blog">Blog</a>
     <a href="#" class="active">Podcast</a>
-    <a href="/notes.html" target="_blank" rel="noopener">My Notes</a>
+    <a href="/notes">My Notes</a>
     <a href="https://precisionnaturalmedicine.com.au/contact">Contact</a>
   </div>
 </nav>
@@ -801,7 +764,7 @@
 <!-- NOW PLAYING BAR — fixed pop-out player -->
 <div id="now-playing">
   <div class="np-inner">
-    <div class="np-art" id="np-art-wrap" style="cursor:pointer;" title="View episode details"><img id="np-art-img" src="" alt="" /></div>
+    <div class="np-art"><img id="np-art-img" src="" alt="" /></div>
     <div class="np-body">
       <p class="np-label">Now Playing</p>
       <p class="np-title" id="np-title">&ndash;</p>
@@ -850,10 +813,6 @@
     </div>
     <div class="np-actions">
       <div class="np-share-row" id="np-share-row"></div>
-      <!-- Take Notes button -->
-      <button class="np-pip-btn" id="np-notes-btn" aria-label="Take notes" title="Take notes for this episode" onclick="window.open('/notes.html?episode=' + (window._currentEp ? encodeURIComponent(window._currentEp.num||'') : '') + '&title=' + (window._currentEp ? encodeURIComponent(window._currentEp.title||'') : '') + '&new=1', '_blank')" style="display:flex;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      </button>
       <button class="np-pip-btn" id="np-pip-btn" aria-label="Mini player" title="Float mini player">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><rect x="12" y="11" width="9" height="7" rx="1" fill="currentColor" stroke="none"/></svg>
       </button>
@@ -874,10 +833,6 @@
         <button class="ep-modal-play-btn" id="ep-modal-play-btn">
           <svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1l10 6L1 13V1z"/></svg>
           <span id="ep-modal-play-label">Play Episode</span>
-        </button>
-        <button class="ep-modal-notes-btn" id="ep-modal-notes-btn" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.85);border:1.5px solid rgba(255,255,255,0.2);border-radius:2px;padding:7px 14px;font-family:'Nunito Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          Take Notes
         </button>
       </div>
       <button class="ep-modal-close" id="ep-modal-close" aria-label="Close">&times;</button>
@@ -930,8 +885,7 @@
   var RSS_FEED     = 'https://media.rss.com/sacredherbology/feed.xml';
   var FALLBACK_ART = 'https://img.rss.com/sacredherbology/536/20260319_050354_abd3b4c55ca870bf346d5bef81cab69a.png';
   var BASE_URL     = 'https://podcast.precisionnaturalmedicine.com.au/';
-  var RSS2JSON_API = 'https://api.rss2json.com/v1/api.json?rss_url=';
-  var PROXIES      = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?'];
+  var PROXIES      = ['https://corsproxy.io/?', 'https://api.allorigins.win/raw?url='];
   var LIKES_API    = 'https://script.google.com/macros/s/AKfycbyGMMpAHiiPaw24Op8SnW_Jp74_im9TZgUM9zEZMEXfe59QIjhPGd_88nwe4Pvvh-NNwA/exec';
 
   // Queue a failed POST for Background Sync retry via the SW
@@ -1521,27 +1475,6 @@
   modalClose.addEventListener('click', closeModal);
   modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
-
-  // Thumbnail click in player bar → open modal for current episode
-  var npArtWrap = document.getElementById('np-art-wrap');
-  if (npArtWrap) {
-    npArtWrap.addEventListener('click', function() {
-      if (window._currentEp) openModal(window._currentEp);
-    });
-  }
-
-  // Take Notes button in modal
-  var modalNotesBtn = document.getElementById('ep-modal-notes-btn');
-  if (modalNotesBtn) {
-    modalNotesBtn.addEventListener('click', function() {
-      if (!modalCurrentEp) return;
-      var ep = modalCurrentEp;
-      window.open('/notes.html?episode=' + encodeURIComponent(ep.num||'')
-        + '&title=' + encodeURIComponent(ep.title||'')
-        + '&new=1', '_blank');
-    });
-  }
-
   modalPlayBtn.addEventListener('click', function() {
     if (!modalCurrentEp) return;
     var ep = modalCurrentEp;
@@ -1566,9 +1499,6 @@
     currentAudio      = ep._audio;
     currentLi         = ep._li;
     currentEp         = ep;
-    // Expose globally for PiP and Notes button
-    window._currentAudio = ep._audio;
-    window._currentEp    = ep;
     currentSetPlaying = ep._setPlaying;
     currentAudio.playbackRate = playbackRate;
     if (npVolSlider) currentAudio.volume = parseFloat(npVolSlider.value);
@@ -1699,42 +1629,6 @@
   }
 
   /* ── XML parse ── */
-  // Parse rss2json API response (JSON format)
-  function parseRss2Json(items) {
-    return items.map(function(item, idx) {
-      var enc      = item.enclosure || {};
-      var audioUrl = enc.link || '';
-      var image    = (enc.image || item.thumbnail || FALLBACK_ART || '').replace(/\?.*$/, '');
-      var title    = item.title || '';
-      var slug     = slugify(title);
-      var rawDesc  = item.description || item.content || '';
-      var hasHtml  = /<[a-z][\s\S]*>/i.test(rawDesc);
-      // Duration: enc.duration is in seconds
-      var durStr   = '';
-      if (enc.duration) {
-        var d = parseInt(enc.duration, 10);
-        var h = Math.floor(d/3600), m = Math.floor((d%3600)/60), s = d%60;
-        durStr = h > 0
-          ? h + ':' + (m<10?'0':'') + m + ':' + (s<10?'0':'') + s
-          : m + ':' + (s<10?'0':'') + s;
-      }
-      return {
-        num:      items.length - idx,
-        title:    title,
-        pubDate:  item.pubDate || '',
-        desc:     hasHtml ? stripHtml(rawDesc) : rawDesc.replace(/\s+/g,' ').trim(),
-        descHtml: hasHtml ? rawDesc : null,
-        audioUrl: audioUrl,
-        duration: durStr,
-        image:    image,
-        slug:     slug,
-        url:      BASE_URL + '#ep-' + slug,
-        season:   0,
-        _audio: null, _li: null, _setPlaying: null,
-      };
-    });
-  }
-
   function parseItems(text) {
     var doc = new DOMParser().parseFromString(text, 'text/xml');
     var NS  = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
@@ -1804,9 +1698,6 @@
             '<div class="ep-featured-foot">' +
               (ep.duration ? '<span class="ep-duration">' + ep.duration + '</span>' : '') +
               '<button class="ep-play-btn ep-play-btn--lg">' + PLAY_ICON_FT + '<span class="ep-btn-label">Play Episode</span></button>' +
-              '<a class="ep-notes-link" href="/notes.html?episode=' + ep.num + '&title=' + encodeURIComponent(ep.title) + '&new=1' target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:var(--gold);font-family:'Nunito Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:8px 0;">' +
-              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
-              ' Take Notes</a>' +
               '<button class="ep-fav-btn" data-slug="' + ep.slug + '" title="Favourite"><svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></button>' +
             '</div>' +
             '<div class="ep-share"><span class="ep-share-label">Share</span>' + shareHtml + makeDownloadBtn(ep) + '</div>' +
@@ -1838,9 +1729,6 @@
             (ep.duration ? '<p class="ep-duration">' + ep.duration + '</p>' : '') +
             '<button class="ep-fav-btn" data-slug="' + ep.slug + '" title="Favourite"><svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></button>' +
             '<button class="ep-play-btn">' + PLAY_ICON + '<span class="ep-btn-label">Play</span></button>' +
-            '<a class="ep-notes-link" href="/notes.html?episode=' + ep.num + '&title=' + encodeURIComponent(ep.title) + '&new=1' target="_blank" rel="noopener" title="Take notes for this episode" style="display:inline-flex;align-items:center;color:var(--grey-nav);padding:4px;border-radius:2px;transition:color 0.15s;">' +
-            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
-            '</a>' +
           '</div>' +
           '<div class="ep-player">' +
             '<div class="ep-progress-wrap">' +
@@ -2250,29 +2138,16 @@
       .catch(function() { return fetchWithFallback(proxies, url, i + 1); });
   }
   function loadFeed() {
-    // Try rss2json first — reliable CORS-enabled JSON API
-    fetch(RSS2JSON_API + encodeURIComponent(RSS_FEED))
-      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function(data) {
-        if (data.status !== 'ok' || !data.items || !data.items.length) throw new Error('no items');
-        var items = parseRss2Json(data.items);
-        if (items.length) { buildList(items); return; }
-        throw new Error('parse failed');
+    fetch(RSS_FEED)
+      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .catch(function() { return fetchWithFallback(PROXIES, RSS_FEED, 0); })
+      .then(function(text) {
+        var items = parseItems(text);
+        if (items.length) buildList(items);
+        else document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:\'Cormorant SC\',serif;letter-spacing:0.15em;font-size:12px;">No episodes found.</p>';
       })
       .catch(function() {
-        // Fallback: try direct XML fetch (may work if CORS headers added later)
-        return fetch(RSS_FEED)
-          .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
-          .catch(function() { return fetchWithFallback(PROXIES, RSS_FEED, 0); })
-          .then(function(text) {
-            var items = parseItems(text);
-            if (items.length) { buildList(items); return; }
-            throw new Error('xml parse failed');
-          });
-      })
-      .catch(function(err) {
-        console.warn('Feed load failed:', err);
-        document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:'Cormorant SC',serif;letter-spacing:0.15em;font-size:12px;">Unable to load episodes — check your connection and refresh.</p>';
+        document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:\'Cormorant SC\',serif;letter-spacing:0.15em;font-size:12px;">Episodes temporarily unavailable.</p>';
       });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadFeed);
@@ -3026,11 +2901,23 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       function syncPiP() {
-        // Use the globally exposed current episode — always accurate
-        var ep    = window._currentEp;
-        var audio = window._currentAudio;
-        if (!ep || !audio) return;
-        pipImg.src           = ep.image || '';
+        var eps = window._allEpisodes;
+        // Find currently playing episode
+        var ep = null;
+        if (eps) {
+          for (var i = 0; i < eps.length; i++) {
+            if (eps[i]._audio && !eps[i]._audio.paused) { ep = eps[i]; break; }
+          }
+          // Fall back to last played
+          if (!ep) {
+            for (var j = 0; j < eps.length; j++) {
+              if (eps[j]._audio && eps[j]._audio.currentTime > 0) { ep = eps[j]; break; }
+            }
+          }
+        }
+        if (!ep || !ep._audio) return;
+        var audio = ep._audio;
+        pipImg.src         = ep.image || '';
         pipTitle.textContent = ep.title || '';
         var dur = audio.duration || 0;
         var cur = audio.currentTime || 0;
@@ -3049,28 +2936,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Controls
       pipPlay.addEventListener('click', function () {
-        var a = window._currentAudio; if (!a) return;
-        if (!a.paused) { a.pause(); pipIcon.innerHTML = PLAY_PATH; }
-        else { a.play(); pipIcon.innerHTML = PAUSE_PATH; }
-        syncPiP();
+        var eps = window._allEpisodes; if (!eps) return;
+        for (var i = 0; i < eps.length; i++) {
+          var a = eps[i]._audio;
+          if (!a) continue;
+          if (!a.paused) { a.pause(); pipIcon.innerHTML = PLAY_PATH; return; }
+          if (a.currentTime > 0) { a.play(); pipIcon.innerHTML = PAUSE_PATH; return; }
+        }
+        // Nothing playing — play first episode
+        var playBtn = document.querySelector('.ep-play-btn');
+        if (playBtn) playBtn.click();
       });
       pipBack.addEventListener('click', function () {
-        var a = window._currentAudio; if (!a) return;
-        a.currentTime = Math.max(0, a.currentTime - 15); syncPiP();
+        var eps = window._allEpisodes; if (!eps) return;
+        for (var i = 0; i < eps.length; i++) {
+          var a = eps[i]._audio;
+          if (a && (a.currentTime > 0 || !a.paused)) { a.currentTime = Math.max(0, a.currentTime - 15); syncPiP(); return; }
+        }
       });
       pipFwd.addEventListener('click', function () {
-        var a = window._currentAudio; if (!a) return;
-        a.currentTime = Math.min(a.duration || 0, a.currentTime + 15); syncPiP();
+        var eps = window._allEpisodes; if (!eps) return;
+        for (var i = 0; i < eps.length; i++) {
+          var a = eps[i]._audio;
+          if (a && (a.currentTime > 0 || !a.paused)) { a.currentTime = Math.min(a.duration || 0, a.currentTime + 15); syncPiP(); return; }
+        }
       });
       pipSpd.addEventListener('click', function () {
         var speeds = [1, 1.25, 1.5, 1.75, 2, 0.75, 0.5];
-        var a = window._currentAudio; if (!a) return;
-        var next = speeds[(speeds.indexOf(a.playbackRate) + 1) % speeds.length] || 1;
-        a.playbackRate = next;
-        pipSpd.textContent = (next === 1 ? '1' : next) + '\u00d7';
-        var mainSpd = document.getElementById('np-speed-btn');
-        if (mainSpd) mainSpd.textContent = pipSpd.textContent;
-        syncPiP();
+        var eps = window._allEpisodes; if (!eps) return;
+        for (var i = 0; i < eps.length; i++) {
+          var a = eps[i]._audio;
+          if (a && (a.currentTime > 0 || !a.paused)) {
+            var cur = a.playbackRate;
+            var next = speeds[(speeds.indexOf(cur) + 1) % speeds.length] || 1;
+            // Apply to all episodes for consistency
+            for (var j = 0; j < eps.length; j++) { if (eps[j]._audio) eps[j]._audio.playbackRate = next; }
+            pipSpd.textContent = (next === 1 ? '1' : next) + '\u00d7';
+            // Sync main speed button
+            var mainSpd = document.getElementById('np-speed-btn');
+            if (mainSpd) mainSpd.textContent = (next === 1 ? '1' : next) + '\u00d7';
+            return;
+          }
+        }
       });
 
       // Scrubber drag
@@ -3112,141 +3019,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     }).catch(function (err) {
       console.warn('PiP failed:', err);
-      // PiP API failed — open floating mini-player instead
-      openFloatPlayer();
     });
   }
 
 });
-
-/* ── Floating Mini-Player — works on all browsers/devices ── */
-(function() {
-  var fp         = document.getElementById('float-player');
-  var fpArt      = document.getElementById('float-art');
-  var fpTitle    = document.getElementById('float-title');
-  var fpCur      = document.getElementById('float-cur');
-  var fpEnd      = document.getElementById('float-end');
-  var fpFill     = document.getElementById('float-bar-fill');
-  var fpBar      = document.getElementById('float-bar');
-  var fpPlayBtn  = document.getElementById('float-play');
-  var fpPlayIcon = document.getElementById('float-play-icon');
-  var fpBack     = document.getElementById('float-back');
-  var fpFwd      = document.getElementById('float-fwd');
-  var fpSpeed    = document.getElementById('float-speed');
-  var fpMinBtn   = document.getElementById('float-minimise');
-  var fpClose    = document.getElementById('float-close');
-  var fpNotes    = document.getElementById('float-notes-btn');
-  var fpHandle   = document.getElementById('float-drag-handle');
-  var fpTick     = null;
-  var PLAY_PATH  = '<path d="M1 1l12 7L1 15V1z" fill="currentColor"/>';
-  var PAUSE_PATH = '<rect x="1" y="1" width="4" height="14" rx="1" fill="currentColor"/><rect x="9" y="1" width="4" height="14" rx="1" fill="currentColor"/>';
-
-  function fmtT(s){ s=Math.floor(s||0); var m=Math.floor(s/60); s=s%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
-
-  function syncFP() {
-    var a = window._currentAudio;
-    var ep = window._currentEp;
-    if (!a || !ep) return;
-    fpArt.src = ep.image || '';
-    fpTitle.textContent = ep.title || '';
-    var dur = a.duration || 0, cur = a.currentTime || 0;
-    fpCur.textContent = fmtT(cur);
-    fpEnd.textContent = fmtT(dur);
-    fpFill.style.width = (dur ? cur/dur*100 : 0) + '%';
-    fpPlayIcon.innerHTML = a.paused ? PLAY_PATH : PAUSE_PATH;
-    fpSpeed.textContent = (a.playbackRate === 1 ? '1' : a.playbackRate) + '\u00d7';
-    if (fpNotes) fpNotes.href = '/notes.html?episode=' + encodeURIComponent(ep.num||'') + '&title=' + encodeURIComponent(ep.title||'') + '&new=1';
-  }
-
-  window.openFloatPlayer = function() {
-    if (!fp) return;
-    fp.classList.add('open');
-    fp.classList.remove('minimised');
-    syncFP();
-    clearInterval(fpTick);
-    fpTick = setInterval(syncFP, 500);
-  };
-
-  window.closeFloatPlayer = function() {
-    fp.classList.remove('open');
-    clearInterval(fpTick);
-  };
-
-  // PiP button on player also opens float player on non-PiP browsers
-  var pipBtn = document.getElementById('np-pip-btn');
-  if (pipBtn && !('documentPictureInPicture' in window)) {
-    pipBtn.classList.add('pip-supported'); // show the button
-    pipBtn.title = 'Float mini player';
-    pipBtn.addEventListener('click', function() {
-      if (fp.classList.contains('open')) { window.closeFloatPlayer(); pipBtn.classList.remove('active'); }
-      else { window.openFloatPlayer(); pipBtn.classList.add('active'); }
-    });
-  }
-
-  if (!fp) return;
-
-  fpClose.addEventListener('click', function() { window.closeFloatPlayer(); if (pipBtn) pipBtn.classList.remove('active'); });
-  fpMinBtn.addEventListener('click', function() { fp.classList.toggle('minimised'); });
-
-  // Minimised tap — expand
-  fp.addEventListener('click', function(e) {
-    if (fp.classList.contains('minimised')) fp.classList.remove('minimised');
-  });
-
-  fpPlayBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    var a = window._currentAudio; if (!a) return;
-    a.paused ? a.play() : a.pause(); syncFP();
-  });
-  fpBack.addEventListener('click', function(e) {
-    e.stopPropagation();
-    var a = window._currentAudio; if (a) { a.currentTime = Math.max(0, a.currentTime-15); syncFP(); }
-  });
-  fpFwd.addEventListener('click', function(e) {
-    e.stopPropagation();
-    var a = window._currentAudio; if (a) { a.currentTime = Math.min(a.duration||0, a.currentTime+15); syncFP(); }
-  });
-  fpSpeed.addEventListener('click', function(e) {
-    e.stopPropagation();
-    var speeds = [1,1.25,1.5,1.75,2,0.75,0.5];
-    var a = window._currentAudio; if (!a) return;
-    var next = speeds[(speeds.indexOf(a.playbackRate)+1) % speeds.length] || 1;
-    a.playbackRate = next; syncFP();
-  });
-
-  // Scrubber
-  fpBar.addEventListener('click', function(e) {
-    var a = window._currentAudio; if (!a || !a.duration) return;
-    var r = fpBar.getBoundingClientRect();
-    a.currentTime = ((e.clientX - r.left) / r.width) * a.duration;
-    syncFP();
-  });
-
-  // Drag to reposition
-  (function() {
-    var startX, startY, startLeft, startBottom, dragging = false;
-    function getPos(e) { return e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY }; }
-    fpHandle.addEventListener('pointerdown', function(e) {
-      dragging = true; fpHandle.setPointerCapture(e.pointerId);
-      var pos = getPos(e); startX = pos.x; startY = pos.y;
-      startLeft   = fp.offsetLeft;
-      startBottom = window.innerHeight - fp.offsetTop - fp.offsetHeight;
-      fp.style.transition = 'none';
-    });
-    fpHandle.addEventListener('pointermove', function(e) {
-      if (!dragging) return;
-      var pos = getPos(e);
-      var dx = pos.x - startX, dy = pos.y - startY;
-      var newLeft   = Math.max(0, Math.min(window.innerWidth - fp.offsetWidth,   startLeft   + dx));
-      var newBottom = Math.max(0, Math.min(window.innerHeight - fp.offsetHeight, startBottom - dy));
-      fp.style.left   = newLeft + 'px';
-      fp.style.bottom = newBottom + 'px';
-      fp.style.right  = 'auto';
-    });
-    fpHandle.addEventListener('pointerup', function() { dragging = false; fp.style.transition = ''; });
-  })();
-
-})();
 </script>
 
 <script>
@@ -3433,7 +3209,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Follow Podcast
       </button>
-      <a href="/notes.html" class="signup-open-btn" style="text-decoration:none;">
+      <a href="/notes" class="signup-open-btn" style="text-decoration:none;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
         My Notes
       </a>
@@ -3731,31 +3507,6 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
   </div>
 </footer>
-
-<!-- Floating mini-player fallback -->
-<div id="float-player">
-  <div id="float-drag-handle"></div>
-  <div class="float-top-bar">
-    <button class="float-btn" id="float-minimise" title="Minimise">&#8211;</button>
-    <button class="float-btn" id="float-close" title="Close">&#x2715;</button>
-  </div>
-  <img id="float-art" src="" alt="" />
-  <div class="float-body">
-    <div id="float-title">Nothing playing</div>
-    <div class="float-progress">
-      <span class="float-time" id="float-cur">0:00</span>
-      <div class="float-bar" id="float-bar"><div class="float-bar-fill" id="float-bar-fill"></div></div>
-      <span class="float-time" id="float-end">--:--</span>
-    </div>
-    <div class="float-controls">
-      <button class="float-btn" id="float-back" title="Back 15s"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.84"/></svg></button>
-      <button class="float-play-btn" id="float-play"><svg id="float-play-icon" width="10" height="12" viewBox="0 0 14 16"><path d="M1 1l12 7L1 15V1z" fill="currentColor"/></svg></button>
-      <button class="float-btn" id="float-fwd" title="Forward 15s"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3.84"/></svg></button>
-      <button id="float-speed">1&#x00d7;</button>
-      <a id="float-notes-btn" href="#" target="_blank" rel="noopener" class="float-btn" title="Take notes" style="text-decoration:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></a>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
