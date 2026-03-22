@@ -930,7 +930,8 @@
   var RSS_FEED     = 'https://media.rss.com/sacredherbology/feed.xml';
   var FALLBACK_ART = 'https://img.rss.com/sacredherbology/536/20260319_050354_abd3b4c55ca870bf346d5bef81cab69a.png';
   var BASE_URL     = 'https://podcast.precisionnaturalmedicine.com.au/';
-  var PROXIES      = ['https://corsproxy.io/?', 'https://api.allorigins.win/raw?url='];
+  var RSS2JSON_API = 'https://api.rss2json.com/v1/api.json?rss_url=';
+  var PROXIES      = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?'];
   var LIKES_API    = 'https://script.google.com/macros/s/AKfycbyGMMpAHiiPaw24Op8SnW_Jp74_im9TZgUM9zEZMEXfe59QIjhPGd_88nwe4Pvvh-NNwA/exec';
 
   // Queue a failed POST for Background Sync retry via the SW
@@ -1698,6 +1699,42 @@
   }
 
   /* ── XML parse ── */
+  // Parse rss2json API response (JSON format)
+  function parseRss2Json(items) {
+    return items.map(function(item, idx) {
+      var enc      = item.enclosure || {};
+      var audioUrl = enc.link || '';
+      var image    = (enc.image || item.thumbnail || FALLBACK_ART || '').replace(/\?.*$/, '');
+      var title    = item.title || '';
+      var slug     = slugify(title);
+      var rawDesc  = item.description || item.content || '';
+      var hasHtml  = /<[a-z][\s\S]*>/i.test(rawDesc);
+      // Duration: enc.duration is in seconds
+      var durStr   = '';
+      if (enc.duration) {
+        var d = parseInt(enc.duration, 10);
+        var h = Math.floor(d/3600), m = Math.floor((d%3600)/60), s = d%60;
+        durStr = h > 0
+          ? h + ':' + (m<10?'0':'') + m + ':' + (s<10?'0':'') + s
+          : m + ':' + (s<10?'0':'') + s;
+      }
+      return {
+        num:      items.length - idx,
+        title:    title,
+        pubDate:  item.pubDate || '',
+        desc:     hasHtml ? stripHtml(rawDesc) : rawDesc.replace(/\s+/g,' ').trim(),
+        descHtml: hasHtml ? rawDesc : null,
+        audioUrl: audioUrl,
+        duration: durStr,
+        image:    image,
+        slug:     slug,
+        url:      BASE_URL + '#ep-' + slug,
+        season:   0,
+        _audio: null, _li: null, _setPlaying: null,
+      };
+    });
+  }
+
   function parseItems(text) {
     var doc = new DOMParser().parseFromString(text, 'text/xml');
     var NS  = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
@@ -2213,16 +2250,29 @@
       .catch(function() { return fetchWithFallback(proxies, url, i + 1); });
   }
   function loadFeed() {
-    fetch(RSS_FEED)
-      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
-      .catch(function() { return fetchWithFallback(PROXIES, RSS_FEED, 0); })
-      .then(function(text) {
-        var items = parseItems(text);
-        if (items.length) buildList(items);
-        else document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:\'Cormorant SC\',serif;letter-spacing:0.15em;font-size:12px;">No episodes found.</p>';
+    // Try rss2json first — reliable CORS-enabled JSON API
+    fetch(RSS2JSON_API + encodeURIComponent(RSS_FEED))
+      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(data) {
+        if (data.status !== 'ok' || !data.items || !data.items.length) throw new Error('no items');
+        var items = parseRss2Json(data.items);
+        if (items.length) { buildList(items); return; }
+        throw new Error('parse failed');
       })
       .catch(function() {
-        document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:\'Cormorant SC\',serif;letter-spacing:0.15em;font-size:12px;">Episodes temporarily unavailable.</p>';
+        // Fallback: try direct XML fetch (may work if CORS headers added later)
+        return fetch(RSS_FEED)
+          .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+          .catch(function() { return fetchWithFallback(PROXIES, RSS_FEED, 0); })
+          .then(function(text) {
+            var items = parseItems(text);
+            if (items.length) { buildList(items); return; }
+            throw new Error('xml parse failed');
+          });
+      })
+      .catch(function(err) {
+        console.warn('Feed load failed:', err);
+        document.getElementById('episode-container').innerHTML = '<p style="text-align:center;padding:60px;color:var(--grey-light);font-family:'Cormorant SC',serif;letter-spacing:0.15em;font-size:12px;">Unable to load episodes — check your connection and refresh.</p>';
       });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadFeed);
@@ -3644,4 +3694,68 @@ document.addEventListener('DOMContentLoaded', function () {
         <a href="https://precisionnaturalmedicine.com.au" class="nav-logo" style="display:inline-flex; margin-bottom:6px;">
           <span class="nav-logo-top" style="color:rgba(255,255,255,0.85);">Precision Natural Medicine</span>
         </a>
-        <p>Based in Cardwell, 
+        <p>Based in Cardwell, Queensland.<br>Consultations available Australia-wide via telehealth.</p>
+      </div>
+      <div class="footer-nav">
+        <h4>Clinic</h4>
+        <ul>
+          <li><a href="https://precisionnaturalmedicine.com.au/consultations">Consultations</a></li>
+          <li><a href="https://precisionnaturalmedicine.com.au/what-we-do">What We Do</a></li>
+          <li><a href="https://precisionnaturalmedicine.com.au/about">About Us</a></li>
+          <li><a href="https://precisionnaturalmedicine.com.au/dispensary">Dispensary</a></li>
+          <li><a href="https://precisionnaturalmedicine.com.au/bookings">Bookings</a></li>
+        </ul>
+      </div>
+      <div class="footer-nav">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="https://precisionnaturalmedicine.com.au/blog">Blog</a></li>
+          <li><a href="https://precisionnaturalmedicine.com.au/faqs">FAQs</a></li>
+          <li><a href="https://precisionnaturalmedicine.com.au/contact">Contact</a></li>
+          <li><a href="https://australian-pharmacognosy.org">Institute of Pharmacognosy</a></li>
+        </ul>
+      </div>
+      <div class="footer-nav">
+        <h4>Listen</h4>
+        <ul>
+          <li><a href="https://open.spotify.com/show/05661buTvrIKkSBao3b29S" target="_blank" rel="noopener">Spotify</a></li>
+          <li><a href="https://music.amazon.com/podcasts/ce477d27-f094-473f-a979-14bb0caff6cc/the-precision-health-podcast" target="_blank" rel="noopener">Amazon Music</a></li>
+          <li><a href="https://www.youtube.com/playlist?list=PLr0rsCCMU07YB-PtoQynncC94Ruzox0VF" target="_blank" rel="noopener">YouTube</a></li>
+          <li><a href="https://media.rss.com/sacredherbology/feed.xml" target="_blank" rel="noopener">RSS Feed</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Precision Natural Medicine. All rights reserved. &nbsp;|&nbsp; <a href="https://precisionnaturalmedicine.com.au/privacy-policy">Privacy Policy</a></p>
+      <p>The information in this podcast is educational and does not constitute medical advice. Always consult a qualified practitioner.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Floating mini-player fallback -->
+<div id="float-player">
+  <div id="float-drag-handle"></div>
+  <div class="float-top-bar">
+    <button class="float-btn" id="float-minimise" title="Minimise">&#8211;</button>
+    <button class="float-btn" id="float-close" title="Close">&#x2715;</button>
+  </div>
+  <img id="float-art" src="" alt="" />
+  <div class="float-body">
+    <div id="float-title">Nothing playing</div>
+    <div class="float-progress">
+      <span class="float-time" id="float-cur">0:00</span>
+      <div class="float-bar" id="float-bar"><div class="float-bar-fill" id="float-bar-fill"></div></div>
+      <span class="float-time" id="float-end">--:--</span>
+    </div>
+    <div class="float-controls">
+      <button class="float-btn" id="float-back" title="Back 15s"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.84"/></svg></button>
+      <button class="float-play-btn" id="float-play"><svg id="float-play-icon" width="10" height="12" viewBox="0 0 14 16"><path d="M1 1l12 7L1 15V1z" fill="currentColor"/></svg></button>
+      <button class="float-btn" id="float-fwd" title="Forward 15s"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3.84"/></svg></button>
+      <button id="float-speed">1&#x00d7;</button>
+      <a id="float-notes-btn" href="#" target="_blank" rel="noopener" class="float-btn" title="Take notes" style="text-decoration:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
