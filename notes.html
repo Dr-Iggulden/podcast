@@ -898,7 +898,7 @@ function openNote(id) {
   renderNotesList(document.getElementById('notes-search').value);
   document.getElementById('notes-sidebar').classList.remove('open');
   updateToolbarState();
-  setTimeout(applyPageStyle, 0);
+  setTimeout(applyPageSettings, 0);
 }
 
 /* ── Create note ── */
@@ -2136,47 +2136,7 @@ document.getElementById('notes-search').addEventListener('input', function(){
 });
 
 /* ── Page settings (colour + lines) ── */
-var PAGE_COLOUR_KEY = 'pnm_page_colour';
-var PAGE_LINES_KEY  = 'pnm_page_lines';
-var currentPageColour = localStorage.getItem(PAGE_COLOUR_KEY) || 'page-white';
-var currentPageLines  = localStorage.getItem(PAGE_LINES_KEY)  || 'lines-none';
-
-function applyPageStyle() {
-  var body = document.getElementById('note-body');
-  if (!body) return;
-  // Remove all page-colour and lines classes
-  body.className = body.className
-    .replace(/page-\S+/g, '')
-    .replace(/lines-\S+/g, '')
-    .trim();
-  if (currentPageColour !== 'page-white') body.classList.add(currentPageColour);
-  if (currentPageLines  !== 'lines-none')  body.classList.add(currentPageLines);
-}
-
-document.querySelectorAll('.page-colour-swatch').forEach(function(sw) {
-  sw.addEventListener('click', function() {
-    document.querySelectorAll('.page-colour-swatch').forEach(function(s){ s.classList.remove('active'); });
-    sw.classList.add('active');
-    currentPageColour = sw.getAttribute('data-colour');
-    localStorage.setItem(PAGE_COLOUR_KEY, currentPageColour);
-    applyPageStyle();
-  });
-  // Mark active on load
-  if (sw.getAttribute('data-colour') === currentPageColour) sw.classList.add('active');
-  else sw.classList.remove('active');
-});
-
-document.querySelectorAll('.page-line-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.page-line-btn').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    currentPageLines = btn.getAttribute('data-lines');
-    localStorage.setItem(PAGE_LINES_KEY, currentPageLines);
-    applyPageStyle();
-  });
-  if (btn.getAttribute('data-lines') === currentPageLines) btn.classList.add('active');
-  else btn.classList.remove('active');
-});
+// Old page style system removed — new system below handles this
 
 /* ── Bulk select ── */
 var selectMode  = false;
@@ -2288,6 +2248,15 @@ document.getElementById('bulk-share-btn').addEventListener('click', function() {
 
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', function(){
+  // Clear any old-format localStorage values (CSS class names not hex colours)
+  var savedColour = localStorage.getItem('pnm_page_colour');
+  if (savedColour && savedColour.startsWith('page-')) {
+    localStorage.removeItem('pnm_page_colour');
+  }
+  var savedLines = localStorage.getItem('pnm_page_lines');
+  if (savedLines && savedLines.startsWith('lines-')) {
+    localStorage.removeItem('pnm_page_lines');
+  }
   loadNotes(); loadCustomColours(); loadActiveColour(); loadEpisodes();
   buildSwatches();
   renderNotesList();
@@ -2309,12 +2278,19 @@ document.addEventListener('DOMContentLoaded', function(){
    PAGE SETTINGS — colours, lines, margin
    ══════════════════════════════════════════════════════ */
 
-var pageSettings = {
-  colour:     localStorage.getItem('pnm_page_colour')     || '#ffffff',
-  lines:      localStorage.getItem('pnm_page_lines')      || 'none',
-  lineColour: localStorage.getItem('pnm_page_linecolour') || 'rgba(0,0,0,0.1)',
-  margin:     localStorage.getItem('pnm_page_margin')     || 'none'
-};
+var pageSettings = (function() {
+  // Validate stored values — discard CSS class names from old system
+  var sc = localStorage.getItem('pnm_page_colour');
+  var sl = localStorage.getItem('pnm_page_lines');
+  var colour = (sc && (sc.startsWith('#') || sc.startsWith('rgb'))) ? sc : '#ffffff';
+  var lines  = (sl && !sl.startsWith('lines-') && !sl.startsWith('page-')) ? sl : 'none';
+  return {
+    colour:     colour,
+    lines:      lines,
+    lineColour: localStorage.getItem('pnm_page_linecolour') || 'rgba(0,0,0,0.1)',
+    margin:     localStorage.getItem('pnm_page_margin')     || 'none'
+  };
+})();
 
 function applyPageSettings() {
   var wrap = document.getElementById('note-body-wrap');
