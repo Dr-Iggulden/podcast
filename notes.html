@@ -132,8 +132,7 @@
     :root { --page-bg: #ffffff; --page-line-color: transparent; --page-margin-color: transparent; --page-line-size: 28px; }
     .note-body-wrap { position: relative; min-height: 100%; }
     /* Ruled lines overlay */
-    .note-body-wrap.ruled::before,
-    .note-body-wrap.ruled-narrow::before {
+    .note-body-wrap.ruled::before {
       content: ''; pointer-events: none;
       position: absolute; inset: 0;
       background-image: repeating-linear-gradient(
@@ -146,16 +145,8 @@
       background-size: 100% var(--page-line-size);
       z-index: 0;
     }
-    /* Narrow ruled — tighter line spacing */
-    .note-body-wrap.ruled-narrow::before {
-      --page-line-size: 20px;
-    }
-    .note-body-wrap.ruled-narrow .note-body {
-      line-height: 20px;
-    }
     /* Red margin line */
-    .note-body-wrap.margin::after,
-    .note-body-wrap.ruled-narrow.margin::after {
+    .note-body-wrap.margin::after {
       content: ''; pointer-events: none;
       position: absolute; top: 0; bottom: 0; left: 48px; width: 1px;
       background: var(--page-margin-color, transparent);
@@ -171,18 +162,12 @@
     }
     /* Page settings panel */
     .page-settings-panel {
-      display: none; position: fixed;
-      background: var(--white); border: 1px solid var(--cream-dark); border-radius: 6px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 0; z-index: 600;
-      width: 300px; font-family: 'Nunito Sans', sans-serif;
-      max-height: 80vh; overflow-y: auto;
+      display: none; position: absolute; top: calc(100% + 4px); right: 0;
+      background: var(--white); border: 1px solid var(--cream-dark); border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12); padding: 12px 14px; z-index: 500;
+      width: 260px; font-family: 'Nunito Sans', sans-serif;
     }
     .page-settings-panel.open { display: block; }
-    .ps-panel-header { display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 14px 8px; border-bottom: 1px solid var(--cream-dark); }
-    .ps-panel-title { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.25em; color: var(--gold); }
-    .ps-panel-close { background: none; border: none; cursor: pointer; color: var(--grey-nav); font-size: 16px; padding: 0 2px; line-height: 1; }
-    .ps-panel-body { padding: 12px 14px; }
     .ps-title { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.25em; color: var(--gold); margin-bottom: 8px; }
     .ps-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
     .ps-btn { font-size: 11px; font-family: 'Nunito Sans', sans-serif; padding: 4px 9px; border: 1.5px solid var(--cream-dark); border-radius: 2px; background: none; cursor: pointer; color: var(--grey-nav); transition: all 0.15s; white-space: nowrap; }
@@ -204,32 +189,6 @@
     .bulk-tb-btn.danger { background: rgba(192,57,74,0.5); }
     .bulk-tb-btn.danger:hover { background: rgba(192,57,74,0.75); }
     .bulk-select-count { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.15em; }
-    /* ── Ink tool palette ── */
-    .ink-palette {
-      display: none; position: absolute; top: calc(100% + 4px); left: 0;
-      background: var(--white); border: 1px solid var(--cream-dark); border-radius: 4px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12); padding: 12px 14px; z-index: 500;
-      width: 280px; font-family: 'Nunito Sans', sans-serif;
-    }
-    .ink-palette.open { display: block; }
-    .ink-section-title { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.25em; color: var(--gold); margin-bottom: 8px; display: block; }
-    .ink-colours { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-    .ink-swatch { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; transition: transform 0.1s, border-color 0.1s; }
-    .ink-swatch:hover { transform: scale(1.2); border-color: rgba(0,0,0,0.2); }
-    .ink-swatch.active { border-color: var(--green-deep); transform: scale(1.2); }
-    .ink-custom-row { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; }
-    .ink-hex { font-family: 'Nunito Sans',sans-serif; font-size:12px; border:1.5px solid var(--cream-dark); border-radius:2px; padding:4px 8px; width:80px; outline:none; }
-    .ink-hex:focus { border-color: var(--green-mid); }
-    .ink-picker { width:28px; height:28px; border:1.5px solid var(--cream-dark); border-radius:2px; padding:0; cursor:pointer; background:none; }
-    .ink-size-row { display: flex; gap: 5px; align-items: center; margin-bottom: 10px; }
-    .ink-size-btn { width:28px; height:28px; border-radius:50%; background:none; border:1.5px solid var(--cream-dark); cursor:pointer; display:flex;align-items:center;justify-content:center; transition:all 0.15s; flex-shrink:0; }
-    .ink-size-btn:hover, .ink-size-btn.active { border-color: var(--green-deep); background: var(--green-deep); color: var(--white); }
-    .ink-size-dot { border-radius:50%; background: currentColor; display:block; }
-    .ink-pen-row { display: flex; flex-wrap:wrap; gap:5px; margin-bottom:4px; }
-    .ink-pen-btn { font-size:11px; font-family:'Nunito Sans',sans-serif; padding:4px 9px; border:1.5px solid var(--cream-dark); border-radius:2px; background:none; cursor:pointer; color:var(--grey-nav); transition:all 0.15s; white-space:nowrap; }
-    .ink-pen-btn:hover { border-color:var(--gold); color:var(--green-deep); }
-    .ink-pen-btn.active { background:var(--green-deep); color:var(--white); border-color:var(--green-deep); }
-    .ink-active-preview { width:32px; height:32px; border-radius:50%; border:2px solid var(--cream-dark); display:inline-block; vertical-align:middle; margin-right:4px; }
     @media print {
       .notes-header, .notes-sidebar, .notes-editor-toolbar, .notes-episode-tag,
       .note-title-input { display: none !important; }
@@ -448,7 +407,6 @@
               <button class="hl-add-btn" id="hl-add-btn">Add</button>
               <button class="hl-clear-btn" id="hl-clear-btn">Clear</button>
             </div>
-            </div><!-- end ps-panel-body -->
           </div>
         </div>
 
@@ -461,58 +419,37 @@
             Page &#9660;
           </button>
           <div class="page-settings-panel" id="page-settings-panel">
-            <div class="ps-panel-header">
-              <span class="ps-panel-title">Page Style</span>
-              <button class="ps-panel-close" id="ps-panel-close" title="Close">&times;</button>
+            <div class="ps-title">Page Style</div>
+            <div class="ps-label">Lines</div>
+            <div class="ps-row">
+              <button class="ps-btn active" data-lines="none">None</button>
+              <button class="ps-btn" data-lines="ruled">Ruled</button>
+              <button class="ps-btn" data-lines="legal">Legal Pad</button>
+              <button class="ps-btn" data-lines="graph">Graph</button>
+              <button class="ps-btn" data-lines="dotted">Dotted</button>
             </div>
-            <div class="ps-panel-body">
-
-              <div class="ps-label">Lines</div>
-              <div class="ps-row">
-                <button class="ps-btn" data-lines="none">None</button>
-                <button class="ps-btn" data-lines="ruled">Ruled</button>
-                <button class="ps-btn" data-lines="legal">Legal Pad</button>
-                <button class="ps-btn" data-lines="legal-narrow">Legal Narrow</button>
-                <button class="ps-btn" data-lines="graph">Graph</button>
-                <button class="ps-btn" data-lines="dotted">Dotted</button>
-              </div>
-
-              <div class="ps-label">Page Colour</div>
-              <div class="ps-colour-row" id="ps-colour-row">
-                <div class="ps-colour" data-colour="#ffffff" style="background:#ffffff;border:1.5px solid #ccc;" title="White"></div>
-                <div class="ps-colour" data-colour="#fefce8" style="background:#fefce8;" title="Legal Pad Yellow"></div>
-                <div class="ps-colour" data-colour="#fdf6e3" style="background:#fdf6e3;" title="Solarised"></div>
-                <div class="ps-colour" data-colour="#fffbf0" style="background:#fffbf0;" title="Warm Cream"></div>
-                <div class="ps-colour" data-colour="#f5f0e8" style="background:#f5f0e8;" title="Parchment"></div>
-                <div class="ps-colour" data-colour="#f0f4ff" style="background:#f0f4ff;" title="Cool Blue"></div>
-                <div class="ps-colour" data-colour="#e8f4fd" style="background:#e8f4fd;" title="Sky"></div>
-                <div class="ps-colour" data-colour="#f0fff4" style="background:#f0fff4;" title="Mint"></div>
-                <div class="ps-colour" data-colour="#e8f5e9" style="background:#e8f5e9;" title="Sage"></div>
-                <div class="ps-colour" data-colour="#fff0f6" style="background:#fff0f6;" title="Rose"></div>
-                <div class="ps-colour" data-colour="#fce4ec" style="background:#fce4ec;" title="Blush"></div>
-                <div class="ps-colour" data-colour="#f3e5f5" style="background:#f3e5f5;" title="Lavender"></div>
-                <div class="ps-colour" data-colour="#f5f5f5" style="background:#f5f5f5;" title="Light Grey"></div>
-                <div class="ps-colour" data-colour="#1a1a2e" style="background:#1a1a2e;" title="Dark Mode"></div>
-                <div class="ps-colour" data-colour="#1e3a2f" style="background:#1e3a2f;" title="Forest Dark"></div>
-                <div class="ps-colour" data-colour="#1a2a3a" style="background:#1a2a3a;" title="Navy Dark"></div>
-              </div>
-
-              <div class="ps-label" style="margin-top:8px;">Line Colour</div>
-              <div class="ps-colour-row" id="ps-linecolour-row">
-                <div class="ps-colour" data-linecolour="rgba(0,0,0,0.1)" style="background:rgba(0,0,0,0.1);border:1.5px solid #ccc;" title="Light Grey"></div>
-                <div class="ps-colour" data-linecolour="rgba(0,0,0,0.18)" style="background:rgba(0,0,0,0.18);" title="Medium Grey"></div>
-                <div class="ps-colour" data-linecolour="#c8b4a0" style="background:#c8b4a0;" title="Legal Tan"></div>
-                <div class="ps-colour" data-linecolour="#a0b4c8" style="background:#a0b4c8;" title="Blue"></div>
-                <div class="ps-colour" data-linecolour="#b0c8a0" style="background:#b0c8a0;" title="Green"></div>
-                <div class="ps-colour" data-linecolour="rgba(255,255,255,0.18)" style="background:rgba(255,255,255,0.18);border:1.5px solid #666;" title="White (dark pages)"></div>
-              </div>
-
-              <div class="ps-label" style="margin-top:8px;">Margin</div>
-              <div class="ps-row">
-                <button class="ps-btn" data-margin="none">None</button>
-                <button class="ps-btn" data-margin="red">Red Line</button>
-              </div>
-
+            <div class="ps-label">Page Colour</div>
+            <div class="ps-colour-row" id="ps-colour-row">
+              <div class="ps-colour active" data-colour="#ffffff" style="background:#ffffff;border:1.5px solid #ddd;" title="White"></div>
+              <div class="ps-colour" data-colour="#fefce8" style="background:#fefce8;" title="Legal Pad Yellow"></div>
+              <div class="ps-colour" data-colour="#fffbf0" style="background:#fffbf0;" title="Warm Cream"></div>
+              <div class="ps-colour" data-colour="#f0f4ff" style="background:#f0f4ff;" title="Cool Blue"></div>
+              <div class="ps-colour" data-colour="#f0fff4" style="background:#f0fff4;" title="Mint"></div>
+              <div class="ps-colour" data-colour="#fff0f6" style="background:#fff0f6;" title="Rose"></div>
+              <div class="ps-colour" data-colour="#1a1a2e" style="background:#1a1a2e;" title="Dark Mode"></div>
+              <div class="ps-colour" data-colour="#1e3a2f" style="background:#1e3a2f;" title="Forest Dark"></div>
+            </div>
+            <div class="ps-label" style="margin-top:6px;">Line Colour</div>
+            <div class="ps-colour-row" id="ps-linecolour-row">
+              <div class="ps-colour active" data-linecolour="rgba(0,0,0,0.08)" style="background:rgba(0,0,0,0.08);border:1.5px solid #ddd;" title="Light Grey"></div>
+              <div class="ps-colour" data-linecolour="#c8b4a0" style="background:#c8b4a0;" title="Legal Tan"></div>
+              <div class="ps-colour" data-linecolour="#a0b4c8" style="background:#a0b4c8;" title="Blue"></div>
+              <div class="ps-colour" data-linecolour="rgba(255,255,255,0.12)" style="background:rgba(255,255,255,0.12);border:1.5px solid #555;" title="White (dark pages)"></div>
+            </div>
+            <div class="ps-label" style="margin-top:6px;">Margin</div>
+            <div class="ps-row">
+              <button class="ps-btn active" data-margin="none">None</button>
+              <button class="ps-btn" data-margin="red">Red Line</button>
             </div>
           </div>
         </div>
@@ -833,7 +770,7 @@ function renderNotesList(filter) {
     var bodyText = n.bodyHtml ? n.bodyHtml.replace(/<[^>]+>/g,'').substring(0,60) : (n.body||'').substring(0,60);
     var date = n.updatedAt ? new Date(n.updatedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '';
     var epLabel = n.episodeTitle ? 'Ep '+n.episodeNum+' — '+n.episodeTitle.substring(0,28) : 'Unlinked';
-    var isSelected = typeof selectedIds !== 'undefined' && selectedIds.indexOf(n.id) >= 0;
+    var isSelected = bulkSelected && bulkSelected.has(n.id);
     return '<div class="note-item'+(n.id===currentId?' active':'')+'" data-id="'+n.id+'">'
       +'<input type="checkbox" class="bulk-cb" data-id="'+n.id+'"'+(isSelected?' checked':'')+' />'
       +'<div style="min-width:0;flex:1;">'
@@ -898,7 +835,7 @@ function openNote(id) {
   renderNotesList(document.getElementById('notes-search').value);
   document.getElementById('notes-sidebar').classList.remove('open');
   updateToolbarState();
-  setTimeout(applyPageSettings, 0);
+  setTimeout(applyPageStyle, 0);
 }
 
 /* ── Create note ── */
@@ -2136,7 +2073,47 @@ document.getElementById('notes-search').addEventListener('input', function(){
 });
 
 /* ── Page settings (colour + lines) ── */
-// Old page style system removed — new system below handles this
+var PAGE_COLOUR_KEY = 'pnm_page_colour';
+var PAGE_LINES_KEY  = 'pnm_page_lines';
+var currentPageColour = localStorage.getItem(PAGE_COLOUR_KEY) || 'page-white';
+var currentPageLines  = localStorage.getItem(PAGE_LINES_KEY)  || 'lines-none';
+
+function applyPageStyle() {
+  var body = document.getElementById('note-body');
+  if (!body) return;
+  // Remove all page-colour and lines classes
+  body.className = body.className
+    .replace(/page-\S+/g, '')
+    .replace(/lines-\S+/g, '')
+    .trim();
+  if (currentPageColour !== 'page-white') body.classList.add(currentPageColour);
+  if (currentPageLines  !== 'lines-none')  body.classList.add(currentPageLines);
+}
+
+document.querySelectorAll('.page-colour-swatch').forEach(function(sw) {
+  sw.addEventListener('click', function() {
+    document.querySelectorAll('.page-colour-swatch').forEach(function(s){ s.classList.remove('active'); });
+    sw.classList.add('active');
+    currentPageColour = sw.getAttribute('data-colour');
+    localStorage.setItem(PAGE_COLOUR_KEY, currentPageColour);
+    applyPageStyle();
+  });
+  // Mark active on load
+  if (sw.getAttribute('data-colour') === currentPageColour) sw.classList.add('active');
+  else sw.classList.remove('active');
+});
+
+document.querySelectorAll('.page-line-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.page-line-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentPageLines = btn.getAttribute('data-lines');
+    localStorage.setItem(PAGE_LINES_KEY, currentPageLines);
+    applyPageStyle();
+  });
+  if (btn.getAttribute('data-lines') === currentPageLines) btn.classList.add('active');
+  else btn.classList.remove('active');
+});
 
 /* ── Bulk select ── */
 var selectMode  = false;
@@ -2248,15 +2225,6 @@ document.getElementById('bulk-share-btn').addEventListener('click', function() {
 
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', function(){
-  // Clear any old-format localStorage values (CSS class names not hex colours)
-  var savedColour = localStorage.getItem('pnm_page_colour');
-  if (savedColour && savedColour.startsWith('page-')) {
-    localStorage.removeItem('pnm_page_colour');
-  }
-  var savedLines = localStorage.getItem('pnm_page_lines');
-  if (savedLines && savedLines.startsWith('lines-')) {
-    localStorage.removeItem('pnm_page_lines');
-  }
   loadNotes(); loadCustomColours(); loadActiveColour(); loadEpisodes();
   buildSwatches();
   renderNotesList();
@@ -2278,63 +2246,44 @@ document.addEventListener('DOMContentLoaded', function(){
    PAGE SETTINGS — colours, lines, margin
    ══════════════════════════════════════════════════════ */
 
-var pageSettings = (function() {
-  // Validate stored values — discard CSS class names from old system
-  var sc = localStorage.getItem('pnm_page_colour');
-  var sl = localStorage.getItem('pnm_page_lines');
-  var colour = (sc && (sc.startsWith('#') || sc.startsWith('rgb'))) ? sc : '#ffffff';
-  var lines  = (sl && !sl.startsWith('lines-') && !sl.startsWith('page-')) ? sl : 'none';
-  return {
-    colour:     colour,
-    lines:      lines,
-    lineColour: localStorage.getItem('pnm_page_linecolour') || 'rgba(0,0,0,0.1)',
-    margin:     localStorage.getItem('pnm_page_margin')     || 'none'
-  };
-})();
+var pageSettings = {
+  colour:     localStorage.getItem('pnm_page_colour')     || '#ffffff',
+  lines:      localStorage.getItem('pnm_page_lines')      || 'none',
+  lineColour: localStorage.getItem('pnm_page_linecolour') || 'rgba(0,0,0,0.08)',
+  margin:     localStorage.getItem('pnm_page_margin')     || 'none'
+};
 
 function applyPageSettings() {
   var wrap = document.getElementById('note-body-wrap');
   var area = document.getElementById('notes-content-area');
   if (!wrap || !area) return;
 
+  // Background colour (on content area, not wrap — so wrap overlay works)
+  area.style.background = pageSettings.colour;
+
+  // Update CSS variables
   var root = document.documentElement;
-  var c    = pageSettings.colour;
-
-  // Page background
-  area.style.background = c;
-  root.style.setProperty('--page-bg', c);
-
-  // Always restore line colour from settings first (dotted overrides below)
+  root.style.setProperty('--page-bg', pageSettings.colour);
   root.style.setProperty('--page-line-color', pageSettings.lineColour);
+  root.style.setProperty('--page-margin-color', pageSettings.margin === 'red' ? '#e57373' : 'transparent');
 
-  // Margin colour
-  root.style.setProperty('--page-margin-color',
-    pageSettings.margin === 'red' ? '#e57373' : 'transparent');
+  // Line style classes
+  wrap.classList.remove('ruled', 'legal', 'graph', 'dotted', 'margin');
+  if (pageSettings.lines === 'ruled')  wrap.classList.add('ruled');
+  if (pageSettings.lines === 'legal')  wrap.classList.add('ruled', 'margin');
+  if (pageSettings.lines === 'graph')  wrap.classList.add('graph');
+  if (pageSettings.lines === 'dotted') wrap.classList.add('ruled');
+  if (pageSettings.margin === 'red')   wrap.classList.add('margin');
 
-  // Clear ALL inline overrides before re-applying
-  wrap.style.backgroundImage = '';
-  wrap.style.backgroundSize  = '';
-
-  // Remove all line/margin classes
-  wrap.classList.remove('ruled', 'ruled-narrow', 'legal', 'legal-narrow', 'graph', 'dotted', 'margin');
-
-  var lines = pageSettings.lines;
-  if (lines === 'ruled')        { wrap.classList.add('ruled'); }
-  else if (lines === 'legal')   { wrap.classList.add('ruled', 'margin'); }
-  else if (lines === 'legal-narrow') { wrap.classList.add('ruled-narrow', 'margin'); }
-  else if (lines === 'graph')   { wrap.classList.add('graph'); }
-  else if (lines === 'dotted')  {
-    // Dotted uses inline radial-gradient — no class needed
-    wrap.style.backgroundImage = 'radial-gradient(' + pageSettings.lineColour + ' 1.5px, transparent 1.5px)';
+  // Dotted lines use a dot pattern
+  if (pageSettings.lines === 'dotted') {
+    root.style.setProperty('--page-line-color', 'transparent');
+    wrap.style.backgroundImage = 'radial-gradient(' + pageSettings.lineColour + ' 1px, transparent 1px)';
     wrap.style.backgroundSize  = 'var(--page-line-size) var(--page-line-size)';
+  } else {
+    wrap.style.backgroundImage = '';
+    wrap.style.backgroundSize  = '';
   }
-
-  // Red margin line independent of line style
-  if (pageSettings.margin === 'red') wrap.classList.add('margin');
-
-  // Dark page: auto-switch text colour
-  var isDark = (c === '#1a1a2e' || c === '#1e3a2f' || c === '#1a2a3a');
-  wrap.style.color = isDark ? '#e8e8e8' : '';
 }
 
 function savePageSettings() {
@@ -2343,105 +2292,64 @@ function savePageSettings() {
   localStorage.setItem('pnm_page_linecolour', pageSettings.lineColour);
   localStorage.setItem('pnm_page_margin',     pageSettings.margin);
   applyPageSettings();
-  updatePsActiveStates();
 }
 
-// Update all active states in panel to match current pageSettings
-function updatePsActiveStates() {
-  document.querySelectorAll('.ps-btn[data-lines]').forEach(function(b) {
-    b.classList.toggle('active', b.getAttribute('data-lines') === pageSettings.lines);
-  });
-  document.querySelectorAll('.ps-colour[data-colour]').forEach(function(s) {
-    s.classList.toggle('active', s.getAttribute('data-colour') === pageSettings.colour);
-  });
-  document.querySelectorAll('.ps-colour[data-linecolour]').forEach(function(s) {
-    s.classList.toggle('active', s.getAttribute('data-linecolour') === pageSettings.lineColour);
-  });
-  document.querySelectorAll('.ps-btn[data-margin]').forEach(function(b) {
-    b.classList.toggle('active', b.getAttribute('data-margin') === pageSettings.margin);
-  });
-}
-
-// Fixed-position panel open/close
-function openPageSettings() {
-  var panel = document.getElementById('page-settings-panel');
-  var btn   = document.getElementById('tb-page-settings');
-  if (!panel || !btn) return;
-  var isOpen = panel.classList.contains('open');
-  // Toggle
-  panel.classList.toggle('open', !isOpen);
-  if (!isOpen) {
-    // Position below button
-    var r = btn.getBoundingClientRect();
-    var panelW = 308;
-    var left   = r.left;
-    var top    = r.bottom + 6;
-    if (left + panelW > window.innerWidth - 8) left = window.innerWidth - panelW - 8;
-    if (left < 8) left = 8;
-    panel.style.left      = left + 'px';
-    panel.style.top       = top  + 'px';
-    panel.style.maxHeight = Math.min(window.innerHeight - top - 16, 520) + 'px';
-    updatePsActiveStates();
-  }
-}
-
-// Wire Page button
+// Wire page settings panel
 document.getElementById('tb-page-settings').addEventListener('click', function(e) {
   e.stopPropagation();
-  openPageSettings();
+  document.getElementById('page-settings-panel').classList.toggle('open');
 });
-
-// Close X button — use event delegation so it works even if panel is added after
 document.addEventListener('click', function(e) {
-  if (e.target && e.target.id === 'ps-panel-close') {
+  if (!document.getElementById('page-settings-wrap').contains(e.target))
     document.getElementById('page-settings-panel').classList.remove('open');
-  }
 });
 
-// Close on outside click — mousedown fires before swatch click, so check carefully:
-// Only close if target is NOT inside the panel AND NOT the open button
-document.addEventListener('mousedown', function(e) {
-  var panel = document.getElementById('page-settings-panel');
-  if (!panel || !panel.classList.contains('open')) return;
-  var btn = document.getElementById('tb-page-settings');
-  if (!panel.contains(e.target) && (!btn || !btn.contains(e.target))) {
-    panel.classList.remove('open');
-  }
+// Lines buttons
+document.querySelectorAll('.ps-btn[data-lines]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    pageSettings.lines = btn.getAttribute('data-lines');
+    document.querySelectorAll('.ps-btn[data-lines]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    savePageSettings();
+  });
+  if (btn.getAttribute('data-lines') === pageSettings.lines) btn.classList.add('active');
 });
 
-// Reposition on resize
-window.addEventListener('resize', function() {
-  var panel = document.getElementById('page-settings-panel');
-  if (panel && panel.classList.contains('open')) openPageSettings();
+// Colour swatches
+document.querySelectorAll('.ps-colour[data-colour]').forEach(function(sw) {
+  sw.addEventListener('click', function() {
+    pageSettings.colour = sw.getAttribute('data-colour');
+    document.querySelectorAll('.ps-colour[data-colour]').forEach(function(s){ s.classList.remove('active'); });
+    sw.classList.add('active');
+    savePageSettings();
+  });
+  if (sw.getAttribute('data-colour') === pageSettings.colour) sw.classList.add('active');
 });
 
-// Event delegation for ALL panel controls — one handler, no timing issues
-document.addEventListener('click', function(e) {
-  var tgt = e.target.closest
-    ? e.target.closest('[data-lines],[data-colour],[data-linecolour],[data-margin]')
-    : null;
-  if (!tgt) return;
-  var panel = document.getElementById('page-settings-panel');
-  if (!panel || !panel.contains(tgt)) return;
+// Line colour swatches
+document.querySelectorAll('.ps-colour[data-linecolour]').forEach(function(sw) {
+  sw.addEventListener('click', function() {
+    pageSettings.lineColour = sw.getAttribute('data-linecolour');
+    document.querySelectorAll('.ps-colour[data-linecolour]').forEach(function(s){ s.classList.remove('active'); });
+    sw.classList.add('active');
+    savePageSettings();
+  });
+  if (sw.getAttribute('data-linecolour') === pageSettings.lineColour) sw.classList.add('active');
+});
 
-  if (tgt.hasAttribute('data-lines')) {
-    pageSettings.lines = tgt.getAttribute('data-lines');
+// Margin buttons
+document.querySelectorAll('.ps-btn[data-margin]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    pageSettings.margin = btn.getAttribute('data-margin');
+    document.querySelectorAll('.ps-btn[data-margin]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
     savePageSettings();
-  } else if (tgt.hasAttribute('data-colour')) {
-    pageSettings.colour = tgt.getAttribute('data-colour');
-    savePageSettings();
-  } else if (tgt.hasAttribute('data-linecolour')) {
-    pageSettings.lineColour = tgt.getAttribute('data-linecolour');
-    savePageSettings();
-  } else if (tgt.hasAttribute('data-margin')) {
-    pageSettings.margin = tgt.getAttribute('data-margin');
-    savePageSettings();
-  }
+  });
+  if (btn.getAttribute('data-margin') === pageSettings.margin) btn.classList.add('active');
 });
 
 // Apply saved settings on load
 applyPageSettings();
-updatePsActiveStates();
 
 /* ══════════════════════════════════════════════════════
    STYLUS / PEN HANDWRITING INPUT
@@ -2501,13 +2409,11 @@ function ensureCanvas() {
     var x = (e.clientX - r.left) * (drawCanvas.width / r.width);
     var y = (e.clientY - r.top)  * (drawCanvas.height / r.height);
     var pressure = (e.pressure && e.pressure > 0) ? e.pressure : 0.5;
+    var lineW  = pressure * 4 + 0.5; // 0.5px min, 4.5px max
     var isDark = pageSettings.colour.startsWith('#1') || pageSettings.colour.startsWith('#0');
-    applyInkToCtx(drawCtx, pressure, isDark);
+    drawCtx.strokeStyle = isDark ? 'rgba(255,255,255,0.85)' : 'rgba(20,20,20,0.85)';
+    drawCtx.lineWidth = lineW;
     drawCtx.lineTo(x, y); drawCtx.stroke();
-    // Reset composite/alpha for next stroke segment
-    drawCtx.globalCompositeOperation = 'source-over';
-    drawCtx.globalAlpha = 1.0;
-    drawCtx.shadowBlur = 0;
     drawCtx.beginPath(); drawCtx.moveTo(x, y);
     drawLastX = x; drawLastY = y;
   });
@@ -2528,210 +2434,23 @@ window.addEventListener('resize', resizeCanvas);
 /* Bulk select handled by existing system above */
 
 /* ══════════════════════════════════════════════════════
-   STYLUS MODE BUTTON + INK TOOL PALETTE
+   STYLUS MODE BUTTON — add to toolbar
    ══════════════════════════════════════════════════════ */
 
-// Ink settings
-var inkSettings = {
-  colour:  localStorage.getItem('pnm_ink_colour') || 'rgba(20,20,20,0.9)',
-  penType: localStorage.getItem('pnm_ink_type')   || 'pen',
-  size:    parseInt(localStorage.getItem('pnm_ink_size') || '2', 10)
-};
-
-var INK_COLOURS = [
-  '#1a1a1a', '#2C4A35', '#1a3a6e', '#6b1a1a', '#4a1a6b',
-  '#B19443', '#c0392b', '#2980b9', '#27ae60', '#8e44ad',
-  '#e67e22', '#16a085', '#2c3e50', '#7f8c8d', '#ffffff',
-  '#f8f9fa', '#ffd700', '#ff69b4', '#00bcd4', '#ff5722'
-];
-
-var PEN_TYPES = {
-  pen:         { name: 'Pen',         lineCap: 'round',  lineJoin: 'round',  alpha: 0.9,  widthMult: 1.0, blur: 0   },
-  pencil:      { name: 'Pencil',      lineCap: 'round',  lineJoin: 'round',  alpha: 0.55, widthMult: 1.0, blur: 0.3 },
-  fountain:    { name: 'Fountain',    lineCap: 'round',  lineJoin: 'round',  alpha: 0.85, widthMult: 1.4, blur: 0   },
-  marker:      { name: 'Marker',      lineCap: 'square', lineJoin: 'miter',  alpha: 0.95, widthMult: 3.5, blur: 0   },
-  highlighter: { name: 'Highlighter', lineCap: 'square', lineJoin: 'miter',  alpha: 0.35, widthMult: 6.0, blur: 0   },
-  eraser:      { name: 'Eraser',      lineCap: 'round',  lineJoin: 'round',  alpha: 1.0,  widthMult: 4.0, blur: 0   }
-};
-
-var INK_SIZES = [1, 2, 4, 7, 12]; // base sizes
-
-function getInkColour() {
-  var type = PEN_TYPES[inkSettings.penType] || PEN_TYPES.pen;
-  if (inkSettings.penType === 'eraser') {
-    // Eraser: use page background colour
-    return pageSettings.colour || '#ffffff';
-  }
-  if (inkSettings.penType === 'highlighter' || inkSettings.penType === 'marker') {
-    // Parse colour and apply alpha
-    var c = inkSettings.colour;
-    if (c.startsWith('#') && c.length === 7) {
-      var r = parseInt(c.slice(1,3),16), g = parseInt(c.slice(3,5),16), b = parseInt(c.slice(5,7),16);
-      return 'rgba(' + r + ',' + g + ',' + b + ',' + type.alpha + ')';
-    }
-  }
-  return inkSettings.colour;
-}
-
-function applyInkToCtx(ctx, pressure, isDark) {
-  var type = PEN_TYPES[inkSettings.penType] || PEN_TYPES.pen;
-  var baseW  = INK_SIZES[inkSettings.size] || 2;
-  var p      = (pressure && pressure > 0) ? pressure : 0.5;
-  var lineW  = baseW * type.widthMult * (0.5 + p * 0.7);
-
-  if (inkSettings.penType === 'eraser') {
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.strokeStyle = 'rgba(0,0,0,1)';
-  } else {
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = getInkColour();
-  }
-  ctx.lineWidth  = lineW;
-  ctx.lineCap    = type.lineCap;
-  ctx.lineJoin   = type.lineJoin;
-  if (type.blur > 0) {
-    ctx.shadowBlur  = type.blur * lineW;
-    ctx.shadowColor = ctx.strokeStyle;
-  } else {
-    ctx.shadowBlur = 0;
-  }
-  // Pencil texture — slight jitter
-  if (inkSettings.penType === 'pencil') {
-    ctx.globalAlpha = type.alpha * (0.7 + Math.random() * 0.3);
-  } else {
-    ctx.globalAlpha = 1.0;
-  }
-}
-
-// Add stylus toggle + ink palette to toolbar dynamically
+// Add stylus toggle button to toolbar dynamically
 (function() {
-  var toolbar = document.getElementById('toolbar');
-  var tbRight = toolbar ? toolbar.querySelector('.tb-right') : null;
-  if (!toolbar || !tbRight) return;
-
-  // Separator
   var tbSep = document.createElement('div'); tbSep.className = 'tb-sep';
-  toolbar.insertBefore(tbSep, tbRight);
-
-  // Pen mode toggle button
   var stylusBtn = document.createElement('button');
   stylusBtn.className = 'tb-btn'; stylusBtn.id = 'tb-stylus';
-  stylusBtn.title = 'Stylus/pen drawing mode (toggle)';
-  stylusBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Pen';
+  stylusBtn.title = 'Stylus/pen drawing mode';
+  stylusBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/><line x1="15" y1="5" x2="19" y2="9"/></svg> Pen';
   stylusBtn.addEventListener('click', toggleStylusMode);
-  toolbar.insertBefore(stylusBtn, tbRight);
-
-  // Ink palette wrap
-  var inkWrap = document.createElement('div');
-  inkWrap.className = 'export-wrap'; inkWrap.id = 'ink-wrap'; inkWrap.style.position = 'relative';
-  toolbar.insertBefore(inkWrap, tbRight);
-
-  // Ink button (colour preview swatch + arrow)
-  var inkBtn = document.createElement('button');
-  inkBtn.className = 'tb-btn'; inkBtn.id = 'tb-ink';
-  inkBtn.title = 'Ink colour and pen style';
-  inkBtn.style.display = 'inline-flex'; inkBtn.style.alignItems = 'center'; inkBtn.style.gap = '5px';
-  inkBtn.innerHTML = '<span id="ink-swatch-preview" style="width:12px;height:12px;border-radius:50%;background:' + inkSettings.colour + ';border:1px solid rgba(0,0,0,0.15);display:inline-block;flex-shrink:0;"></span> Ink &#9660;';
-  inkWrap.appendChild(inkBtn);
-
-  // Ink palette panel
-  var palHtml = '<span class="ink-section-title">Pen Type</span>'
-    + '<div class="ink-pen-row">'
-    + Object.entries(PEN_TYPES).map(function(entry) {
-        var k = entry[0], v = entry[1];
-        return '<button class="ink-pen-btn' + (inkSettings.penType === k ? ' active' : '') + '" data-pentype="' + k + '">' + v.name + '</button>';
-      }).join('')
-    + '</div>'
-    + '<span class="ink-section-title" style="margin-top:8px;">Ink Colour</span>'
-    + '<div class="ink-colours" id="ink-colours-row">'
-    + INK_COLOURS.map(function(c) {
-        var border = (c === '#ffffff' || c === '#f8f9fa') ? '1.5px solid #ddd' : '2px solid transparent';
-        return '<div class="ink-swatch' + (inkSettings.colour === c ? ' active' : '') + '" data-colour="' + c + '" style="background:' + c + ';border:' + border + ';" title="' + c + '"></div>';
-      }).join('')
-    + '</div>'
-    + '<div class="ink-custom-row">'
-    + '<input type="text" class="ink-hex" id="ink-hex-input" placeholder="#1a1a1a" maxlength="7" value="' + (inkSettings.colour.startsWith('#') ? inkSettings.colour : '') + '">'
-    + '<input type="color" class="ink-picker" id="ink-colour-picker" value="' + (inkSettings.colour.startsWith('#') ? inkSettings.colour : '#1a1a1a') + '" title="Colour wheel">'
-    + '<button class="hl-add-btn" id="ink-apply-custom">Apply</button>'
-    + '</div>'
-    + '<span class="ink-section-title">Size</span>'
-    + '<div class="ink-size-row">'
-    + INK_SIZES.map(function(sz, i) {
-        var d = Math.min(sz * 1.8 + 4, 22);
-        return '<button class="ink-size-btn' + (inkSettings.size === i ? ' active' : '') + '" data-size="' + i + '" title="' + sz + 'px"><span class="ink-size-dot" style="width:' + d + 'px;height:' + d + 'px;"></span></button>';
-      }).join('')
-    + '</div>';
-
-  var pal = document.createElement('div');
-  pal.className = 'ink-palette'; pal.id = 'ink-palette';
-  pal.innerHTML = palHtml;
-  inkWrap.appendChild(pal);
-
-  // Toggle palette
-  inkBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    pal.classList.toggle('open');
-  });
-  document.addEventListener('click', function(e) {
-    if (!inkWrap.contains(e.target)) pal.classList.remove('open');
-  });
-
-  // Pen type selection
-  pal.querySelectorAll('.ink-pen-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      inkSettings.penType = btn.getAttribute('data-pentype');
-      localStorage.setItem('pnm_ink_type', inkSettings.penType);
-      pal.querySelectorAll('.ink-pen-btn').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      updateInkPreview();
-    });
-  });
-
-  // Colour swatch selection
-  pal.querySelectorAll('.ink-swatch').forEach(function(sw) {
-    sw.addEventListener('click', function() {
-      inkSettings.colour = sw.getAttribute('data-colour');
-      localStorage.setItem('pnm_ink_colour', inkSettings.colour);
-      pal.querySelectorAll('.ink-swatch').forEach(function(s){ s.classList.remove('active'); });
-      sw.classList.add('active');
-      updateInkPreview();
-    });
-  });
-
-  // Colour picker sync
-  var hexInput = document.getElementById('ink-hex-input');
-  var colPicker = document.getElementById('ink-colour-picker');
-  if (hexInput && colPicker) {
-    colPicker.addEventListener('input', function() { hexInput.value = colPicker.value; });
-    hexInput.addEventListener('input', function() {
-      if (/^#[0-9a-fA-F]{6}$/.test(hexInput.value.trim())) colPicker.value = hexInput.value.trim();
-    });
-    document.getElementById('ink-apply-custom').addEventListener('click', function() {
-      var v = hexInput.value.trim() || colPicker.value;
-      if (!/^#[0-9a-fA-F]{6}$/.test(v)) v = colPicker.value;
-      inkSettings.colour = v;
-      localStorage.setItem('pnm_ink_colour', v);
-      pal.querySelectorAll('.ink-swatch').forEach(function(s){ s.classList.remove('active'); });
-      updateInkPreview();
-    });
+  var toolbar = document.getElementById('toolbar');
+  var tbRight = toolbar ? toolbar.querySelector('.tb-right') : null;
+  if (tbRight && toolbar) {
+    toolbar.insertBefore(tbSep, tbRight);
+    toolbar.insertBefore(stylusBtn, tbRight);
   }
-
-  // Size selection
-  pal.querySelectorAll('.ink-size-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      inkSettings.size = parseInt(btn.getAttribute('data-size'), 10);
-      localStorage.setItem('pnm_ink_size', inkSettings.size);
-      pal.querySelectorAll('.ink-size-btn').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-    });
-  });
-
-  function updateInkPreview() {
-    var preview = document.getElementById('ink-swatch-preview');
-    if (preview) preview.style.background = inkSettings.colour;
-  }
-
-  updateInkPreview();
 })();
 
 if ('serviceWorker' in navigator) {
