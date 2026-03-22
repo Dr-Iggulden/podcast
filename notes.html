@@ -132,7 +132,8 @@
     :root { --page-bg: #ffffff; --page-line-color: transparent; --page-margin-color: transparent; --page-line-size: 28px; }
     .note-body-wrap { position: relative; min-height: 100%; }
     /* Ruled lines overlay */
-    .note-body-wrap.ruled::before {
+    .note-body-wrap.ruled::before,
+    .note-body-wrap.ruled-narrow::before {
       content: ''; pointer-events: none;
       position: absolute; inset: 0;
       background-image: repeating-linear-gradient(
@@ -145,8 +146,16 @@
       background-size: 100% var(--page-line-size);
       z-index: 0;
     }
+    /* Narrow ruled — tighter line spacing */
+    .note-body-wrap.ruled-narrow::before {
+      --page-line-size: 20px;
+    }
+    .note-body-wrap.ruled-narrow .note-body {
+      line-height: 20px;
+    }
     /* Red margin line */
-    .note-body-wrap.margin::after {
+    .note-body-wrap.margin::after,
+    .note-body-wrap.ruled-narrow.margin::after {
       content: ''; pointer-events: none;
       position: absolute; top: 0; bottom: 0; left: 48px; width: 1px;
       background: var(--page-margin-color, transparent);
@@ -457,44 +466,53 @@
               <button class="ps-panel-close" id="ps-panel-close" title="Close">&times;</button>
             </div>
             <div class="ps-panel-body">
-            <div class="ps-label">Lines</div>
-            <div class="ps-row">
-              <button class="ps-btn active" data-lines="none">None</button>
-              <button class="ps-btn" data-lines="ruled">Ruled</button>
-              <button class="ps-btn" data-lines="legal">Legal Pad</button>
-              <button class="ps-btn" data-lines="graph">Graph</button>
-              <button class="ps-btn" data-lines="dotted">Dotted</button>
-            </div>
-            <div class="ps-label">Page Colour</div>
-            <div class="ps-colour-row" id="ps-colour-row">
-              <div class="ps-colour active" data-colour="#ffffff" style="background:#ffffff;border:1.5px solid #ddd;" title="White"></div>
-              <div class="ps-colour" data-colour="#fefce8" style="background:#fefce8;" title="Legal Pad Yellow"></div>
-              <div class="ps-colour" data-colour="#fdf6e3" style="background:#fdf6e3;" title="Solarised"></div>
-              <div class="ps-colour" data-colour="#fffbf0" style="background:#fffbf0;" title="Warm Cream"></div>
-              <div class="ps-colour" data-colour="#f5f0e8" style="background:#f5f0e8;" title="Parchment"></div>
-              <div class="ps-colour" data-colour="#f0f4ff" style="background:#f0f4ff;" title="Cool Blue"></div>
-              <div class="ps-colour" data-colour="#e8f4fd" style="background:#e8f4fd;" title="Sky"></div>
-              <div class="ps-colour" data-colour="#f0fff4" style="background:#f0fff4;" title="Mint"></div>
-              <div class="ps-colour" data-colour="#e8f5e9" style="background:#e8f5e9;" title="Sage"></div>
-              <div class="ps-colour" data-colour="#fff0f6" style="background:#fff0f6;" title="Rose"></div>
-              <div class="ps-colour" data-colour="#fce4ec" style="background:#fce4ec;" title="Blush"></div>
-              <div class="ps-colour" data-colour="#f3e5f5" style="background:#f3e5f5;" title="Lavender"></div>
-              <div class="ps-colour" data-colour="#f5f5f5" style="background:#f5f5f5;" title="Light Grey"></div>
-              <div class="ps-colour" data-colour="#1a1a2e" style="background:#1a1a2e;" title="Dark Mode"></div>
-              <div class="ps-colour" data-colour="#1e3a2f" style="background:#1e3a2f;" title="Forest Dark"></div>
-              <div class="ps-colour" data-colour="#1a2a3a" style="background:#1a2a3a;" title="Navy Dark"></div>
-            </div>
-            <div class="ps-label" style="margin-top:6px;">Line Colour</div>
-            <div class="ps-colour-row" id="ps-linecolour-row">
-              <div class="ps-colour active" data-linecolour="rgba(0,0,0,0.08)" style="background:rgba(0,0,0,0.08);border:1.5px solid #ddd;" title="Light Grey"></div>
-              <div class="ps-colour" data-linecolour="#c8b4a0" style="background:#c8b4a0;" title="Legal Tan"></div>
-              <div class="ps-colour" data-linecolour="#a0b4c8" style="background:#a0b4c8;" title="Blue"></div>
-              <div class="ps-colour" data-linecolour="rgba(255,255,255,0.12)" style="background:rgba(255,255,255,0.12);border:1.5px solid #555;" title="White (dark pages)"></div>
-            </div>
-            <div class="ps-label" style="margin-top:6px;">Margin</div>
-            <div class="ps-row">
-              <button class="ps-btn active" data-margin="none">None</button>
-              <button class="ps-btn" data-margin="red">Red Line</button>
+
+              <div class="ps-label">Lines</div>
+              <div class="ps-row">
+                <button class="ps-btn" data-lines="none">None</button>
+                <button class="ps-btn" data-lines="ruled">Ruled</button>
+                <button class="ps-btn" data-lines="legal">Legal Pad</button>
+                <button class="ps-btn" data-lines="legal-narrow">Legal Narrow</button>
+                <button class="ps-btn" data-lines="graph">Graph</button>
+                <button class="ps-btn" data-lines="dotted">Dotted</button>
+              </div>
+
+              <div class="ps-label">Page Colour</div>
+              <div class="ps-colour-row" id="ps-colour-row">
+                <div class="ps-colour" data-colour="#ffffff" style="background:#ffffff;border:1.5px solid #ccc;" title="White"></div>
+                <div class="ps-colour" data-colour="#fefce8" style="background:#fefce8;" title="Legal Pad Yellow"></div>
+                <div class="ps-colour" data-colour="#fdf6e3" style="background:#fdf6e3;" title="Solarised"></div>
+                <div class="ps-colour" data-colour="#fffbf0" style="background:#fffbf0;" title="Warm Cream"></div>
+                <div class="ps-colour" data-colour="#f5f0e8" style="background:#f5f0e8;" title="Parchment"></div>
+                <div class="ps-colour" data-colour="#f0f4ff" style="background:#f0f4ff;" title="Cool Blue"></div>
+                <div class="ps-colour" data-colour="#e8f4fd" style="background:#e8f4fd;" title="Sky"></div>
+                <div class="ps-colour" data-colour="#f0fff4" style="background:#f0fff4;" title="Mint"></div>
+                <div class="ps-colour" data-colour="#e8f5e9" style="background:#e8f5e9;" title="Sage"></div>
+                <div class="ps-colour" data-colour="#fff0f6" style="background:#fff0f6;" title="Rose"></div>
+                <div class="ps-colour" data-colour="#fce4ec" style="background:#fce4ec;" title="Blush"></div>
+                <div class="ps-colour" data-colour="#f3e5f5" style="background:#f3e5f5;" title="Lavender"></div>
+                <div class="ps-colour" data-colour="#f5f5f5" style="background:#f5f5f5;" title="Light Grey"></div>
+                <div class="ps-colour" data-colour="#1a1a2e" style="background:#1a1a2e;" title="Dark Mode"></div>
+                <div class="ps-colour" data-colour="#1e3a2f" style="background:#1e3a2f;" title="Forest Dark"></div>
+                <div class="ps-colour" data-colour="#1a2a3a" style="background:#1a2a3a;" title="Navy Dark"></div>
+              </div>
+
+              <div class="ps-label" style="margin-top:8px;">Line Colour</div>
+              <div class="ps-colour-row" id="ps-linecolour-row">
+                <div class="ps-colour" data-linecolour="rgba(0,0,0,0.1)" style="background:rgba(0,0,0,0.1);border:1.5px solid #ccc;" title="Light Grey"></div>
+                <div class="ps-colour" data-linecolour="rgba(0,0,0,0.18)" style="background:rgba(0,0,0,0.18);" title="Medium Grey"></div>
+                <div class="ps-colour" data-linecolour="#c8b4a0" style="background:#c8b4a0;" title="Legal Tan"></div>
+                <div class="ps-colour" data-linecolour="#a0b4c8" style="background:#a0b4c8;" title="Blue"></div>
+                <div class="ps-colour" data-linecolour="#b0c8a0" style="background:#b0c8a0;" title="Green"></div>
+                <div class="ps-colour" data-linecolour="rgba(255,255,255,0.18)" style="background:rgba(255,255,255,0.18);border:1.5px solid #666;" title="White (dark pages)"></div>
+              </div>
+
+              <div class="ps-label" style="margin-top:8px;">Margin</div>
+              <div class="ps-row">
+                <button class="ps-btn" data-margin="none">None</button>
+                <button class="ps-btn" data-margin="red">Red Line</button>
+              </div>
+
             </div>
           </div>
         </div>
@@ -2294,7 +2312,7 @@ document.addEventListener('DOMContentLoaded', function(){
 var pageSettings = {
   colour:     localStorage.getItem('pnm_page_colour')     || '#ffffff',
   lines:      localStorage.getItem('pnm_page_lines')      || 'none',
-  lineColour: localStorage.getItem('pnm_page_linecolour') || 'rgba(0,0,0,0.08)',
+  lineColour: localStorage.getItem('pnm_page_linecolour') || 'rgba(0,0,0,0.1)',
   margin:     localStorage.getItem('pnm_page_margin')     || 'none'
 };
 
@@ -2303,32 +2321,44 @@ function applyPageSettings() {
   var area = document.getElementById('notes-content-area');
   if (!wrap || !area) return;
 
-  // Background colour (on content area, not wrap — so wrap overlay works)
-  area.style.background = pageSettings.colour;
-
-  // Update CSS variables
   var root = document.documentElement;
-  root.style.setProperty('--page-bg', pageSettings.colour);
+  var c    = pageSettings.colour;
+
+  // Page background
+  area.style.background = c;
+  root.style.setProperty('--page-bg', c);
+
+  // Always restore line colour from settings first (dotted overrides below)
   root.style.setProperty('--page-line-color', pageSettings.lineColour);
-  root.style.setProperty('--page-margin-color', pageSettings.margin === 'red' ? '#e57373' : 'transparent');
 
-  // Line style classes
-  wrap.classList.remove('ruled', 'legal', 'graph', 'dotted', 'margin');
-  if (pageSettings.lines === 'ruled')  wrap.classList.add('ruled');
-  if (pageSettings.lines === 'legal')  wrap.classList.add('ruled', 'margin');
-  if (pageSettings.lines === 'graph')  wrap.classList.add('graph');
-  if (pageSettings.lines === 'dotted') wrap.classList.add('ruled');
-  if (pageSettings.margin === 'red')   wrap.classList.add('margin');
+  // Margin colour
+  root.style.setProperty('--page-margin-color',
+    pageSettings.margin === 'red' ? '#e57373' : 'transparent');
 
-  // Dotted lines use a dot pattern
-  if (pageSettings.lines === 'dotted') {
-    root.style.setProperty('--page-line-color', 'transparent');
-    wrap.style.backgroundImage = 'radial-gradient(' + pageSettings.lineColour + ' 1px, transparent 1px)';
+  // Clear ALL inline overrides before re-applying
+  wrap.style.backgroundImage = '';
+  wrap.style.backgroundSize  = '';
+
+  // Remove all line/margin classes
+  wrap.classList.remove('ruled', 'ruled-narrow', 'legal', 'legal-narrow', 'graph', 'dotted', 'margin');
+
+  var lines = pageSettings.lines;
+  if (lines === 'ruled')        { wrap.classList.add('ruled'); }
+  else if (lines === 'legal')   { wrap.classList.add('ruled', 'margin'); }
+  else if (lines === 'legal-narrow') { wrap.classList.add('ruled-narrow', 'margin'); }
+  else if (lines === 'graph')   { wrap.classList.add('graph'); }
+  else if (lines === 'dotted')  {
+    // Dotted uses inline radial-gradient — no class needed
+    wrap.style.backgroundImage = 'radial-gradient(' + pageSettings.lineColour + ' 1.5px, transparent 1.5px)';
     wrap.style.backgroundSize  = 'var(--page-line-size) var(--page-line-size)';
-  } else {
-    wrap.style.backgroundImage = '';
-    wrap.style.backgroundSize  = '';
   }
+
+  // Red margin line independent of line style
+  if (pageSettings.margin === 'red') wrap.classList.add('margin');
+
+  // Dark page: auto-switch text colour
+  var isDark = (c === '#1a1a2e' || c === '#1e3a2f' || c === '#1a2a3a');
+  wrap.style.color = isDark ? '#e8e8e8' : '';
 }
 
 function savePageSettings() {
@@ -2337,106 +2367,105 @@ function savePageSettings() {
   localStorage.setItem('pnm_page_linecolour', pageSettings.lineColour);
   localStorage.setItem('pnm_page_margin',     pageSettings.margin);
   applyPageSettings();
+  updatePsActiveStates();
 }
 
-// Wire page settings panel — fixed position under button
+// Update all active states in panel to match current pageSettings
+function updatePsActiveStates() {
+  document.querySelectorAll('.ps-btn[data-lines]').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-lines') === pageSettings.lines);
+  });
+  document.querySelectorAll('.ps-colour[data-colour]').forEach(function(s) {
+    s.classList.toggle('active', s.getAttribute('data-colour') === pageSettings.colour);
+  });
+  document.querySelectorAll('.ps-colour[data-linecolour]').forEach(function(s) {
+    s.classList.toggle('active', s.getAttribute('data-linecolour') === pageSettings.lineColour);
+  });
+  document.querySelectorAll('.ps-btn[data-margin]').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-margin') === pageSettings.margin);
+  });
+}
+
+// Fixed-position panel open/close
 function openPageSettings() {
   var panel = document.getElementById('page-settings-panel');
   var btn   = document.getElementById('tb-page-settings');
   if (!panel || !btn) return;
-  var r = btn.getBoundingClientRect();
-  // Position below button, aligned right if near right edge
-  var left = r.left;
-  var top  = r.bottom + 6;
-  // Clamp to viewport
-  var panelW = 300;
-  if (left + panelW > window.innerWidth - 8) left = window.innerWidth - panelW - 8;
-  if (left < 8) left = 8;
-  // Clamp bottom
-  var maxH = window.innerHeight - top - 16;
-  panel.style.left      = left + 'px';
-  panel.style.top       = top  + 'px';
-  panel.style.maxHeight = Math.min(maxH, 480) + 'px';
-  panel.classList.toggle('open');
+  var isOpen = panel.classList.contains('open');
+  // Toggle
+  panel.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    // Position below button
+    var r = btn.getBoundingClientRect();
+    var panelW = 308;
+    var left   = r.left;
+    var top    = r.bottom + 6;
+    if (left + panelW > window.innerWidth - 8) left = window.innerWidth - panelW - 8;
+    if (left < 8) left = 8;
+    panel.style.left      = left + 'px';
+    panel.style.top       = top  + 'px';
+    panel.style.maxHeight = Math.min(window.innerHeight - top - 16, 520) + 'px';
+    updatePsActiveStates();
+  }
 }
 
+// Wire Page button
 document.getElementById('tb-page-settings').addEventListener('click', function(e) {
   e.stopPropagation();
   openPageSettings();
 });
 
-// Close panel button
-document.addEventListener('DOMContentLoaded', function() {
-  var closeBtn = document.getElementById('ps-panel-close');
-  if (closeBtn) closeBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
+// Close X button — use event delegation so it works even if panel is added after
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.id === 'ps-panel-close') {
     document.getElementById('page-settings-panel').classList.remove('open');
-  });
+  }
 });
 
-// Close on outside click — use mousedown so it fires before focus changes
+// Close on outside click — mousedown fires before swatch click, so check carefully:
+// Only close if target is NOT inside the panel AND NOT the open button
 document.addEventListener('mousedown', function(e) {
   var panel = document.getElementById('page-settings-panel');
-  var btn   = document.getElementById('tb-page-settings');
   if (!panel || !panel.classList.contains('open')) return;
-  if (!panel.contains(e.target) && !btn.contains(e.target)) {
+  var btn = document.getElementById('tb-page-settings');
+  if (!panel.contains(e.target) && (!btn || !btn.contains(e.target))) {
     panel.classList.remove('open');
   }
 });
 
-// Reposition on scroll/resize
+// Reposition on resize
 window.addEventListener('resize', function() {
   var panel = document.getElementById('page-settings-panel');
   if (panel && panel.classList.contains('open')) openPageSettings();
 });
 
-// Lines buttons
-document.querySelectorAll('.ps-btn[data-lines]').forEach(function(btn) {
-  // Set initial active state
-  btn.classList.toggle('active', btn.getAttribute('data-lines') === pageSettings.lines);
-  btn.addEventListener('click', function() {
-    pageSettings.lines = btn.getAttribute('data-lines');
-    document.querySelectorAll('.ps-btn[data-lines]').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    savePageSettings();
-  });
-});
+// Event delegation for ALL panel controls — one handler, no timing issues
+document.addEventListener('click', function(e) {
+  var tgt = e.target.closest
+    ? e.target.closest('[data-lines],[data-colour],[data-linecolour],[data-margin]')
+    : null;
+  if (!tgt) return;
+  var panel = document.getElementById('page-settings-panel');
+  if (!panel || !panel.contains(tgt)) return;
 
-// Colour swatches
-document.querySelectorAll('.ps-colour[data-colour]').forEach(function(sw) {
-  sw.classList.toggle('active', sw.getAttribute('data-colour') === pageSettings.colour);
-  sw.addEventListener('click', function() {
-    pageSettings.colour = sw.getAttribute('data-colour');
-    document.querySelectorAll('.ps-colour[data-colour]').forEach(function(s){ s.classList.remove('active'); });
-    sw.classList.add('active');
+  if (tgt.hasAttribute('data-lines')) {
+    pageSettings.lines = tgt.getAttribute('data-lines');
     savePageSettings();
-  });
-});
-
-// Line colour swatches
-document.querySelectorAll('.ps-colour[data-linecolour]').forEach(function(sw) {
-  sw.classList.toggle('active', sw.getAttribute('data-linecolour') === pageSettings.lineColour);
-  sw.addEventListener('click', function() {
-    pageSettings.lineColour = sw.getAttribute('data-linecolour');
-    document.querySelectorAll('.ps-colour[data-linecolour]').forEach(function(s){ s.classList.remove('active'); });
-    sw.classList.add('active');
+  } else if (tgt.hasAttribute('data-colour')) {
+    pageSettings.colour = tgt.getAttribute('data-colour');
     savePageSettings();
-  });
-});
-
-// Margin buttons
-document.querySelectorAll('.ps-btn[data-margin]').forEach(function(btn) {
-  btn.classList.toggle('active', btn.getAttribute('data-margin') === pageSettings.margin);
-  btn.addEventListener('click', function() {
-    pageSettings.margin = btn.getAttribute('data-margin');
-    document.querySelectorAll('.ps-btn[data-margin]').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
+  } else if (tgt.hasAttribute('data-linecolour')) {
+    pageSettings.lineColour = tgt.getAttribute('data-linecolour');
     savePageSettings();
-  });
+  } else if (tgt.hasAttribute('data-margin')) {
+    pageSettings.margin = tgt.getAttribute('data-margin');
+    savePageSettings();
+  }
 });
 
 // Apply saved settings on load
 applyPageSettings();
+updatePsActiveStates();
 
 /* ══════════════════════════════════════════════════════
    STYLUS / PEN HANDWRITING INPUT
