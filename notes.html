@@ -189,6 +189,32 @@
     .bulk-tb-btn.danger { background: rgba(192,57,74,0.5); }
     .bulk-tb-btn.danger:hover { background: rgba(192,57,74,0.75); }
     .bulk-select-count { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.15em; }
+    /* ── Ink tool palette ── */
+    .ink-palette {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0;
+      background: var(--white); border: 1px solid var(--cream-dark); border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12); padding: 12px 14px; z-index: 500;
+      width: 280px; font-family: 'Nunito Sans', sans-serif;
+    }
+    .ink-palette.open { display: block; }
+    .ink-section-title { font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.25em; color: var(--gold); margin-bottom: 8px; display: block; }
+    .ink-colours { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .ink-swatch { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; transition: transform 0.1s, border-color 0.1s; }
+    .ink-swatch:hover { transform: scale(1.2); border-color: rgba(0,0,0,0.2); }
+    .ink-swatch.active { border-color: var(--green-deep); transform: scale(1.2); }
+    .ink-custom-row { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; }
+    .ink-hex { font-family: 'Nunito Sans',sans-serif; font-size:12px; border:1.5px solid var(--cream-dark); border-radius:2px; padding:4px 8px; width:80px; outline:none; }
+    .ink-hex:focus { border-color: var(--green-mid); }
+    .ink-picker { width:28px; height:28px; border:1.5px solid var(--cream-dark); border-radius:2px; padding:0; cursor:pointer; background:none; }
+    .ink-size-row { display: flex; gap: 5px; align-items: center; margin-bottom: 10px; }
+    .ink-size-btn { width:28px; height:28px; border-radius:50%; background:none; border:1.5px solid var(--cream-dark); cursor:pointer; display:flex;align-items:center;justify-content:center; transition:all 0.15s; flex-shrink:0; }
+    .ink-size-btn:hover, .ink-size-btn.active { border-color: var(--green-deep); background: var(--green-deep); color: var(--white); }
+    .ink-size-dot { border-radius:50%; background: currentColor; display:block; }
+    .ink-pen-row { display: flex; flex-wrap:wrap; gap:5px; margin-bottom:4px; }
+    .ink-pen-btn { font-size:11px; font-family:'Nunito Sans',sans-serif; padding:4px 9px; border:1.5px solid var(--cream-dark); border-radius:2px; background:none; cursor:pointer; color:var(--grey-nav); transition:all 0.15s; white-space:nowrap; }
+    .ink-pen-btn:hover { border-color:var(--gold); color:var(--green-deep); }
+    .ink-pen-btn.active { background:var(--green-deep); color:var(--white); border-color:var(--green-deep); }
+    .ink-active-preview { width:32px; height:32px; border-radius:50%; border:2px solid var(--cream-dark); display:inline-block; vertical-align:middle; margin-right:4px; }
     @media print {
       .notes-header, .notes-sidebar, .notes-editor-toolbar, .notes-episode-tag,
       .note-title-input { display: none !important; }
@@ -770,7 +796,7 @@ function renderNotesList(filter) {
     var bodyText = n.bodyHtml ? n.bodyHtml.replace(/<[^>]+>/g,'').substring(0,60) : (n.body||'').substring(0,60);
     var date = n.updatedAt ? new Date(n.updatedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '';
     var epLabel = n.episodeTitle ? 'Ep '+n.episodeNum+' — '+n.episodeTitle.substring(0,28) : 'Unlinked';
-    var isSelected = bulkSelected && bulkSelected.has(n.id);
+    var isSelected = typeof selectedIds !== 'undefined' && selectedIds.indexOf(n.id) >= 0;
     return '<div class="note-item'+(n.id===currentId?' active':'')+'" data-id="'+n.id+'">'
       +'<input type="checkbox" class="bulk-cb" data-id="'+n.id+'"'+(isSelected?' checked':'')+' />'
       +'<div style="min-width:0;flex:1;">'
@@ -2409,11 +2435,13 @@ function ensureCanvas() {
     var x = (e.clientX - r.left) * (drawCanvas.width / r.width);
     var y = (e.clientY - r.top)  * (drawCanvas.height / r.height);
     var pressure = (e.pressure && e.pressure > 0) ? e.pressure : 0.5;
-    var lineW  = pressure * 4 + 0.5; // 0.5px min, 4.5px max
     var isDark = pageSettings.colour.startsWith('#1') || pageSettings.colour.startsWith('#0');
-    drawCtx.strokeStyle = isDark ? 'rgba(255,255,255,0.85)' : 'rgba(20,20,20,0.85)';
-    drawCtx.lineWidth = lineW;
+    applyInkToCtx(drawCtx, pressure, isDark);
     drawCtx.lineTo(x, y); drawCtx.stroke();
+    // Reset composite/alpha for next stroke segment
+    drawCtx.globalCompositeOperation = 'source-over';
+    drawCtx.globalAlpha = 1.0;
+    drawCtx.shadowBlur = 0;
     drawCtx.beginPath(); drawCtx.moveTo(x, y);
     drawLastX = x; drawLastY = y;
   });
@@ -2434,23 +2462,210 @@ window.addEventListener('resize', resizeCanvas);
 /* Bulk select handled by existing system above */
 
 /* ══════════════════════════════════════════════════════
-   STYLUS MODE BUTTON — add to toolbar
+   STYLUS MODE BUTTON + INK TOOL PALETTE
    ══════════════════════════════════════════════════════ */
 
-// Add stylus toggle button to toolbar dynamically
+// Ink settings
+var inkSettings = {
+  colour:  localStorage.getItem('pnm_ink_colour') || 'rgba(20,20,20,0.9)',
+  penType: localStorage.getItem('pnm_ink_type')   || 'pen',
+  size:    parseInt(localStorage.getItem('pnm_ink_size') || '2', 10)
+};
+
+var INK_COLOURS = [
+  '#1a1a1a', '#2C4A35', '#1a3a6e', '#6b1a1a', '#4a1a6b',
+  '#B19443', '#c0392b', '#2980b9', '#27ae60', '#8e44ad',
+  '#e67e22', '#16a085', '#2c3e50', '#7f8c8d', '#ffffff',
+  '#f8f9fa', '#ffd700', '#ff69b4', '#00bcd4', '#ff5722'
+];
+
+var PEN_TYPES = {
+  pen:         { name: 'Pen',         lineCap: 'round',  lineJoin: 'round',  alpha: 0.9,  widthMult: 1.0, blur: 0   },
+  pencil:      { name: 'Pencil',      lineCap: 'round',  lineJoin: 'round',  alpha: 0.55, widthMult: 1.0, blur: 0.3 },
+  fountain:    { name: 'Fountain',    lineCap: 'round',  lineJoin: 'round',  alpha: 0.85, widthMult: 1.4, blur: 0   },
+  marker:      { name: 'Marker',      lineCap: 'square', lineJoin: 'miter',  alpha: 0.95, widthMult: 3.5, blur: 0   },
+  highlighter: { name: 'Highlighter', lineCap: 'square', lineJoin: 'miter',  alpha: 0.35, widthMult: 6.0, blur: 0   },
+  eraser:      { name: 'Eraser',      lineCap: 'round',  lineJoin: 'round',  alpha: 1.0,  widthMult: 4.0, blur: 0   }
+};
+
+var INK_SIZES = [1, 2, 4, 7, 12]; // base sizes
+
+function getInkColour() {
+  var type = PEN_TYPES[inkSettings.penType] || PEN_TYPES.pen;
+  if (inkSettings.penType === 'eraser') {
+    // Eraser: use page background colour
+    return pageSettings.colour || '#ffffff';
+  }
+  if (inkSettings.penType === 'highlighter' || inkSettings.penType === 'marker') {
+    // Parse colour and apply alpha
+    var c = inkSettings.colour;
+    if (c.startsWith('#') && c.length === 7) {
+      var r = parseInt(c.slice(1,3),16), g = parseInt(c.slice(3,5),16), b = parseInt(c.slice(5,7),16);
+      return 'rgba(' + r + ',' + g + ',' + b + ',' + type.alpha + ')';
+    }
+  }
+  return inkSettings.colour;
+}
+
+function applyInkToCtx(ctx, pressure, isDark) {
+  var type = PEN_TYPES[inkSettings.penType] || PEN_TYPES.pen;
+  var baseW  = INK_SIZES[inkSettings.size] || 2;
+  var p      = (pressure && pressure > 0) ? pressure : 0.5;
+  var lineW  = baseW * type.widthMult * (0.5 + p * 0.7);
+
+  if (inkSettings.penType === 'eraser') {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = 'rgba(0,0,0,1)';
+  } else {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = getInkColour();
+  }
+  ctx.lineWidth  = lineW;
+  ctx.lineCap    = type.lineCap;
+  ctx.lineJoin   = type.lineJoin;
+  if (type.blur > 0) {
+    ctx.shadowBlur  = type.blur * lineW;
+    ctx.shadowColor = ctx.strokeStyle;
+  } else {
+    ctx.shadowBlur = 0;
+  }
+  // Pencil texture — slight jitter
+  if (inkSettings.penType === 'pencil') {
+    ctx.globalAlpha = type.alpha * (0.7 + Math.random() * 0.3);
+  } else {
+    ctx.globalAlpha = 1.0;
+  }
+}
+
+// Add stylus toggle + ink palette to toolbar dynamically
 (function() {
-  var tbSep = document.createElement('div'); tbSep.className = 'tb-sep';
-  var stylusBtn = document.createElement('button');
-  stylusBtn.className = 'tb-btn'; stylusBtn.id = 'tb-stylus';
-  stylusBtn.title = 'Stylus/pen drawing mode';
-  stylusBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/><line x1="15" y1="5" x2="19" y2="9"/></svg> Pen';
-  stylusBtn.addEventListener('click', toggleStylusMode);
   var toolbar = document.getElementById('toolbar');
   var tbRight = toolbar ? toolbar.querySelector('.tb-right') : null;
-  if (tbRight && toolbar) {
-    toolbar.insertBefore(tbSep, tbRight);
-    toolbar.insertBefore(stylusBtn, tbRight);
+  if (!toolbar || !tbRight) return;
+
+  // Separator
+  var tbSep = document.createElement('div'); tbSep.className = 'tb-sep';
+  toolbar.insertBefore(tbSep, tbRight);
+
+  // Pen mode toggle button
+  var stylusBtn = document.createElement('button');
+  stylusBtn.className = 'tb-btn'; stylusBtn.id = 'tb-stylus';
+  stylusBtn.title = 'Stylus/pen drawing mode (toggle)';
+  stylusBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Pen';
+  stylusBtn.addEventListener('click', toggleStylusMode);
+  toolbar.insertBefore(stylusBtn, tbRight);
+
+  // Ink palette wrap
+  var inkWrap = document.createElement('div');
+  inkWrap.className = 'export-wrap'; inkWrap.id = 'ink-wrap'; inkWrap.style.position = 'relative';
+  toolbar.insertBefore(inkWrap, tbRight);
+
+  // Ink button (colour preview swatch + arrow)
+  var inkBtn = document.createElement('button');
+  inkBtn.className = 'tb-btn'; inkBtn.id = 'tb-ink';
+  inkBtn.title = 'Ink colour and pen style';
+  inkBtn.style.display = 'inline-flex'; inkBtn.style.alignItems = 'center'; inkBtn.style.gap = '5px';
+  inkBtn.innerHTML = '<span id="ink-swatch-preview" style="width:12px;height:12px;border-radius:50%;background:' + inkSettings.colour + ';border:1px solid rgba(0,0,0,0.15);display:inline-block;flex-shrink:0;"></span> Ink &#9660;';
+  inkWrap.appendChild(inkBtn);
+
+  // Ink palette panel
+  var palHtml = '<span class="ink-section-title">Pen Type</span>'
+    + '<div class="ink-pen-row">'
+    + Object.entries(PEN_TYPES).map(function(entry) {
+        var k = entry[0], v = entry[1];
+        return '<button class="ink-pen-btn' + (inkSettings.penType === k ? ' active' : '') + '" data-pentype="' + k + '">' + v.name + '</button>';
+      }).join('')
+    + '</div>'
+    + '<span class="ink-section-title" style="margin-top:8px;">Ink Colour</span>'
+    + '<div class="ink-colours" id="ink-colours-row">'
+    + INK_COLOURS.map(function(c) {
+        var border = (c === '#ffffff' || c === '#f8f9fa') ? '1.5px solid #ddd' : '2px solid transparent';
+        return '<div class="ink-swatch' + (inkSettings.colour === c ? ' active' : '') + '" data-colour="' + c + '" style="background:' + c + ';border:' + border + ';" title="' + c + '"></div>';
+      }).join('')
+    + '</div>'
+    + '<div class="ink-custom-row">'
+    + '<input type="text" class="ink-hex" id="ink-hex-input" placeholder="#1a1a1a" maxlength="7" value="' + (inkSettings.colour.startsWith('#') ? inkSettings.colour : '') + '">'
+    + '<input type="color" class="ink-picker" id="ink-colour-picker" value="' + (inkSettings.colour.startsWith('#') ? inkSettings.colour : '#1a1a1a') + '" title="Colour wheel">'
+    + '<button class="hl-add-btn" id="ink-apply-custom">Apply</button>'
+    + '</div>'
+    + '<span class="ink-section-title">Size</span>'
+    + '<div class="ink-size-row">'
+    + INK_SIZES.map(function(sz, i) {
+        var d = Math.min(sz * 1.8 + 4, 22);
+        return '<button class="ink-size-btn' + (inkSettings.size === i ? ' active' : '') + '" data-size="' + i + '" title="' + sz + 'px"><span class="ink-size-dot" style="width:' + d + 'px;height:' + d + 'px;"></span></button>';
+      }).join('')
+    + '</div>';
+
+  var pal = document.createElement('div');
+  pal.className = 'ink-palette'; pal.id = 'ink-palette';
+  pal.innerHTML = palHtml;
+  inkWrap.appendChild(pal);
+
+  // Toggle palette
+  inkBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    pal.classList.toggle('open');
+  });
+  document.addEventListener('click', function(e) {
+    if (!inkWrap.contains(e.target)) pal.classList.remove('open');
+  });
+
+  // Pen type selection
+  pal.querySelectorAll('.ink-pen-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      inkSettings.penType = btn.getAttribute('data-pentype');
+      localStorage.setItem('pnm_ink_type', inkSettings.penType);
+      pal.querySelectorAll('.ink-pen-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      updateInkPreview();
+    });
+  });
+
+  // Colour swatch selection
+  pal.querySelectorAll('.ink-swatch').forEach(function(sw) {
+    sw.addEventListener('click', function() {
+      inkSettings.colour = sw.getAttribute('data-colour');
+      localStorage.setItem('pnm_ink_colour', inkSettings.colour);
+      pal.querySelectorAll('.ink-swatch').forEach(function(s){ s.classList.remove('active'); });
+      sw.classList.add('active');
+      updateInkPreview();
+    });
+  });
+
+  // Colour picker sync
+  var hexInput = document.getElementById('ink-hex-input');
+  var colPicker = document.getElementById('ink-colour-picker');
+  if (hexInput && colPicker) {
+    colPicker.addEventListener('input', function() { hexInput.value = colPicker.value; });
+    hexInput.addEventListener('input', function() {
+      if (/^#[0-9a-fA-F]{6}$/.test(hexInput.value.trim())) colPicker.value = hexInput.value.trim();
+    });
+    document.getElementById('ink-apply-custom').addEventListener('click', function() {
+      var v = hexInput.value.trim() || colPicker.value;
+      if (!/^#[0-9a-fA-F]{6}$/.test(v)) v = colPicker.value;
+      inkSettings.colour = v;
+      localStorage.setItem('pnm_ink_colour', v);
+      pal.querySelectorAll('.ink-swatch').forEach(function(s){ s.classList.remove('active'); });
+      updateInkPreview();
+    });
   }
+
+  // Size selection
+  pal.querySelectorAll('.ink-size-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      inkSettings.size = parseInt(btn.getAttribute('data-size'), 10);
+      localStorage.setItem('pnm_ink_size', inkSettings.size);
+      pal.querySelectorAll('.ink-size-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+
+  function updateInkPreview() {
+    var preview = document.getElementById('ink-swatch-preview');
+    if (preview) preview.style.background = inkSettings.colour;
+  }
+
+  updateInkPreview();
 })();
 
 if ('serviceWorker' in navigator) {
